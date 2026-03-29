@@ -3,59 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Social v33.46 - Playability Fix</title>
+    <title>Apex Social v33.47 - Movement Active</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script async src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
 
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
         #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; }
 
-        /* MONETIZATION: FIXED TOP */
-        #top-ad { width: 320px; height: 50px; flex-shrink: 0; margin-top: 5px; overflow: hidden; }
+        #top-ad { width: 320px; height: 50px; margin-top: 5px; overflow: hidden; flex-shrink: 0; }
 
-        /* COMPACT STATS */
-        #stats { width: 95%; background: var(--white); border-radius: 10px; display: flex; justify-content: space-around; padding: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .v { font-size: 14px; font-weight: 800; color: var(--accent); display: block; }
+        #stats { width: 95%; background: var(--white); border-radius: 10px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .v { font-size: 14px; font-weight: 800; color: var(--accent); }
         .l { font-size: 8px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        /* GAME AREA: MAXIMIZED FOR TOUCH */
         #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
         
         #grid { 
             display: grid; grid-template-columns: repeat(7, 36px); grid-template-rows: repeat(7, 36px); 
             gap: 4px; padding: 8px; background: #8d6e63; border-radius: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
-        .cell { width: 36px; height: 36px; background: #fff9c4; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
+        .cell { 
+            width: 36px; height: 36px; background: #fff9c4; border-radius: 5px; 
+            display: flex; align-items: center; justify-content: center; transition: 0.2s;
+        }
         .cell img { width: 26px; height: 26px; pointer-events: none; }
+        .selected { background: #b9f6ca; border: 2px solid var(--accent); transform: scale(1.1); z-index: 5; }
 
-        /* COMPACT BOOSTERS */
         #boosters { display: flex; gap: 8px; margin-top: 10px; }
-        .b-mini { 
-            background: var(--white); padding: 4px 10px; border-radius: 8px;
-            display: flex; align-items: center; gap: 5px; border: 1px solid #ddd; position: relative;
-        }
+        .b-mini { background: var(--white); padding: 5px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
         .b-mini img { width: 16px; height: 16px; }
-        .b-mini span { font-size: 9px; font-weight: 800; }
-        .count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 8px; padding: 1px 4px; border-radius: 10px; }
 
-        /* MONETIZATION: FIXED BOTTOM */
-        #bottom-ad { width: 320px; height: 50px; flex-shrink: 0; margin-bottom: 35px; overflow: hidden; }
-
-        #admin { position: fixed; bottom: 0; width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 9px; text-align: center; z-index: 100; }
+        #bottom-ad { width: 320px; height: 50px; margin-bottom: 35px; overflow: hidden; flex-shrink: 0; }
+        #admin { position: fixed; bottom: 0; width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 9px; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
     <div id="top-ad">
-        <script type="text/javascript">
-            atOptions = { 'key' : '52802f8e0e936960203e1401659b0395', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
+        <script type="text/javascript">atOptions = {'key':'52802f8e0e936960203e1401659b0395','format':'iframe','height':50,'width':320,'params':{}};</script>
         <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
     </div>
 
@@ -68,25 +58,24 @@
     <div id="game-zone">
         <div id="grid"></div>
         <div id="boosters">
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"><span>BOMBA</span><div class="count">2</div></div>
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"><span>TROCA</span><div class="count">2</div></div>
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"><span>PÁ</span><div class="count">3</div></div>
+            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png">BOMBA</div>
+            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png">TROCA</div>
+            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png">PÁ</div>
         </div>
     </div>
 
     <div id="bottom-ad">
-        <script type="text/javascript">
-            atOptions = { 'key' : '52802f8e0e936960203e1401659b0395', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
+        <script type="text/javascript">atOptions = {'key':'52802f8e0e936960203e1401659b0395','format':'iframe','height':50,'width':320,'params':{}};</script>
         <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
     </div>
 
-    <div id="admin">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
+    <div id="admin">ADMIN: 5401881400 | MOVEMENT V1</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const icons = ['https://cdn-icons-png.flaticon.com/128/3050/3050181.png', 'https://cdn-icons-png.flaticon.com/128/802/802271.png', 'https://cdn-icons-png.flaticon.com/128/837/837560.png', 'https://cdn-icons-png.flaticon.com/128/2909/2909774.png', 'https://cdn-icons-png.flaticon.com/128/3104/3104618.png'];
+    let selected = null;
 
     function init() {
         tg.ready(); tg.expand();
@@ -94,9 +83,34 @@
         for (let i = 0; i < 49; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
+            cell.dataset.idx = i;
             cell.innerHTML = `<img src="${icons[Math.floor(Math.random()*icons.length)]}">`;
-            cell.onclick = () => { tg.HapticFeedback.impactOccurred('light'); cell.style.transform = 'scale(0.9)'; setTimeout(()=>cell.style.transform='scale(1)', 100); };
+            cell.onclick = () => handleMove(cell);
             grid.appendChild(cell);
+        }
+    }
+
+    function handleMove(cell) {
+        if (!selected) {
+            selected = cell;
+            cell.classList.add('selected');
+            tg.HapticFeedback.impactOccurred('light');
+        } else {
+            const idx1 = parseInt(selected.dataset.idx);
+            const idx2 = parseInt(cell.dataset.idx);
+            
+            // Verifica se são vizinhos (cima, baixo, esquerda, direita)
+            const isNeighbor = [1, -1, 7, -7].includes(idx1 - idx2);
+
+            if (isNeighbor) {
+                const img1 = selected.innerHTML;
+                selected.innerHTML = cell.innerHTML;
+                cell.innerHTML = img1;
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+            
+            selected.classList.remove('selected');
+            selected = null;
         }
     }
     init();
