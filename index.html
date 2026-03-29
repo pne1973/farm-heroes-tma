@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.15 - HD & Progressive</title>
+    <title>Ouro da Quinta v33.16 - Anti-Initial Match</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; --gray: #f1f3f4; }
@@ -14,32 +14,17 @@
         #ad-top { width: 100%; height: 45px; background: var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 1px solid #dadce0; color: #70757a; flex-shrink: 0; }
         #ad-bottom { width: 100%; height: 55px; background: var(--gray); position: fixed; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 1px solid #dadce0; color: #70757a; z-index: 100; }
 
-        /* Dashboard de Dinheiro */
+        /* Dashboard */
         #header-wallet { width: 94%; background: var(--white); margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0; cursor: pointer; }
         .val { font-size: 16px; font-weight: 700; color: var(--accent); }
         .label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #5f6368; }
 
         #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: var(--white); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; flex-shrink: 0; }
         
-        /* Grid de Jogo Otimizada para Nitidez */
+        /* Grid de Jogo HD (Peças nítidas de 40px) */
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
         #grid { display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); gap: 4px; padding: 8px; background: #bdc1c6; border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-        
-        /* CORREÇÃO DE DESFOQUE AQUI */
-        .cell { 
-            width: 40px; height: 40px; 
-            background: #f8f9fa; 
-            border-radius: 6px; 
-            display: flex; align-items: center; justify-content: center; 
-            font-size: 22px; /* Ligeiramente maior para nitidez */
-            transition: all 0.2s;
-            
-            /* Propriedades para forçar nitidez de emojis/fontes */
-            text-rendering: optimizeLegibility;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-smooth: always;
-        }
+        .cell { width: 40px; height: 40px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.2s; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-smooth: always; }
         .cell.selected { outline: 3px solid var(--google-blue); z-index: 10; transform: scale(1.1); background: white; }
 
         /* Boosters */
@@ -53,7 +38,7 @@
         #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: #ffffff; padding: 8px 0; font-size: 10px; z-index: 95; border-top: 1px solid #3c4043; display: none; }
         .admin-flex { display: flex; justify-content: space-around; align-items: center; }
 
-        /* Overlay e Popups */
+        /* Overlays */
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
         .popup { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 300px; text-align: center; }
         .btn-pay { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
@@ -113,9 +98,8 @@
     const tg = window.Telegram.WebApp;
     const ADMIN_ID = "5401881400";
     
-    // Lista Mestra de Ícones (Progressiva)
     const allItems = ['🧀', '🍯', '🥚', '🍞', '🥛', '🍎', '🍓', '🎃'];
-    let activeItems = []; // Ícones ativos no nível atual
+    let activeItems = [];
     
     let moves = 21, level = 1, balance = 0.0, minPayout = 5.0, currency = "€";
     let boosters = { bomb: 2, shovel: 3, swap: 2 }, mission = [10, 5, 12], squares = [];
@@ -126,48 +110,63 @@
         const grid = document.getElementById('grid');
         grid.innerHTML = ''; squares = [];
         
-        // Define quais ícones estão ativos baseados no nível
         updateActiveItems();
-        
+        const tempBoard = new Array(49); // Tabuleiro temporário para validação
+
         for (let i = 0; i < 49; i++) {
+            let possibleItem;
+            let invalidMatch = true;
+            
+            // Lógica CORRIGIDA: Gera item e valida se cria match de 3+
+            while (invalidMatch) {
+                possibleItem = activeItems[Math.floor(Math.random() * activeItems.length)];
+                invalidMatch = false; // Assume que é válido até prova em contrário
+
+                // Valida Horizontal (com os dois anteriores na linha)
+                if (i % 7 >= 2) {
+                    if (tempBoard[i-1] === possibleItem && tempBoard[i-2] === possibleItem) {
+                        invalidMatch = true;
+                    }
+                }
+                
+                // Valida Vertical (com os dois superiores na coluna)
+                if (i >= 14 && !invalidMatch) {
+                    if (tempBoard[i-7] === possibleItem && tempBoard[i-14] === possibleItem) {
+                        invalidMatch = true;
+                    }
+                }
+            }
+            
+            // Item validado: coloca no tabuleiro real e temporário
+            tempBoard[i] = possibleItem;
             const square = document.createElement('div');
             square.id = i; square.className = 'cell';
-            // Gera apenas usando ícones ativos
-            square.innerHTML = activeItems[Math.floor(Math.random() * activeItems.length)];
+            square.innerHTML = possibleItem;
             grid.appendChild(square); squares.push(square);
             square.onclick = () => handleCellClick(i);
         }
 
-        const userId = tg.initDataUnsafe.user?.id.toString();
-        if (userId === ADMIN_ID) {
+        if (tg.initDataUnsafe.user?.id.toString() === ADMIN_ID) {
             document.getElementById('admin-panel').style.display = 'block';
             document.getElementById('adm-id').innerText = userId;
         }
         updateUI();
     }
 
-    // Lógica de Progressão de Ícones
+    // Lógica Progressiva de Ícones (igual)
     function updateActiveItems() {
-        if (level < 4) {
-            activeItems = allItems.slice(0, 4); // 🧀, 🍯, 🥚, 🍞
-        } else if (level < 7) {
-            activeItems = allItems.slice(0, 5); // Adiciona 🥛
-        } else if (level < 10) {
-            activeItems = allItems.slice(0, 6); // Adiciona 🍎
-        } else if (level < 15) {
-            activeItems = allItems.slice(0, 7); // Adiciona 🍓
-        } else {
-            activeItems = allItems; // Adiciona 🎃 (Todos)
-        }
-        console.log(`Nível ${level}: Ícones ativos: ${activeItems.join(' ')}`);
+        if (level < 4) { activeItems = allItems.slice(0, 4); } 
+        else if (level < 7) { activeItems = allItems.slice(0, 5); } 
+        else if (level < 10) { activeItems = allItems.slice(0, 6); } 
+        else if (level < 15) { activeItems = allItems.slice(0, 7); } 
+        else { activeItems = allItems; }
     }
 
+    // Resto da lógica Match-3 (igual)
     function handleCellClick(id) {
         if (activeBooster) { executeBooster(id); return; }
-        
         const item = squares[id].innerHTML;
         const matches = findMatches(id, item);
-        
         if (matches.length >= 3) {
             tg.HapticFeedback.impactOccurred('light');
             matches.forEach(idx => {
@@ -177,26 +176,18 @@
                 if (char === '🥚') mission[2] = Math.max(0, mission[2]-1);
                 squares[idx].innerHTML = '';
             });
-            moves--;
-            balance += 0.0002;
-            setTimeout(applyGravity, 300);
-            checkLevel();
+            moves--; balance += 0.0002;
+            setTimeout(applyGravity, 300); checkLevel();
         }
         updateUI();
     }
 
     function applyGravity() {
         for (let i = 41; i >= 0; i--) {
-            if (squares[i+7].innerHTML === '') {
-                squares[i+7].innerHTML = squares[i].innerHTML;
-                squares[i].innerHTML = '';
-            }
+            if (squares[i+7].innerHTML === '') { squares[i+7].innerHTML = squares[i].innerHTML; squares[i].innerHTML = ''; }
         }
         for (let i = 0; i < 7; i++) {
-            if (squares[i].innerHTML === '') {
-                // Gera novos itens usando APENAS os ícones ativos do nível
-                squares[i].innerHTML = activeItems[Math.floor(Math.random()*activeItems.length)];
-            }
+            if (squares[i].innerHTML === '') { squares[i].innerHTML = activeItems[Math.floor(Math.random()*activeItems.length)]; }
         }
         if (squares.some(s => s.innerHTML === '')) applyGravity();
     }
@@ -210,14 +201,13 @@
             if (idx >= 7) neighbors.push(idx - 7);
             if (idx < 42) neighbors.push(idx + 7);
             neighbors.forEach(n => {
-                if (!matches.has(n) && squares[n].innerHTML === item && item !== '') {
-                    matches.add(n); check(n);
-                }
+                if (!matches.has(n) && squares[n].innerHTML === item && item !== '') { matches.add(n); check(n); }
             });
         };
         check(id); return Array.from(matches);
     }
 
+    // Boosters e Economia (igual)
     function toggleBooster(type) {
         if (boosters[type] <= 0) return;
         activeBooster = (activeBooster === type) ? null : type;
@@ -228,65 +218,56 @@
     }
 
     function executeBooster(id) {
-        if (activeBooster === 'bomb') {
-            const r = Math.floor(id/7), c = id%7;
-            for(let i=r-1; i<=r+1; i++) {
-                for(let j=c-1; j<=c+1; j++) {
-                    if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = '';
-                }
-            }
-        } else if (activeBooster === 'shovel') {
-            squares[id].innerHTML = '';
-        } else if (activeBooster === 'swap') {
-            if (firstSwapId === null) { firstSwapId = id; squares[id].classList.add('selected'); return; }
-            else { 
-                let t = squares[firstSwapId].innerHTML; 
-                squares[firstSwapId].innerHTML = squares[id].innerHTML; 
-                squares[id].innerHTML = t; 
-            }
+        if (activeBooster === 'bomb') { applyBomb(id); } 
+        else if (activeBooster === 'shovel') { squares[id].innerHTML = ''; } 
+        else if (activeBooster === 'swap') { executeSwap(id); return; }
+        finalizeBoosterUse();
+    }
+
+    function applyBomb(id) {
+        const r = Math.floor(id/7), c = id%7;
+        for(let i=r-1; i<=r+1; i++) {
+            for(let j=c-1; j<=c+1; j++) { if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = ''; }
         }
-        boosters[activeBooster]--;
-        activeBooster = null;
+    }
+
+    function executeSwap(id) {
+        if (firstSwapId === null) { firstSwapId = id; squares[id].classList.add('selected'); return; }
+        else { 
+            let t = squares[firstSwapId].innerHTML; 
+            squares[firstSwapId].innerHTML = squares[id].innerHTML; squares[id].innerHTML = t; 
+            finalizeBoosterUse();
+        }
+    }
+
+    function finalizeBoosterUse() {
+        boosters[activeBooster]--; activeBooster = null; firstSwapId = null;
         document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-        setTimeout(applyGravity, 300);
-        updateUI();
+        setTimeout(applyGravity, 300); updateUI();
+    }
+
+    function checkLevel() {
+        if (mission.every(m => m === 0)) {
+            level++; balance += 0.0050;
+            tg.showAlert(`Nível ${level-1} Concluído! Bónus de € 0.0050.`);
+            mission = [10+level, 5+level, 10+level]; updateActiveItems(); init(); 
+        }
     }
 
     function showWithdrawal() {
         const overlay = document.getElementById('overlay');
         const content = document.getElementById('popup-content');
         overlay.style.display = 'flex';
-        
-        if (balance < minPayout) {
-            content.innerHTML = `<h3>Saldo Insuficiente</h3><p>Mínimo para levantamento: <b>${currency} ${minPayout.toFixed(2)}</b></p><button class="btn-pay" onclick="closeOverlay()">VOLTAR</button>`;
-        } else {
-            content.innerHTML = `<h3>Levantamento PayPal</h3><p>Saldo disponível: ${currency} ${balance.toFixed(4)}</p><input type="email" id="paypal-email" placeholder="Seu e-mail PayPal"><button class="btn-pay" onclick="requestPay()">SOLICITAR PAGAMENTO</button>`;
-        }
-    }
-
-    function checkLevel() {
-        if (mission.every(m => m === 0)) {
-            level++; balance += 0.0050;
-            tg.showAlert(`Nível ${level-1} Concluído! Ganhou bónus de € 0.0050. A dificuldade aumentou!`);
-            mission = [10+level, 5+level, 10+level];
-            
-            // Atualiza a lista de ícones para o novo nível ANTES de reiniciar
-            updateActiveItems();
-            init(); // Reinicia o grid com os novos ícones
-        }
+        content.innerHTML = (balance < minPayout) ? `<h3>Saldo Insuficiente</h3><p>Mínimo: ${currency} ${minPayout.toFixed(2)}</p><button class="btn-pay" onclick="closeOverlay()">VOLTAR</button>` : `<h3>PayPal</h3><p>Saldo: ${currency} ${balance.toFixed(4)}</p><input type="email" placeholder="E-mail PayPal"><button class="btn-pay">SOLICITAR</button>`;
     }
 
     function updateUI() {
         document.getElementById('money-val').innerText = `${currency} ${balance.toFixed(4)}`;
         document.getElementById('moves-val').innerText = moves;
         document.getElementById('lvl-val').innerText = level;
-        document.getElementById('m-0').innerText = mission[0];
-        document.getElementById('m-1').innerText = mission[1];
-        document.getElementById('m-2').innerText = mission[2];
-        document.getElementById('count-bomb').innerText = boosters.bomb;
-        document.getElementById('count-swap').innerText = boosters.swap;
-        document.getElementById('count-shovel').innerText = boosters.shovel;
+        document.getElementById('m-0').innerText = mission[0]; document.getElementById('m-1').innerText = mission[1]; document.getElementById('m-2').innerText = mission[2];
+        document.getElementById('count-bomb').innerText = boosters.bomb; document.getElementById('count-swap').innerText = boosters.swap; document.getElementById('count-shovel').innerText = boosters.shovel;
     }
 
     function closeOverlay() { document.getElementById('overlay').style.display = 'none'; }
