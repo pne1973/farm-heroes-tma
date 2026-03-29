@@ -1,219 +1,44 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ouro da Quinta - Ganhe Real</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <style>
-        :root { --bg: #fcf3cf; --wood: #5d4037; --accent: #2e7d32; --gold: #ffd700; }
-        body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; color: var(--wood); touch-action: none; }
-        
-        /* Header Financeiro */
-        #header-wallet { width: 95%; background: white; margin-top: 10px; border-radius: 15px; display: flex; justify-content: space-between; padding: 12px; border: 3px solid var(--wood); box-shadow: 0 4px 0 var(--wood); box-sizing: border-box; }
-        .wallet-item { display: flex; flex-direction: column; align-items: center; }
-        .label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #8d6e63; }
-        .val { font-size: 18px; font-weight: 900; color: var(--accent); }
-
-        #mission-bar { display: flex; gap: 15px; margin: 15px 0; background: rgba(0,0,0,0.05); padding: 8px 20px; border-radius: 20px; font-weight: bold; border: 1px solid var(--wood); }
-        
-        #grid { display: grid; grid-template-columns: repeat(7, 46px); grid-template-rows: repeat(7, 46px); gap: 4px; padding: 10px; background: #a1887f; border: 5px solid var(--wood); border-radius: 12px; }
-        .cell { width: 46px; height: 46px; background: #efebe9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
-
-        /* Popups de Anúncio e Fim de Jogo */
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; padding: 20px; text-align: center; }
-        .btn { width: 80%; padding: 15px; font-size: 16px; border: none; border-radius: 50px; font-weight: bold; margin: 10px; cursor: pointer; }
-        .btn-ad { background: var(--gold); color: black; box-shadow: 0 4px 0 #b8860b; }
-        .btn-reset { background: #757575; color: white; }
-    </style>
-</head>
-<body>
-
-    <div id="header-wallet">
-        <div class="wallet-item">
-            <span class="label">Nível</span>
-            <span id="lvl-val" class="val" style="color:var(--wood)">1</span>
-        </div>
-        <div class="wallet-item">
-            <span class="label">Saldo Disponível</span>
-            <span id="money-val" class="val">€ 0,00</span>
-        </div>
-        <div class="wallet-item">
-            <span class="label">Ações</span>
-            <span id="moves-val" class="val" style="color:#d32f2f">20</span>
-        </div>
-    </div>
-
-    <div id="mission-bar">
-        <div>🧀 <span id="m-0">10</span></div>
-        <div>🍯 <span id="m-1">5</span></div>
-        <div>🥚 <span id="m-2">15</span></div>
-    </div>
-
-    <div id="grid"></div>
-
-    <div id="overlay">
-        <h2 id="status-title">ACABARAM AS AÇÕES!</h2>
-        <p>Assista a um vídeo curto para continuar a produzir e não perder o seu lucro deste nível.</p>
-        
-        <button class="btn btn-ad" onclick="simulateAd()">🎬 ASSISTIR VÍDEO (+5 AÇÕES)</button>
-        <button class="btn btn-reset" onclick="resetLevel()">DESISTIR E RECOMEÇAR</button>
-        
-        <p style="font-size: 11px; margin-top: 20px; opacity: 0.7;">Os seus ganhos são processados após atingir o mínimo de levantamento.</p>
-    </div>
-
-<script>
-    const tg = window.Telegram.WebApp;
-    tg.ready(); tg.expand();
-
-    const products = ['🧀', '🍯', '🥚', '🍞', '🥛'];
-    let moves = 20, level = 1, balance = 0.0, currency = "€";
-    let mission = [10, 5, 15];
-    let squares = [];
-
-    // Detetar Moeda pelo idioma do Telegram
-    const userLang = tg.initDataUnsafe.user?.language_code || 'pt';
-    if (userLang === 'pt-br') currency = "R$";
-
-    function loadProgress() {
-        tg.CloudStorage.getItems(['farm_lvl', 'farm_bal'], (err, values) => {
-            if (!err) {
-                level = parseInt(values.farm_lvl) || 1;
-                balance = parseFloat(values.farm_bal) || 0.0;
-                updateUI();
-            }
-        });
+function init() {
+    const grid = document.getElementById('grid');
+    grid.innerHTML = ''; 
+    squares = [];
+    moves = 20;
+    mission = [10 + level, 5 + Math.floor(level/2), 15 + level];
+    
+    // 1. Gera o tabuleiro aleatório
+    for (let i = 0; i < 49; i++) {
+        const square = document.createElement('div');
+        square.id = i;
+        square.classList.add('cell');
+        square.innerHTML = products[Math.floor(Math.random() * products.length)];
+        grid.appendChild(square);
+        squares.push(square);
+        square.addEventListener('touchstart', dragStart, {passive: false});
+        square.addEventListener('touchend', dragEnd, {passive: false});
     }
 
-    function init() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = ''; squares = [];
-        moves = 20;
-        mission = [10 + level, 5 + Math.floor(level/2), 15 + level];
-        
+    // 2. Limpa matches iniciais antes do jogador começar
+    // Isso evita que o jogador comece com itens já alinhados
+    cleanInitialMatches();
+    updateUI();
+}
+
+function cleanInitialMatches() {
+    let hasMatch = true;
+    while (hasMatch) {
+        hasMatch = false;
         for (let i = 0; i < 49; i++) {
-            const square = document.createElement('div');
-            square.id = i;
-            square.classList.add('cell');
-            square.innerHTML = products[Math.floor(Math.random() * products.length)];
-            grid.appendChild(square);
-            squares.push(square);
-            square.addEventListener('touchstart', dragStart);
-            square.addEventListener('touchend', dragEnd);
-        }
-        updateUI();
-    }
-
-    // Lógica de Drag & Match (resumida para o exemplo)
-    let startX, startY, startId;
-    function dragStart(e) { startId = parseInt(this.id); startX = e.touches[0].clientX; startY = e.touches[0].clientY; }
-    function dragEnd(e) {
-        const diffX = e.changedTouches[0].clientX - startX;
-        const diffY = e.changedTouches[0].clientY - startY;
-        let targetId = startId;
-        if (Math.abs(diffX) > Math.abs(diffY)) {
-            if (diffX > 30 && startId % 7 < 6) targetId = startId + 1;
-            else if (diffX < -30 && startId % 7 > 0) targetId = startId - 1;
-        } else {
-            if (diffY > 30 && startId < 42) targetId = startId + 7;
-            else if (diffY < -30 && startId >= 7) targetId = startId - 7;
-        }
-        if (targetId !== startId && moves > 0) {
-            let temp = squares[startId].innerHTML;
-            squares[startId].innerHTML = squares[targetId].innerHTML;
-            squares[targetId].innerHTML = temp;
-            moves--;
-            checkMatches();
-            updateUI();
+            let item = squares[i].innerHTML;
+            // Verifica horizontal
+            if (i % 7 < 5 && squares[i+1].innerHTML === item && squares[i+2].innerHTML === item) {
+                squares[i].innerHTML = products[Math.floor(Math.random() * products.length)];
+                hasMatch = true;
+            }
+            // Verifica vertical
+            if (i < 35 && squares[i+7].innerHTML === item && squares[i+14].innerHTML === item) {
+                squares[i].innerHTML = products[Math.floor(Math.random() * products.length)];
+                hasMatch = true;
+            }
         }
     }
-
-    function checkMatches() {
-        let matched = false;
-        squares.forEach((s, i) => {
-            let item = s.innerHTML;
-            if (item !== '' && i % 7 < 5 && squares[i+1].innerHTML === item && squares[i+2].innerHTML === item) {
-                [i, i+1, i+2].forEach(idx => squares[idx].setAttribute('match', true)); matched = true;
-            }
-            if (item !== '' && i < 35 && squares[i+7].innerHTML === item && squares[i+14].innerHTML === item) {
-                [i, i+7, i+14].forEach(idx => squares[idx].setAttribute('match', true)); matched = true;
-            }
-        });
-        if (matched) collect();
-    }
-
-    function collect() {
-        squares.forEach(s => {
-            if (s.getAttribute('match')) {
-                let type = s.innerHTML;
-                if (type === '🧀') mission[0]--;
-                if (type === '🍯') mission[1]--;
-                if (type === '🥚') mission[2]--;
-                // Cada item coletado dá 0,0001€ (Baseado no seu CPM de 1€)
-                balance += 0.0001; 
-                s.innerHTML = '';
-                s.removeAttribute('match');
-            }
-        });
-        setTimeout(applyGravity, 300);
-    }
-
-    function applyGravity() {
-        for (let i = 0; i < 7; i++) {
-            let col = [];
-            for (let j = 0; j < 7; j++) {
-                let val = squares[i + (j * 7)].innerHTML;
-                if (val !== '') col.push(val);
-            }
-            while (col.length < 7) col.unshift(products[Math.floor(Math.random() * products.length)]);
-            for (let j = 0; j < 7; j++) squares[i + (j * 7)].innerHTML = col[j];
-        }
-        updateUI();
-    }
-
-    // SIMULAÇÃO DE ANÚNCIO (Aqui entrará o código do seu Ad Network)
-    function simulateAd() {
-        tg.showConfirm("Assistir vídeo de 15 segundos?", (ok) => {
-            if (ok) {
-                tg.showScanQrPopup({ text: "Carregando Anúncio..." });
-                setTimeout(() => {
-                    tg.closeScanQrPopup();
-                    moves += 5;
-                    document.getElementById('overlay').style.display = 'none';
-                    updateUI();
-                    tg.showAlert("Obrigado! Recebeu +5 Ações.");
-                }, 2000);
-            }
-        });
-    }
-
-    function updateUI() {
-        document.getElementById('moves-val').innerText = moves;
-        document.getElementById('lvl-val').innerText = level;
-        document.getElementById('money-val').innerText = `${currency} ${balance.toFixed(4)}`;
-        
-        document.getElementById('m-0').innerText = Math.max(0, mission[0]);
-        document.getElementById('m-1').innerText = Math.max(0, mission[1]);
-        document.getElementById('m-2').innerText = Math.max(0, mission[2]);
-
-        if (mission[0] <= 0 && mission[1] <= 0 && mission[2] <= 0) {
-            level++;
-            tg.CloudStorage.setItem('farm_lvl', level.toString());
-            tg.CloudStorage.setItem('farm_bal', balance.toString());
-            tg.showAlert(`Nível ${level-1} Concluído! Ganhos Salvos.`);
-            init();
-        } else if (moves <= 0) {
-            document.getElementById('overlay').style.display = 'flex';
-        }
-    }
-
-    function resetLevel() {
-        document.getElementById('overlay').style.display = 'none';
-        init();
-    }
-
-    loadProgress();
-    init();
-</script>
-</body>
-</html>
+}
