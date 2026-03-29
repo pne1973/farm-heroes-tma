@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.30 - Pure Farm Only</title>
+    <title>Ouro da Quinta v33.31 - Farm Fix</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; }
@@ -14,19 +14,19 @@
         .val { font-size: 18px; font-weight: 800; color: var(--accent); }
         .label { font-size: 10px; text-transform: uppercase; color: #5f6368; font-weight: 700; }
 
-        #mission-bar { display: flex; gap: 15px; margin-bottom: 10px; background: var(--white); padding: 8px 25px; border-radius: 25px; font-size: 14px; font-weight: 800; border: 1px solid #eee; }
+        #mission-bar { display: flex; gap: 15px; margin-bottom: 10px; background: var(--white); padding: 8px 25px; border-radius: 25px; font-size: 14px; font-weight: 800; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .m-img { width: 22px; height: 22px; vertical-align: middle; }
 
-        /* Grid Farm - Cor de Terra */
+        /* Grid Farm - Solo de Quinta */
         #grid { 
             display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
-            gap: 5px; padding: 12px; background: #6d4c41; border-radius: 15px;
+            gap: 5px; padding: 12px; background: #8d6e63; border-radius: 15px;
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
         }
         .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
         .cell img { width: 32px; height: 32px; pointer-events: none; }
 
-        /* Boosters - Ícones de Ferramentas Reais */
+        /* Boosters Temáticos */
         #booster-container { display: flex; gap: 12px; margin-top: 20px; margin-bottom: 90px; }
         .booster-btn { background: var(--white); padding: 10px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; min-width: 75px; border: 1px solid #ddd; position: relative; }
         .b-icon { width: 26px; height: 26px; margin-bottom: 4px; }
@@ -52,29 +52,17 @@
     <div id="grid"></div>
 
     <div id="booster-container">
-        <div class="booster-btn">
-            <img src="https://cdn-icons-png.flaticon.com/128/598/598219.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">BOMBA</span>
-            <div class="b-count">2</div>
-        </div>
-        <div class="booster-btn">
-            <img src="https://cdn-icons-png.flaticon.com/128/940/940561.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">TRATOR</span>
-            <div class="b-count">2</div>
-        </div>
-        <div class="booster-btn">
-            <img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">PÁ</span>
-            <div class="b-count">3</div>
-        </div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png" class="b-icon"><span>BOMBA</span><div class="b-count">2</div></div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png" class="b-icon"><span>TRATOR</span><div class="b-count">2</div></div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png" class="b-icon"><span>PÁ</span><div class="b-count">3</div></div>
     </div>
 
     <div id="admin-panel">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // LISTA DEFINITIVA E ÚNICA DE ATIVOS (SEM GATOS, SEM BERINGELAS)
-    const farmAssets = [
+    // Lista estrita de ativos agrícolas (URLs verificadas)
+    const farmIcons = [
         'https://cdn-icons-png.flaticon.com/128/802/802271.png',   // Queijo
         'https://cdn-icons-png.flaticon.com/128/3050/3050181.png', // Mel
         'https://cdn-icons-png.flaticon.com/128/837/837560.png',   // Ovo
@@ -89,25 +77,24 @@
         
         let board = [];
         for (let i = 0; i < 49; i++) {
-            let assetIdx;
-            // Lógica Anti-Match Inicial
+            let idx;
+            // Anti-Match Inicial: impede alinhamentos de 3 automáticos
             do {
-                assetIdx = Math.floor(Math.random() * farmAssets.length);
+                idx = Math.floor(Math.random() * farmIcons.length);
             } while (
-                (i % 7 >= 2 && board[i-1] === assetIdx && board[i-2] === assetIdx) ||
-                (i >= 14 && board[i-7] === assetIdx && board[i-14] === assetIdx)
+                (i % 7 >= 2 && board[i-1] === idx && board[i-2] === idx) ||
+                (i >= 14 && board[i-7] === idx && board[i-14] === idx)
             );
 
-            board[i] = assetIdx;
+            board[i] = idx;
             const cell = document.createElement('div');
             cell.className = 'cell';
             const img = document.createElement('img');
-            img.src = farmAssets[assetIdx]; // Injeção direta da URL segura
+            img.src = farmIcons[idx]; // Atribuição direta
             cell.appendChild(img);
             grid.appendChild(cell);
         }
     }
-
     init();
 </script>
 </body>
