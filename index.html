@@ -3,39 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.32 - Booster Fix</title>
+    <title>Ouro da Quinta v33.35 - Ads Live</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <script src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
+
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --blue: #1a73e8; }
         body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
 
-        #header-wallet { width: 92%; background: var(--white); margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+        /* Dashboard */
+        #header-wallet { width: 92%; background: var(--white); margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); flex-shrink: 0; }
         .val { font-size: 18px; font-weight: 800; color: var(--accent); }
         .label { font-size: 10px; text-transform: uppercase; color: #5f6368; font-weight: 700; }
 
         #mission-bar { display: flex; gap: 15px; margin-bottom: 10px; background: var(--white); padding: 8px 25px; border-radius: 25px; font-size: 14px; font-weight: 800; }
         .m-img { width: 22px; height: 22px; vertical-align: middle; }
 
+        /* Grid */
         #grid { 
             display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
             gap: 5px; padding: 12px; background: #8d6e63; border-radius: 15px;
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.3);
         }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; transition: 0.2s; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; position: relative; }
         .cell img { width: 32px; height: 32px; pointer-events: none; }
-        .cell.target-mode { border: 2px solid var(--blue); background: #e3f2fd; animation: pulse 1s infinite; }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-        .match-anim { animation: poof 0.4s forwards; }
-        @keyframes poof { 0% { transform: scale(1); } 100% { transform: scale(0); opacity: 0; } }
 
-        #booster-container { display: flex; gap: 12px; margin-top: 20px; margin-bottom: 90px; }
-        .booster-btn { background: var(--white); padding: 10px; border-radius: 18px; display: flex; flex-direction: column; align-items: center; min-width: 75px; border: 1px solid #ddd; position: relative; cursor: pointer; }
-        .booster-btn.active { border: 2px solid var(--blue); background: #e8f0fe; }
-        .b-icon { width: 26px; height: 26px; margin-bottom: 4px; }
-        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: bold; }
+        /* ÁREA DE ANÚNCIO NATIVO (Abaixo do Jogo) */
+        #native-ad-container { width: 92%; margin: 15px 0; min-height: 80px; border-radius: 12px; overflow: hidden; background: #f1f3f4; border: 1px dashed #ccc; }
 
-        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: white; padding: 10px 0; font-size: 11px; text-align: center; }
+        /* Boosters */
+        #booster-container { display: flex; gap: 10px; margin-bottom: 80px; flex-shrink: 0; }
+        .booster-btn { background: var(--white); padding: 8px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; min-width: 70px; border: 1px solid #ddd; position: relative; }
+        .b-icon { width: 24px; height: 24px; margin-bottom: 2px; }
+        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: white; padding: 8px 0; font-size: 11px; text-align: center; }
     </style>
 </head>
 <body>
@@ -54,22 +57,15 @@
 
     <div id="grid"></div>
 
+    <div id="native-ad-container">
+        <div id="container-5a080aa61604cd40501f4a250aa83ca6"></div>
+        <script async="async" data-cfasync="false" src="https://pl29012865.profitablecpmratenetwork.com/5a080aa61604cd40501f4a250aa83ca6/invoke.js"></script>
+    </div>
+
     <div id="booster-container">
-        <div class="booster-btn" onclick="activateBooster('bomb', this)">
-            <img src="https://cdn-icons-png.flaticon.com/128/598/598219.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">BOMBA</span>
-            <div id="count-bomb" class="b-count">2</div>
-        </div>
-        <div class="booster-btn" onclick="activateBooster('tractor', this)">
-            <img src="https://cdn-icons-png.flaticon.com/128/940/940561.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">TRATOR</span>
-            <div id="count-tractor" class="b-count">2</div>
-        </div>
-        <div class="booster-btn" onclick="activateBooster('shovel', this)">
-            <img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png" class="b-icon">
-            <span style="font-size: 10px; font-weight: bold;">PÁ</span>
-            <div id="count-shovel" class="b-count">3</div>
-        </div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png" class="b-icon"><span>BOMBA</span><div class="b-count">2</div></div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png" class="b-icon"><span>TRATOR</span><div class="b-count">2</div></div>
+        <div class="booster-btn"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png" class="b-icon"><span>PÁ</span><div class="b-count">3</div></div>
     </div>
 
     <div id="admin-panel">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
@@ -77,102 +73,31 @@
 <script>
     const tg = window.Telegram.WebApp;
     const farmIcons = [
-        'https://cdn-icons-png.flaticon.com/128/802/802271.png',   // Queijo
-        'https://cdn-icons-png.flaticon.com/128/3050/3050181.png', // Mel
-        'https://cdn-icons-png.flaticon.com/128/837/837560.png',   // Ovo
-        'https://cdn-icons-png.flaticon.com/128/2909/2909774.png', // Maçã
-        'https://cdn-icons-png.flaticon.com/128/3104/3104618.png'  // Leite
+        'https://cdn-icons-png.flaticon.com/128/802/802271.png', 'https://cdn-icons-png.flaticon.com/128/3050/3050181.png',
+        'https://cdn-icons-png.flaticon.com/128/837/837560.png', 'https://cdn-icons-png.flaticon.com/128/2909/2909774.png',
+        'https://cdn-icons-png.flaticon.com/128/3104/3104618.png'
     ];
-
-    let activeBooster = null;
-    let counts = { bomb: 2, tractor: 2, shovel: 3 };
-    let moves = 21, balance = 0, mission = [10, 5, 12];
 
     function init() {
         tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
-        
+        let board = [];
         for (let i = 0; i < 49; i++) {
+            let idx;
+            do {
+                idx = Math.floor(Math.random() * farmIcons.length);
+            } while (
+                (i % 7 >= 2 && board[i-1] === idx && board[i-2] === idx) ||
+                (i >= 14 && board[i-7] === idx && board[i-14] === idx)
+            );
+            board[i] = idx;
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.dataset.id = i;
-            cell.onclick = () => handleCellClick(i);
-            
-            const idx = Math.floor(Math.random() * farmIcons.length);
-            cell.dataset.idx = idx;
-            const img = document.createElement('img');
-            img.src = farmIcons[idx];
-            cell.appendChild(img);
+            cell.innerHTML = `<img src="${farmIcons[idx]}">`;
             grid.appendChild(cell);
         }
-        updateUI();
     }
-
-    function activateBooster(type, btn) {
-        if (counts[type] <= 0) return;
-        
-        // Remove estado ativo anterior
-        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.cell').forEach(c => c.classList.remove('target-mode'));
-
-        if (activeBooster === type) {
-            activeBooster = null;
-        } else {
-            activeBooster = type;
-            btn.classList.add('active');
-            document.querySelectorAll('.cell').forEach(c => c.classList.add('target-mode'));
-        }
-    }
-
-    function handleCellClick(id) {
-        if (!activeBooster) return;
-
-        const cells = document.querySelectorAll('.cell');
-        let targets = [];
-
-        if (activeBooster === 'bomb') {
-            const row = Math.floor(id / 7);
-            const col = id % 7;
-            for (let r = row - 1; r <= row + 1; r++) {
-                for (let c = col - 1; c <= col + 1; c++) {
-                    if (r >= 0 && r < 7 && c >= 0 && c < 7) targets.push(r * 7 + c);
-                }
-            }
-        } else if (activeBooster === 'tractor') {
-            const row = Math.floor(id / 7);
-            for (let c = 0; c < 7; c++) targets.push(row * 7 + c);
-        } else if (activeBooster === 'shovel') {
-            targets.push(id);
-        }
-
-        // Executar efeito
-        targets.forEach(tIdx => {
-            const cell = cells[tIdx];
-            cell.querySelector('img').classList.add('match-anim');
-            setTimeout(() => {
-                const newIdx = Math.floor(Math.random() * farmIcons.length);
-                cell.dataset.idx = newIdx;
-                cell.querySelector('img').src = farmIcons[newIdx];
-                cell.querySelector('img').classList.remove('match-anim');
-            }, 400);
-        });
-
-        counts[activeBooster]--;
-        activeBooster = null;
-        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.cell').forEach(c => c.classList.remove('target-mode'));
-        updateUI();
-    }
-
-    function updateUI() {
-        document.getElementById('bal').innerText = '€ ' + balance.toFixed(4);
-        document.getElementById('mov').innerText = moves;
-        document.getElementById('count-bomb').innerText = counts.bomb;
-        document.getElementById('count-tractor').innerText = counts.tractor;
-        document.getElementById('count-shovel').innerText = counts.shovel;
-    }
-
     init();
 </script>
 </body>
