@@ -3,62 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.22 - Full Production</title>
+    <title>Ouro da Quinta v33.23 PRO</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; }
-        body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         
-        /* Monetização e Design Principal */
-        #ad-top { width: 100%; height: 45px; background: #f1f3f4; display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 1px solid #dadce0; color: #70757a; flex-shrink: 0; }
+        body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; color: var(--wood); touch-action: none; overflow: hidden; }
+
+        /* Dashboard Organizado */
+        #header-wallet { width: 94%; background: var(--white); margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0; cursor: pointer; }
+        .val { font-size: 16px; font-weight: 700; color: var(--accent); }
+        .label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #5f6368; }
+
+        #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: var(--white); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; flex-shrink: 0; }
+        .m-img { width: 18px; height: 18px; vertical-align: middle; }
         
-        #header-wallet { width: 94%; background: white; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; cursor: pointer; }
-        .val { font-size: 18px; font-weight: bold; color: var(--accent); }
-        .label { font-size: 10px; text-transform: uppercase; color: #666; font-weight: 700; }
+        /* Grid de Jogo Otimizada (40px) */
+        #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
+        #grid { display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); gap: 4px; padding: 8px; background: #bdc1c6; border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        
+        .cell { width: 40px; height: 40px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; transition: all 0.2s; }
+        .cell img { width: 30px; height: 30px; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        #mission-bar { display: flex; gap: 15px; margin-bottom: 8px; background: white; padding: 8px 25px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #eee; }
-        .m-img { width: 20px; height: 20px; vertical-align: middle; }
-
-        /* Grid de Jogo - Performance e Nitidez */
-        #grid { 
-            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
-            gap: 4px; padding: 10px; background: #ccd0d5; border-radius: 12px;
-            touch-action: none; user-select: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
-        }
-        .cell { 
-            width: 44px; height: 44px; background: #f8f9fa; border-radius: 8px; 
-            display: flex; align-items: center; justify-content: center; position: relative;
-        }
-        .cell img { width: 34px; height: 34px; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* Animação de Explosão/Match */
+        /* Animação de Match/Explosão */
         .match-anim { animation: explode 0.3s forwards; }
-        @keyframes explode {
-            0% { transform: scale(1); filter: brightness(1.8); }
-            100% { transform: scale(0); opacity: 0; }
-        }
+        @keyframes explode { 0% { transform: scale(1); filter: brightness(1.5); } 100% { transform: scale(0); opacity: 0; } }
 
-        /* Boosters Reativados */
-        #booster-container { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 85px; flex-shrink: 0; }
-        .booster-btn { background: white; padding: 10px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; min-width: 72px; border: 1px solid #ddd; position: relative; cursor: pointer; }
+        /* Boosters */
+        #booster-container { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 10px 0; margin-bottom: 90px; flex-shrink: 0; }
+        .booster-btn { background: var(--white); border: 1px solid #dadce0; padding: 6px 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 65px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .booster-btn.active { border: 2px solid var(--google-blue); background: #e8f0fe; }
-        .b-icon { width: 26px; height: 26px; margin-bottom: 4px; }
-        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+        .b-icon { width: 22px; height: 22px; margin-bottom: 2px; }
+        .b-count { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: bold; }
 
-        /* Painel Admin (ID: 5401881400) */
-        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: white; padding: 10px; font-size: 11px; display: none; z-index: 1000; border-top: 1px solid #3c4043; }
+        /* Admin Panel (ID 5401881400) */
+        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: #ffffff; padding: 8px 0; font-size: 10px; z-index: 95; border-top: 1px solid #3c4043; display: none; }
         .admin-flex { display: flex; justify-content: space-around; align-items: center; }
-
-        #ad-bottom { width: 100%; height: 55px; background: #f1f3f4; position: fixed; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 1px solid #dadce0; color: #70757a; z-index: 100; }
     </style>
 </head>
 <body>
-    <div id="ad-top">MONETIZAÇÃO: BANNER SUPERIOR</div>
     
     <div id="header-wallet">
-        <div style="text-align:center"><div class="label">Nível</div><div id="lvl" class="val" style="color:#202124">1</div></div>
-        <div style="text-align:center"><div class="label">Saldo</div><div id="bal" class="val">€ 0.0000</div></div>
-        <div style="text-align:center"><div class="label">Ações</div><div id="mov" class="val" style="color:var(--red)">21</div></div>
+        <div class="wallet-item"><div class="label">Nível</div><div id="lvl" class="val" style="color:#202124">1</div></div>
+        <div class="wallet-item"><div class="label">Saldo</div><div id="bal" class="val">€ 0.0000</div></div>
+        <div class="wallet-item"><div class="label">Ações</div><div id="mov" class="val" style="color:var(--red)">21</div></div>
     </div>
 
     <div id="mission-bar">
@@ -67,7 +55,9 @@
         <span><img src="https://cdn-icons-png.flaticon.com/128/837/837560.png" class="m-img"> <span id="m2">12</span></span>
     </div>
 
-    <div id="grid"></div>
+    <div id="grid-container">
+        <div id="grid"></div>
+    </div>
 
     <div id="booster-container">
         <div class="booster-btn" id="btn-bomb" onclick="toggleB('bomb')">
@@ -88,21 +78,21 @@
         <div class="admin-flex">
             <span>ADMIN: 5401881400</span>
             <span>TOTAL APP: € <span id="adm-t">0.0000</span></span>
-            <span style="color:var(--google-blue); font-weight:bold; cursor:pointer" onclick="alert('Lista PayPal Carregada')">PAYPAL LIST</span>
+            <span style="color:var(--google-blue); font-weight:bold; cursor:pointer">PAYPAL LIST</span>
         </div>
     </div>
-
-    <div id="ad-bottom">MONETIZAÇÃO: BANNER INFERIOR</div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const ADMIN_ID = "5401881400";
+    
+    // Novas Imagens HD com tema de Quinta
     const imgAssets = [
         'https://cdn-icons-png.flaticon.com/128/802/802271.png', // 0: Queijo
         'https://cdn-icons-png.flaticon.com/128/3050/3050181.png', // 1: Mel
-        'https://cdn-icons-png.flaticon.com/128/837/837560.png', // 2: Ovo
-        'https://cdn-icons-png.flaticon.com/128/3034/3034873.png', // 3: Pão
-        'https://cdn-icons-png.flaticon.com/128/940/940561.png'    // 4: Leite
+        'https://cdn-icons-png.flaticon.com/128/837/837560.png', // 2: Ovo Caseiro
+        'https://cdn-icons-png.flaticon.com/128/2909/2909774.png', // 3: Maçã Doce (Substitui Pão)
+        'https://cdn-icons-png.flaticon.com/128/3104/3104618.png'  // 4: Garrafa Leite Fresco (HD)
     ];
     
     let moves = 21, balance = 0, level = 1, squares = [], mission = [10, 5, 12];
@@ -113,8 +103,29 @@
         const container = document.getElementById('grid');
         container.innerHTML = ''; squares = [];
         
+        const tempBoard = new Array(49); // Tabuleiro temporário para validação
+        
         for (let i = 0; i < 49; i++) {
-            let idx = Math.floor(Math.random() * imgAssets.length);
+            let idx;
+            let invalidMatch = true;
+            
+            // Lógica ANTI-MATCH INICIAL: Gera e valida
+            while (invalidMatch) {
+                idx = Math.floor(Math.random() * imgAssets.length);
+                invalidMatch = false; // Assume que é válido
+
+                // Valida Horizontal (com as duas anteriores na linha)
+                if (i % 7 >= 2) {
+                    if (tempBoard[i-1] === idx && tempBoard[i-2] === idx) { invalidMatch = true; }
+                }
+                // Valida Vertical (com as duas superiores na coluna)
+                if (i >= 14 && !invalidMatch) {
+                    if (tempBoard[i-7] === idx && tempBoard[i-14] === idx) { invalidMatch = true; }
+                }
+            }
+            
+            // Item validado: coloca no tabuleiro real
+            tempBoard[i] = idx;
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.id = i;
@@ -124,7 +135,8 @@
             img.src = imgAssets[idx];
             cell.appendChild(img);
             
-            cell.addEventListener('touchstart', (e) => { startId = i; isDragging = true; });
+            // Eventos de Jogo
+            cell.addEventListener('touchstart', (e) => { if(!activeBooster) { startId = i; isDragging = true; } });
             cell.addEventListener('touchmove', handleMove);
             cell.addEventListener('touchend', () => isDragging = false);
             cell.onclick = () => { if(activeBooster) useBooster(i); };
@@ -138,6 +150,8 @@
         updateUI();
     }
 
+    // [Resto da lógica Swipe, Gravity e Boosters mantida da v33.22, ajustada para dataset.idx]
+    
     function handleMove(e) {
         if (!isDragging || activeBooster) return;
         const touch = e.touches[0];
@@ -158,13 +172,9 @@
         let idx1 = squares[id1].dataset.idx;
         let idx2 = squares[id2].dataset.idx;
         updateCell(id1, idx2); updateCell(id2, idx1);
-
         setTimeout(() => {
-            if (!checkMatches()) {
-                updateCell(id1, idx1); updateCell(id2, idx2);
-            } else {
-                moves--; updateUI();
-            }
+            if (!checkMatches()) { updateCell(id1, idx1); updateCell(id2, idx2); } 
+            else { moves--; updateUI(); }
         }, 250);
     }
 
@@ -183,20 +193,21 @@
         if(activeBooster === 'bomb') {
             const area = [id, id-1, id+1, id-7, id+7, id-8, id+8, id-6, id+6];
             area.forEach(i => { if(i >= 0 && i < 49) squares[i].querySelector('img').classList.add('match-anim'); });
-            setTimeout(() => { area.forEach(i => { if(i >= 0 && i < 49) updateCell(i, Math.floor(Math.random()*5)); }); gravity(); }, 300);
+            setTimeout(() => { area.forEach(i => { if(i >= 0 && i < 49) updateCell(i, Math.floor(Math.random()*imgAssets.length)); }); gravity(); }, 300);
         } else if(activeBooster === 'shovel') {
             squares[id].querySelector('img').classList.add('match-anim');
-            setTimeout(() => { updateCell(id, Math.floor(Math.random()*5)); gravity(); }, 300);
+            setTimeout(() => { updateCell(id, Math.floor(Math.random()*imgAssets.length)); gravity(); }, 300);
         }
         toggleB(null);
     }
 
     function checkMatches() {
         let toRemove = new Set();
+        // Lógica de Matches (Horizontal e Vertical)
         for (let r = 0; r < 7; r++) {
             for (let c = 0; c < 5; c++) {
                 let i = r * 7 + c;
-                if (squares[i].dataset.idx === squares[i+1].dataset.idx && squares[i].dataset.idx === squares[i+2].dataset.idx) {
+                if (squares[i].dataset.idx == squares[i+1].dataset.idx && squares[i].dataset.idx == squares[i+2].dataset.idx) {
                     toRemove.add(i); toRemove.add(i+1); toRemove.add(i+2);
                 }
             }
@@ -204,7 +215,7 @@
         for (let c = 0; c < 7; c++) {
             for (let r = 0; r < 5; r++) {
                 let i = r * 7 + c;
-                if (squares[i].dataset.idx === squares[i+7].dataset.idx && squares[i].dataset.idx === squares[i+14].dataset.idx) {
+                if (squares[i].dataset.idx == squares[i+7].dataset.idx && squares[i].dataset.idx == squares[i+14].dataset.idx) {
                     toRemove.add(i); toRemove.add(i+7); toRemove.add(i+14);
                 }
             }
@@ -229,9 +240,7 @@
         return false;
     }
 
-    function gravity() {
-        checkMatches(); updateUI();
-    }
+    function gravity() { checkMatches(); updateUI(); }
 
     function updateUI() {
         document.getElementById('bal').innerText = '€ ' + balance.toFixed(4);
@@ -239,7 +248,7 @@
         document.getElementById('m0').innerText = mission[0];
         document.getElementById('m1').innerText = mission[1];
         document.getElementById('m2').innerText = mission[2];
-        if(moves <= 0) { tg.showAlert("Fim das Ações! Reiniciando..."); location.reload(); }
+        if(moves <= 0) { tg.showAlert("Fim das Ações!"); init(); }
     }
 
     init();
