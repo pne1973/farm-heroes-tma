@@ -3,41 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta - Boosters Full Set</title>
+    <title>Ouro da Quinta - Versão Estável</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; }
         
         body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; color: var(--wood); touch-action: none; overflow: hidden; }
 
-        /* Estrutura de Espaçamento */
+        /* Publicidade */
         #ad-top { width: 100%; height: 45px; background: #f1f3f4; display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 1px solid #dadce0; color: #70757a; flex-shrink: 0; }
         #ad-bottom { width: 100%; height: 55px; background: #f1f3f4; position: fixed; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 1px solid #dadce0; color: #70757a; z-index: 100; }
 
-        /* Dashboard e Missão */
-        #header-wallet { width: 94%; background: var(--white); margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0; }
+        /* Dashboard */
+        #header-wallet { width: 94%; background: var(--white); margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0; }
         .val { font-size: 16px; font-weight: 700; color: var(--accent); }
         .label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #5f6368; }
 
-        #mission-bar { display: flex; gap: 10px; margin-bottom: 5px; background: var(--white); padding: 5px 15px; border-radius: 20px; font-size: 13px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; flex-shrink: 0; }
+        #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: var(--white); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; flex-shrink: 0; }
         
-        /* Grid (Reduzido para 40px para caber o 3º booster) */
+        /* Grid Centralizada */
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
-        #grid { display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); gap: 4px; padding: 8px; background: #bdc1c6; border-radius: 10px; }
-        .cell { width: 40px; height: 40px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.1s; }
+        #grid { display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); gap: 4px; padding: 8px; background: #bdc1c6; border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+        .cell { width: 40px; height: 40px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.2s, background 0.2s; }
         .cell.selected { outline: 3px solid var(--google-blue); z-index: 10; transform: scale(1.1); background: white; }
+        .cell.matched { transform: scale(0); opacity: 0; }
 
-        /* Painel de Boosters (3 itens) */
-        #booster-container { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 8px 0; margin-bottom: 95px; flex-shrink: 0; }
-        .booster-btn { background: var(--white); border: 1px solid #dadce0; padding: 6px 10px; border-radius: 10px; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 60px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* Boosters */
+        #booster-container { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 10px 0; margin-bottom: 95px; flex-shrink: 0; }
+        .booster-btn { background: var(--white); border: 1px solid #dadce0; padding: 6px 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 65px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .booster-btn.active { border: 2px solid var(--google-blue); background: #e8f0fe; }
         .booster-count { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: bold; }
         .booster-label { font-size: 8px; font-weight: 900; color: #5f6368; margin-top: 2px; text-transform: uppercase; }
 
-        /* Admin Fixo */
+        /* Admin */
         #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: #ffffff; padding: 8px 0; font-size: 10px; z-index: 95; border-top: 1px solid #3c4043; display: none; }
         .admin-flex { display: flex; justify-content: space-around; align-items: center; }
         .admin-tag { background: var(--google-blue); padding: 1px 4px; border-radius: 3px; font-weight: bold; margin-right: 4px; }
+
+        /* Popups */
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
+        .popup { background: white; padding: 25px; border-radius: 16px; width: 80%; max-width: 300px; text-align: center; }
+        .btn-action { width: 100%; padding: 12px; margin-top: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--google-blue); color: white; }
     </style>
 </head>
 <body>
@@ -64,125 +70,245 @@
         <div id="boost-bomb" class="booster-btn" onclick="toggleBooster('bomb')">
             <span style="font-size:18px">💣</span>
             <span class="booster-label">BOMBA</span>
-            <span id="count-bomb" class="booster-count">2</span>
+            <span id="count-bomb" class="booster-count">0</span>
         </div>
         <div id="boost-swap" class="booster-btn" onclick="toggleBooster('swap')">
             <span style="font-size:18px">🔄</span>
             <span class="booster-label">TROCA</span>
-            <span id="count-swap" class="booster-count">2</span>
+            <span id="count-swap" class="booster-count">0</span>
         </div>
         <div id="boost-shovel" class="booster-btn" onclick="toggleBooster('shovel')">
             <span style="font-size:18px">🧹</span>
             <span class="booster-label">PÁ</span>
-            <span id="count-shovel" class="booster-count">3</span>
+            <span id="count-shovel" class="booster-count">0</span>
         </div>
     </div>
 
     <div id="admin-panel">
         <div class="admin-flex">
-            <span><span class="admin-tag">ADMIN</span> ID: <span id="adm-id">5401881400</span></span>
+            <span><span class="admin-tag">ADMIN</span> ID: <span id="adm-id"></span></span>
             <span>TOTAL APP: € <span id="adm-total">0.00</span></span>
         </div>
     </div>
 
     <div id="ad-bottom">ANÚNCIO: BANNER INFERIOR</div>
 
+    <div id="overlay">
+        <div class="popup" id="popup-content"></div>
+    </div>
+
 <script>
     const tg = window.Telegram.WebApp;
     const ADMIN_ID = "5401881400";
-    const products = ['🧀', '🍯', '🥚', '🍞', '🥛'];
-    let moves = 21, level = 1, balance = 0.0, squares = [];
+    const items = ['🧀', '🍯', '🥚', '🍞', '🥛'];
+    
+    let moves = 21, level = 1, balance = 0.0, currency = "€";
     let boosters = { bomb: 2, shovel: 3, swap: 2 };
-    let activeBooster = null;
-    let firstSwapId = null;
+    let mission = [10, 5, 12], squares = [];
+    let activeBooster = null, firstSwapId = null;
 
+    // Inicialização
     function init() {
+        tg.expand();
         const grid = document.getElementById('grid');
         grid.innerHTML = ''; squares = [];
+        
         for (let i = 0; i < 49; i++) {
             const square = document.createElement('div');
             square.id = i; square.className = 'cell';
-            square.innerHTML = products[Math.floor(Math.random() * products.length)];
+            square.innerHTML = items[Math.floor(Math.random() * items.length)];
             grid.appendChild(square); squares.push(square);
-            square.onclick = () => handleCellClick(i);
+            square.onclick = () => handleInteraction(i);
         }
+
         if (tg.initDataUnsafe.user?.id.toString() === ADMIN_ID) {
             document.getElementById('admin-panel').style.display = 'block';
+            document.getElementById('adm-id').innerText = ADMIN_ID;
+        }
+        
+        updateUI();
+    }
+
+    function handleInteraction(id) {
+        if (moves <= 0) return;
+
+        if (activeBooster) {
+            executeBooster(id);
+        } else {
+            // Lógica Match-3 simplificada
+            processMatch(id);
+        }
+    }
+
+    function processMatch(id) {
+        const item = squares[id].innerHTML;
+        const matches = findMatches(id, item);
+
+        if (matches.length >= 3) {
+            tg.HapticFeedback.impactOccurred('light');
+            matches.forEach(idx => {
+                const char = squares[idx].innerHTML;
+                updateMission(char);
+                squares[idx].innerHTML = '';
+            });
+            moves--;
+            balance += 0.0002;
+            setTimeout(applyGravity, 300);
         }
         updateUI();
+        checkGameState();
+    }
+
+    function findMatches(id, item) {
+        const matches = new Set([id]);
+        const check = (idx) => {
+            const neighbors = [];
+            if (idx % 7 > 0) neighbors.push(idx - 1);
+            if (idx % 7 < 6) neighbors.push(idx + 1);
+            if (idx >= 7) neighbors.push(idx - 7);
+            if (idx < 42) neighbors.push(idx + 7);
+
+            neighbors.forEach(n => {
+                if (!matches.has(n) && squares[n].innerHTML === item && item !== '') {
+                    matches.add(n);
+                    check(n);
+                }
+            });
+        };
+        check(id);
+        return Array.from(matches);
+    }
+
+    function applyGravity() {
+        for (let i = 41; i >= 0; i--) {
+            if (squares[i + 7].innerHTML === '') {
+                squares[i + 7].innerHTML = squares[i].innerHTML;
+                squares[i].innerHTML = '';
+            }
+        }
+        for (let i = 0; i < 7; i++) {
+            if (squares[i].innerHTML === '') {
+                squares[i].innerHTML = items[Math.floor(Math.random() * items.length)];
+            }
+        }
+        if (squares.some(s => s.innerHTML === '')) applyGravity();
     }
 
     function toggleBooster(type) {
         if (boosters[type] <= 0) {
-            // Lógica de ver anúncio para ganhar mais...
+            showAdPopup(type);
             return;
         }
-        // Se clicar no mesmo, desativa
-        if (activeBooster === type) {
-            activeBooster = null;
-            firstSwapId = null;
-        } else {
-            activeBooster = type;
-            firstSwapId = null; // Reset se mudar de booster
-        }
-        
+        activeBooster = (activeBooster === type) ? null : type;
+        firstSwapId = null;
         document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-        
         if (activeBooster) document.getElementById(`boost-${type}`).classList.add('active');
     }
 
-    function handleCellClick(id) {
-        if (!activeBooster) return;
-
+    function executeBooster(id) {
         tg.HapticFeedback.impactOccurred('medium');
-
         if (activeBooster === 'bomb') {
-            applyBomb(id);
+            const r = Math.floor(id/7), c = id%7;
+            for(let i=r-1; i<=r+1; i++) {
+                for(let j=c-1; j<=c+1; j++) {
+                    if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = '';
+                }
+            }
         } else if (activeBooster === 'shovel') {
             squares[id].innerHTML = '';
-            finalizeBoosterUse();
         } else if (activeBooster === 'swap') {
             if (firstSwapId === null) {
                 firstSwapId = id;
                 squares[id].classList.add('selected');
+                return;
             } else {
-                // Troca as duas peças sem gastar ações
                 let temp = squares[firstSwapId].innerHTML;
                 squares[firstSwapId].innerHTML = squares[id].innerHTML;
                 squares[id].innerHTML = temp;
-                finalizeBoosterUse();
             }
         }
-        updateUI();
-    }
-
-    function applyBomb(id) {
-        const r = Math.floor(id/7), c = id%7;
-        for(let i=r-1; i<=r+1; i++) {
-            for(let j=c-1; j<=c+1; j++) {
-                if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = '';
-            }
-        }
-        finalizeBoosterUse();
-    }
-
-    function finalizeBoosterUse() {
+        
         boosters[activeBooster]--;
         activeBooster = null;
         firstSwapId = null;
         document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
         document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-        // applyGravity(); // Chamar queda de peças aqui
+        setTimeout(applyGravity, 300);
+        updateUI();
+    }
+
+    function updateMission(char) {
+        if (char === '🧀') mission[0] = Math.max(0, mission[0] - 1);
+        if (char === '🍯') mission[1] = Math.max(0, mission[1] - 1);
+        if (char === '🥚') mission[2] = Math.max(0, mission[2] - 1);
     }
 
     function updateUI() {
         document.getElementById('moves-val').innerText = moves;
         document.getElementById('money-val').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('lvl-val').innerText = level;
+        document.getElementById('m-0').innerText = mission[0];
+        document.getElementById('m-1').innerText = mission[1];
+        document.getElementById('m-2').innerText = mission[2];
         document.getElementById('count-bomb').innerText = boosters.bomb;
-        document.getElementById('count-shovel').innerText = boosters.shovel;
         document.getElementById('count-swap').innerText = boosters.swap;
+        document.getElementById('count-shovel').innerText = boosters.shovel;
     }
+
+    function showAdPopup(type) {
+        const overlay = document.getElementById('overlay');
+        const content = document.getElementById('popup-content');
+        overlay.style.display = 'flex';
+        content.innerHTML = `
+            <h3>Acabaram os Boosters!</h3>
+            <p>Vê um anúncio para ganhar <b>+2</b> unidades.</p>
+            <div style="background:#f1f3f4; height:100px; margin:10px 0; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:10px; color:#70757a;">ANÚNCIO DE VÍDEO</div>
+            <button class="btn-action" onclick="rewardAd('${type}')">🎬 VER VÍDEO</button>
+            <button class="btn-action" style="background:#eee; color:#333" onclick="closeOverlay()">FECHAR</button>
+        `;
+    }
+
+    function rewardAd(type) {
+        tg.showScanQrPopup({text: "A carregar anúncio..."});
+        setTimeout(() => {
+            tg.closeScanQrPopup();
+            boosters[type] += 2;
+            closeOverlay();
+            updateUI();
+        }, 2000);
+    }
+
+    function checkGameState() {
+        if (mission.every(m => m === 0)) {
+            level++;
+            balance += 0.0050;
+            tg.showAlert("Nível Concluído! Ganhaste bónus de € 0.0050");
+            init();
+        } else if (moves <= 0) {
+            showGameOver();
+        }
+    }
+
+    function showGameOver() {
+        const overlay = document.getElementById('overlay');
+        const content = document.getElementById('popup-content');
+        overlay.style.display = 'flex';
+        content.innerHTML = `
+            <h3>Ações Esgotadas!</h3>
+            <p>Vê um anúncio para ganhar <b>+5 ações</b> e continuar este nível.</p>
+            <button class="btn-action" onclick="rewardMoves()">🎬 VER ANÚNCIO</button>
+            <button class="btn-action" style="background:#eee; color:#333" onclick="location.reload()">RECOMEÇAR</button>
+        `;
+    }
+
+    function rewardMoves() {
+        moves += 5;
+        closeOverlay();
+        updateUI();
+    }
+
+    function closeOverlay() { document.getElementById('overlay').style.display = 'none'; }
 
     init();
 </script>
