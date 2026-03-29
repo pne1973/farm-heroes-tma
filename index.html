@@ -3,221 +3,243 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.20 - HD SVG</title>
+    <title>Ouro da Quinta v33.22 - Full Production</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; --gray: #bdc1c6; }
-        body { margin: 0; padding: 0; background: var(--bg); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
+        :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; }
+        body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         
-        /* Dashboard */
-        #header-wallet { width: 94%; background: white; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
+        /* Monetização e Design Principal */
+        #ad-top { width: 100%; height: 45px; background: #f1f3f4; display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 1px solid #dadce0; color: #70757a; flex-shrink: 0; }
+        
+        #header-wallet { width: 94%; background: white; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; cursor: pointer; }
         .val { font-size: 18px; font-weight: bold; color: var(--accent); }
-        .label { font-size: 10px; text-transform: uppercase; color: #666; }
-        #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: white; padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; }
-        .m-icon { width: 18px; height: 18px; vertical-align: middle; }
+        .label { font-size: 10px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        /* GRID HD - USANDO IMAGENS SVG */
+        #mission-bar { display: flex; gap: 15px; margin-bottom: 8px; background: white; padding: 8px 25px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #eee; }
+        .m-img { width: 20px; height: 20px; vertical-align: middle; }
+
+        /* Grid de Jogo - Performance e Nitidez */
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
-            gap: 4px; padding: 10px; background: #9da3a8; border-radius: 10px;
-            touch-action: none; user-select: none;
+            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
+            gap: 4px; padding: 10px; background: #ccd0d5; border-radius: 12px;
+            touch-action: none; user-select: none; box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
         }
         .cell { 
-            width: 42px; height: 42px; background: #f8f9fa; border-radius: 6px; 
-            display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: transform 0.15s ease-out, opacity 0.15s ease-out;
+            width: 44px; height: 44px; background: #f8f9fa; border-radius: 8px; 
+            display: flex; align-items: center; justify-content: center; position: relative;
         }
-        
-        /* Ícones HD Cristais */
-        .icon { width: 32px; height: 32px; pointer-events: none; }
+        .cell img { width: 34px; height: 34px; pointer-events: none; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* ANIMAÇÃO DE EXPLOSÃO */
-        .explode { transform: scale(0); opacity: 0; }
+        /* Animação de Explosão/Match */
+        .match-anim { animation: explode 0.3s forwards; }
+        @keyframes explode {
+            0% { transform: scale(1); filter: brightness(1.8); }
+            100% { transform: scale(0); opacity: 0; }
+        }
 
-        /* Resto do Layout */
-        #booster-container { display: flex; gap: 15px; margin-top: 20px; margin-bottom: 80px; }
-        .booster-btn { background: white; padding: 8px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; min-width: 65px; border: 1px solid #ddd; position: relative; }
-        .b-icon { width: 24px; height: 24px; margin-bottom: 3px; }
-        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #222; color: white; padding: 8px; font-size: 12px; display: none; text-align: center; }
+        /* Boosters Reativados */
+        #booster-container { display: flex; gap: 10px; margin-top: 20px; margin-bottom: 85px; flex-shrink: 0; }
+        .booster-btn { background: white; padding: 10px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; min-width: 72px; border: 1px solid #ddd; position: relative; cursor: pointer; }
+        .booster-btn.active { border: 2px solid var(--google-blue); background: #e8f0fe; }
+        .b-icon { width: 26px; height: 26px; margin-bottom: 4px; }
+        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 10px; padding: 2px 6px; border-radius: 10px; font-weight: bold; }
+
+        /* Painel Admin (ID: 5401881400) */
+        #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: white; padding: 10px; font-size: 11px; display: none; z-index: 1000; border-top: 1px solid #3c4043; }
+        .admin-flex { display: flex; justify-content: space-around; align-items: center; }
+
+        #ad-bottom { width: 100%; height: 55px; background: #f1f3f4; position: fixed; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 1px solid #dadce0; color: #70757a; z-index: 100; }
     </style>
 </head>
 <body>
+    <div id="ad-top">MONETIZAÇÃO: BANNER SUPERIOR</div>
+    
     <div id="header-wallet">
-        <div style="text-align:center"><div class="label">Nível</div><div id="lvl" class="val">1</div></div>
+        <div style="text-align:center"><div class="label">Nível</div><div id="lvl" class="val" style="color:#202124">1</div></div>
         <div style="text-align:center"><div class="label">Saldo</div><div id="bal" class="val">€ 0.0000</div></div>
         <div style="text-align:center"><div class="label">Ações</div><div id="mov" class="val" style="color:var(--red)">21</div></div>
     </div>
 
     <div id="mission-bar">
-        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9c0.svg" class="m-icon"> <span id="m0">10</span></div>
-        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f36f.svg" class="m-icon"> <span id="m1">5</span></div>
-        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95a.svg" class="m-icon"> <span id="m2">12</span></div>
+        <span><img src="https://cdn-icons-png.flaticon.com/128/802/802271.png" class="m-img"> <span id="m0">10</span></span>
+        <span><img src="https://cdn-icons-png.flaticon.com/128/3050/3050181.png" class="m-img"> <span id="m1">5</span></span>
+        <span><img src="https://cdn-icons-png.flaticon.com/128/837/837560.png" class="m-img"> <span id="m2">12</span></span>
     </div>
 
     <div id="grid"></div>
 
     <div id="booster-container">
-        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f4a3.svg" class="b-icon"><span>BOMBA</span></div>
-        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f504.svg" class="b-icon"><span>TROCA</span></div>
-        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9f9.svg" class="b-icon"><span>PÁ</span></div>
+        <div class="booster-btn" id="btn-bomb" onclick="toggleB('bomb')">
+            <img src="https://cdn-icons-png.flaticon.com/128/598/598219.png" class="b-icon"><span>BOMBA</span>
+            <div class="b-count">2</div>
+        </div>
+        <div class="booster-btn" id="btn-swap" onclick="toggleB('swap')">
+            <img src="https://cdn-icons-png.flaticon.com/128/3466/3466115.png" class="b-icon"><span>TROCA</span>
+            <div class="b-count">2</div>
+        </div>
+        <div class="booster-btn" id="btn-shovel" onclick="toggleB('shovel')">
+            <img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png" class="b-icon"><span>PÁ</span>
+            <div class="b-count">3</div>
+        </div>
     </div>
 
-    <div id="admin-panel">ADMIN: 5401881400 | TOTAL APP: € <span id="adm-t">0.0000</span></div>
+    <div id="admin-panel">
+        <div class="admin-flex">
+            <span>ADMIN: 5401881400</span>
+            <span>TOTAL APP: € <span id="adm-t">0.0000</span></span>
+            <span style="color:var(--google-blue); font-weight:bold; cursor:pointer" onclick="alert('Lista PayPal Carregada')">PAYPAL LIST</span>
+        </div>
+    </div>
+
+    <div id="ad-bottom">MONETIZAÇÃO: BANNER INFERIOR</div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // URLs dos Ícones SVG Cristais (usando repositório oficial Google Noto Emoji)
-    const itemSvgs = [
-        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9c0.svg', // 🧀
-        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f36f.svg', // 🍯
-        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95a.svg', // 🥚
-        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f35e.svg', // 🍞
-        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95b.svg'  // 🥛
+    const ADMIN_ID = "5401881400";
+    const imgAssets = [
+        'https://cdn-icons-png.flaticon.com/128/802/802271.png', // 0: Queijo
+        'https://cdn-icons-png.flaticon.com/128/3050/3050181.png', // 1: Mel
+        'https://cdn-icons-png.flaticon.com/128/837/837560.png', // 2: Ovo
+        'https://cdn-icons-png.flaticon.com/128/3034/3034873.png', // 3: Pão
+        'https://cdn-icons-png.flaticon.com/128/940/940561.png'    // 4: Leite
     ];
     
     let moves = 21, balance = 0, level = 1, squares = [], mission = [10, 5, 12];
-    let startId = null, isDragging = false;
+    let startId = null, isDragging = false, activeBooster = null;
 
     function init() {
+        tg.ready(); tg.expand();
         const container = document.getElementById('grid');
         container.innerHTML = ''; squares = [];
         
-        const temp = [];
         for (let i = 0; i < 49; i++) {
-            let svgIdx;
-            do {
-                svgIdx = Math.floor(Math.random() * itemSvgs.length);
-            } while (
-                (i % 7 >= 2 && temp[i-1] === svgIdx && temp[i-2] === svgIdx) ||
-                (i >= 14 && temp[i-7] === svgIdx && temp[i-14] === svgIdx)
-            );
-            temp[i] = svgIdx;
+            let idx = Math.floor(Math.random() * imgAssets.length);
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.id = i;
-            cell.dataset.svgIdx = svgIdx;
+            cell.dataset.idx = idx;
             
-            // Injeta a imagem SVG HD
             const img = document.createElement('img');
-            img.src = itemSvgs[svgIdx];
-            img.className = 'icon';
+            img.src = imgAssets[idx];
             cell.appendChild(img);
             
-            cell.addEventListener('touchstart', handleStart);
+            cell.addEventListener('touchstart', (e) => { startId = i; isDragging = true; });
             cell.addEventListener('touchmove', handleMove);
-            cell.addEventListener('touchend', handleEnd);
+            cell.addEventListener('touchend', () => isDragging = false);
+            cell.onclick = () => { if(activeBooster) useBooster(i); };
             
             container.appendChild(cell);
             squares.push(cell);
         }
-        if(tg.initDataUnsafe.user?.id == 5401881400) document.getElementById('admin-panel').style.display = 'block';
+
+        const uId = tg.initDataUnsafe.user?.id.toString();
+        if(uId === ADMIN_ID) document.getElementById('admin-panel').style.display = 'block';
         updateUI();
     }
 
-    function handleStart(e) { startId = parseInt(e.currentTarget.dataset.id); isDragging = true; }
-    function handleEnd() { isDragging = false; }
     function handleMove(e) {
-        if (!isDragging) return;
+        if (!isDragging || activeBooster) return;
         const touch = e.touches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (!target || !target.dataset.id) return;
-        const endId = parseInt(target.dataset.id);
-        if (endId !== startId) {
-            const diff = Math.abs(startId - endId);
-            if ((diff === 1 && Math.floor(startId/7) === Math.floor(endId/7)) || diff === 7) {
-                isDragging = false; swap(startId, endId);
+        if (target && target.dataset.id) {
+            let endId = parseInt(target.dataset.id);
+            if (endId !== startId) {
+                let diff = Math.abs(startId - endId);
+                if ((diff === 1 && Math.floor(startId/7) === Math.floor(endId/7)) || diff === 7) {
+                    isDragging = false;
+                    performSwap(startId, endId);
+                }
             }
         }
     }
 
-    function swap(id1, id2) {
-        const idx1 = squares[id1].dataset.svgIdx;
-        const idx2 = squares[id2].dataset.svgIdx;
-        
-        // Troca visual e de dados
-        updateCell(id1, idx2);
-        updateCell(id2, idx1);
+    function performSwap(id1, id2) {
+        let idx1 = squares[id1].dataset.idx;
+        let idx2 = squares[id2].dataset.idx;
+        updateCell(id1, idx2); updateCell(id2, idx1);
 
-        if (!checkMatches()) {
-            setTimeout(() => { updateCell(id1, idx1); updateCell(id2, idx2); }, 300);
-        } else {
-            moves--; updateUI();
-        }
+        setTimeout(() => {
+            if (!checkMatches()) {
+                updateCell(id1, idx1); updateCell(id2, idx2);
+            } else {
+                moves--; updateUI();
+            }
+        }, 250);
     }
 
-    function updateCell(id, svgIdx) {
-        squares[id].dataset.svgIdx = svgIdx;
-        squares[id].querySelector('.icon').src = itemSvgs[svgIdx];
+    function updateCell(id, idx) {
+        squares[id].dataset.idx = idx;
+        squares[id].querySelector('img').src = imgAssets[idx];
+    }
+
+    function toggleB(type) {
+        activeBooster = (activeBooster === type) ? null : type;
+        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
+        if(activeBooster) document.getElementById('btn-'+type).classList.add('active');
+    }
+
+    function useBooster(id) {
+        if(activeBooster === 'bomb') {
+            const area = [id, id-1, id+1, id-7, id+7, id-8, id+8, id-6, id+6];
+            area.forEach(i => { if(i >= 0 && i < 49) squares[i].querySelector('img').classList.add('match-anim'); });
+            setTimeout(() => { area.forEach(i => { if(i >= 0 && i < 49) updateCell(i, Math.floor(Math.random()*5)); }); gravity(); }, 300);
+        } else if(activeBooster === 'shovel') {
+            squares[id].querySelector('img').classList.add('match-anim');
+            setTimeout(() => { updateCell(id, Math.floor(Math.random()*5)); gravity(); }, 300);
+        }
+        toggleB(null);
     }
 
     function checkMatches() {
-        let matched = false;
         let toRemove = new Set();
-
-        for (let i = 0; i < 49; i++) {
-            if (i % 7 < 5) {
-                if (squares[i].dataset.svgIdx === squares[i+1].dataset.svgIdx && squares[i].dataset.svgIdx === squares[i+2].dataset.svgIdx) {
-                    [i, i+1, i+2].forEach(idx => toRemove.add(idx)); matched = true;
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 5; c++) {
+                let i = r * 7 + c;
+                if (squares[i].dataset.idx === squares[i+1].dataset.idx && squares[i].dataset.idx === squares[i+2].dataset.idx) {
+                    toRemove.add(i); toRemove.add(i+1); toRemove.add(i+2);
                 }
             }
-            if (i < 35) {
-                if (squares[i].dataset.svgIdx === squares[i+7].dataset.svgIdx && squares[i].dataset.svgIdx === squares[i+14].dataset.svgIdx) {
-                    [i, i+7, i+14].forEach(idx => toRemove.add(idx)); matched = true;
+        }
+        for (let c = 0; c < 7; c++) {
+            for (let r = 0; r < 5; r++) {
+                let i = r * 7 + c;
+                if (squares[i].dataset.idx === squares[i+7].dataset.idx && squares[i].dataset.idx === squares[i+14].dataset.idx) {
+                    toRemove.add(i); toRemove.add(i+7); toRemove.add(i+14);
                 }
             }
         }
 
-        if (matched) {
+        if (toRemove.size > 0) {
             toRemove.forEach(idx => {
-                const svgIdx = squares[idx].dataset.svgIdx;
-                // Atualiza missão
-                if (svgIdx == 0) mission[0] = Math.max(0, mission[0]-1);
-                if (svgIdx == 1) mission[1] = Math.max(0, mission[1]-1);
-                if (svgIdx == 2) mission[2] = Math.max(0, mission[2]-1);
-                
-                // APLICA EFEITO DE EXPLOSÃO VISUAL (Shrink + Fade)
-                squares[idx].classList.add('explode');
+                let sIdx = squares[idx].dataset.idx;
+                if (sIdx <= 2) mission[sIdx] = Math.max(0, mission[sIdx]-1);
+                squares[idx].querySelector('img').classList.add('match-anim');
             });
             balance += 0.0005;
-            // Aguarda a animação (150ms) antes de remover e aplicar gravidade
-            setTimeout(gravity, 160);
+            setTimeout(() => {
+                toRemove.forEach(idx => {
+                    updateCell(idx, Math.floor(Math.random() * imgAssets.length));
+                    squares[idx].querySelector('img').classList.remove('match-anim');
+                });
+                gravity();
+            }, 310);
+            return true;
         }
-        return matched;
+        return false;
     }
 
     function gravity() {
-        // Remove os ícones marcados e limpa a classe explode
-        squares.forEach(s => {
-            if (s.classList.contains('explode')) {
-                s.classList.remove('explode');
-                s.dataset.svgIdx = ''; // Limpa o dado
-                s.querySelector('.icon').src = ''; // Limpa a imagem
-            }
-        });
-
-        for (let i = 41; i >= 0; i--) {
-            if (squares[i+7].dataset.svgIdx === '') {
-                updateCell(i+7, squares[i].dataset.svgIdx);
-                squares[i].dataset.svgIdx = '';
-                squares[i].querySelector('.icon').src = '';
-            }
-        }
-        squares.forEach(s => {
-            if (s.dataset.svgIdx === '') {
-                updateCell(s.dataset.id, Math.floor(Math.random() * itemSvgs.length));
-            }
-        });
-        if (checkMatches()) { setTimeout(gravity, 300); }
-        updateUI();
+        checkMatches(); updateUI();
     }
 
     function updateUI() {
         document.getElementById('bal').innerText = '€ ' + balance.toFixed(4);
         document.getElementById('mov').innerText = moves;
-        document.getElementById('lvl').innerText = level;
         document.getElementById('m0').innerText = mission[0];
         document.getElementById('m1').innerText = mission[1];
         document.getElementById('m2').innerText = mission[2];
+        if(moves <= 0) { tg.showAlert("Fim das Ações! Reiniciando..."); location.reload(); }
     }
 
     init();
