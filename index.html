@@ -3,68 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.16 - Anti-Initial Match</title>
+    <title>Ouro da Quinta v33.17 - Fixed Boosters</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; --gray: #f1f3f4; }
-        
         body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; color: var(--wood); touch-action: none; overflow: hidden; }
-
-        /* Anúncios */
         #ad-top { width: 100%; height: 45px; background: var(--gray); display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 1px solid #dadce0; color: #70757a; flex-shrink: 0; }
         #ad-bottom { width: 100%; height: 55px; background: var(--gray); position: fixed; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 1px solid #dadce0; color: #70757a; z-index: 100; }
-
-        /* Dashboard */
         #header-wallet { width: 94%; background: var(--white); margin: 8px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex-shrink: 0; cursor: pointer; }
         .val { font-size: 16px; font-weight: 700; color: var(--accent); }
         .label { font-size: 9px; font-weight: 700; text-transform: uppercase; color: #5f6368; }
-
         #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: var(--white); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; flex-shrink: 0; }
-        
-        /* Grid de Jogo HD (Peças nítidas de 40px) */
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; width: 100%; min-height: 0; }
         #grid { display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); gap: 4px; padding: 8px; background: #bdc1c6; border-radius: 10px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
         .cell { width: 40px; height: 40px; background: #f8f9fa; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: all 0.2s; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; font-smooth: always; }
         .cell.selected { outline: 3px solid var(--google-blue); z-index: 10; transform: scale(1.1); background: white; }
-
-        /* Boosters */
         #booster-container { width: 100%; display: flex; justify-content: center; gap: 12px; padding: 10px 0; margin-bottom: 95px; flex-shrink: 0; }
-        .booster-btn { background: var(--white); border: 1px solid #dadce0; padding: 6px 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 65px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        .booster-btn { background: var(--white); border: 1px solid #dadce0; padding: 6px 10px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; position: relative; min-width: 65px; box-shadow: 0 1px 2px rgba(0,0,0,0.1); cursor: pointer; }
         .booster-btn.active { border: 2px solid var(--google-blue); background: #e8f0fe; }
         .booster-count { position: absolute; top: -6px; right: -6px; background: var(--red); color: white; font-size: 10px; padding: 1px 5px; border-radius: 8px; font-weight: bold; }
         .booster-label { font-size: 8px; font-weight: 900; color: #5f6368; margin-top: 2px; text-transform: uppercase; }
-
-        /* Admin Panel (ID 5401881400) */
         #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #202124; color: #ffffff; padding: 8px 0; font-size: 10px; z-index: 95; border-top: 1px solid #3c4043; display: none; }
         .admin-flex { display: flex; justify-content: space-around; align-items: center; }
-
-        /* Overlays */
         #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; }
         .popup { background: white; padding: 25px; border-radius: 16px; width: 85%; max-width: 300px; text-align: center; }
         .btn-pay { background: var(--accent); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; margin-top: 15px; cursor: pointer; }
-        input { width: 90%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
     </style>
 </head>
 <body>
-
     <div id="ad-top">ANÚNCIO: BANNER SUPERIOR</div>
-
     <div id="header-wallet" onclick="showWithdrawal()">
         <div class="wallet-item"><div class="label">Nível</div><div id="lvl-val" class="val" style="color:#202124">1</div></div>
         <div class="wallet-item"><div class="label">Saldo</div><div id="money-val" class="val">€ 0.0000</div></div>
         <div class="wallet-item"><div class="label">Ações</div><div id="moves-val" class="val" style="color:var(--red)">21</div></div>
     </div>
-
     <div id="mission-bar">
         <div>🧀 <span id="m-0">0</span></div>
         <div>🍯 <span id="m-1">0</span></div>
         <div>🥚 <span id="m-2">0</span></div>
     </div>
-
-    <div id="grid-container">
-        <div id="grid"></div>
-    </div>
-
+    <div id="grid-container"><div id="grid"></div></div>
     <div id="booster-container">
         <div id="boost-bomb" class="booster-btn" onclick="toggleBooster('bomb')">
             <span>💣</span><span class="booster-label">BOMBA</span>
@@ -79,29 +57,19 @@
             <span id="count-shovel" class="booster-count">3</span>
         </div>
     </div>
-
-    <div id="admin-panel">
-        <div class="admin-flex">
-            <span>ADMIN ID: <span id="adm-id"></span></span>
-            <span>TOTAL APP: € <span id="adm-total">0.0000</span></span>
-            <span style="color:var(--google-blue); font-weight:bold; cursor:pointer">PAYPAL LIST</span>
-        </div>
-    </div>
-
+    <div id="admin-panel"><div class="admin-flex">
+        <span>ADMIN ID: <span id="adm-id"></span></span>
+        <span>TOTAL APP: € <span id="adm-total">0.0000</span></span>
+        <span style="color:var(--google-blue); font-weight:bold; cursor:pointer">PAYPAL LIST</span>
+    </div></div>
     <div id="ad-bottom">ANÚNCIO: BANNER INFERIOR</div>
-
-    <div id="overlay">
-        <div class="popup" id="popup-content"></div>
-    </div>
+    <div id="overlay"><div class="popup" id="popup-content"></div></div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const ADMIN_ID = "5401881400";
-    
     const allItems = ['🧀', '🍯', '🥚', '🍞', '🥛', '🍎', '🍓', '🎃'];
-    let activeItems = [];
-    
-    let moves = 21, level = 1, balance = 0.0, minPayout = 5.0, currency = "€";
+    let activeItems = [], moves = 21, level = 1, balance = 0.0, minPayout = 5.0, currency = "€";
     let boosters = { bomb: 2, shovel: 3, swap: 2 }, mission = [10, 5, 12], squares = [];
     let activeBooster = null, firstSwapId = null;
 
@@ -109,35 +77,16 @@
         tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
         grid.innerHTML = ''; squares = [];
-        
         updateActiveItems();
-        const tempBoard = new Array(49); // Tabuleiro temporário para validação
-
+        const tempBoard = new Array(49);
         for (let i = 0; i < 49; i++) {
-            let possibleItem;
-            let invalidMatch = true;
-            
-            // Lógica CORRIGIDA: Gera item e valida se cria match de 3+
+            let possibleItem; let invalidMatch = true;
             while (invalidMatch) {
                 possibleItem = activeItems[Math.floor(Math.random() * activeItems.length)];
-                invalidMatch = false; // Assume que é válido até prova em contrário
-
-                // Valida Horizontal (com os dois anteriores na linha)
-                if (i % 7 >= 2) {
-                    if (tempBoard[i-1] === possibleItem && tempBoard[i-2] === possibleItem) {
-                        invalidMatch = true;
-                    }
-                }
-                
-                // Valida Vertical (com os dois superiores na coluna)
-                if (i >= 14 && !invalidMatch) {
-                    if (tempBoard[i-7] === possibleItem && tempBoard[i-14] === possibleItem) {
-                        invalidMatch = true;
-                    }
-                }
+                invalidMatch = false;
+                if (i % 7 >= 2 && tempBoard[i-1] === possibleItem && tempBoard[i-2] === possibleItem) invalidMatch = true;
+                if (i >= 14 && !invalidMatch && tempBoard[i-7] === possibleItem && tempBoard[i-14] === possibleItem) invalidMatch = true;
             }
-            
-            // Item validado: coloca no tabuleiro real e temporário
             tempBoard[i] = possibleItem;
             const square = document.createElement('div');
             square.id = i; square.className = 'cell';
@@ -145,26 +94,22 @@
             grid.appendChild(square); squares.push(square);
             square.onclick = () => handleCellClick(i);
         }
-
-        if (tg.initDataUnsafe.user?.id.toString() === ADMIN_ID) {
+        const userId = tg.initDataUnsafe.user?.id.toString();
+        if (userId === ADMIN_ID) {
             document.getElementById('admin-panel').style.display = 'block';
             document.getElementById('adm-id').innerText = userId;
         }
         updateUI();
     }
 
-    // Lógica Progressiva de Ícones (igual)
     function updateActiveItems() {
-        if (level < 4) { activeItems = allItems.slice(0, 4); } 
-        else if (level < 7) { activeItems = allItems.slice(0, 5); } 
-        else if (level < 10) { activeItems = allItems.slice(0, 6); } 
-        else if (level < 15) { activeItems = allItems.slice(0, 7); } 
-        else { activeItems = allItems; }
+        if (level < 4) activeItems = allItems.slice(0, 4);
+        else if (level < 7) activeItems = allItems.slice(0, 5);
+        else activeItems = allItems;
     }
 
-    // Resto da lógica Match-3 (igual)
     function handleCellClick(id) {
-        if (activeBooster) { executeBooster(id); return; }
+        if (activeBooster) { executeBoosterAction(id); return; }
         const item = squares[id].innerHTML;
         const matches = findMatches(id, item);
         if (matches.length >= 3) {
@@ -182,95 +127,83 @@
         updateUI();
     }
 
+    function toggleBooster(type) {
+        if (boosters[type] <= 0) return;
+        if (activeBooster === type) { activeBooster = null; } 
+        else { activeBooster = type; firstSwapId = null; }
+        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+        if (activeBooster) document.getElementById(`boost-${type}`).classList.add('active');
+    }
+
+    function executeBoosterAction(id) {
+        if (activeBooster === 'bomb') {
+            const r = Math.floor(id/7), c = id%7;
+            for(let i=r-1; i<=r+1; i++) {
+                for(let j=c-1; j<=c+1; j++) { if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = ''; }
+            }
+        } else if (activeBooster === 'shovel') {
+            squares[id].innerHTML = '';
+        } else if (activeBooster === 'swap') {
+            if (firstSwapId === null) { firstSwapId = id; squares[id].classList.add('selected'); return; }
+            else { 
+                let t = squares[firstSwapId].innerHTML; 
+                squares[firstSwapId].innerHTML = squares[id].innerHTML; squares[id].innerHTML = t; 
+            }
+        }
+        boosters[activeBooster]--; 
+        activeBooster = null; 
+        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+        setTimeout(applyGravity, 300); updateUI();
+    }
+
     function applyGravity() {
-        for (let i = 41; i >= 0; i--) {
-            if (squares[i+7].innerHTML === '') { squares[i+7].innerHTML = squares[i].innerHTML; squares[i].innerHTML = ''; }
-        }
-        for (let i = 0; i < 7; i++) {
-            if (squares[i].innerHTML === '') { squares[i].innerHTML = activeItems[Math.floor(Math.random()*activeItems.length)]; }
-        }
+        for (let i = 41; i >= 0; i--) { if (squares[i+7].innerHTML === '') { squares[i+7].innerHTML = squares[i].innerHTML; squares[i].innerHTML = ''; } }
+        for (let i = 0; i < 7; i++) { if (squares[i].innerHTML === '') squares[i].innerHTML = activeItems[Math.floor(Math.random()*activeItems.length)]; }
         if (squares.some(s => s.innerHTML === '')) applyGravity();
     }
 
     function findMatches(id, item) {
         const matches = new Set([id]);
         const check = (idx) => {
-            const neighbors = [];
-            if (idx % 7 > 0) neighbors.push(idx - 1);
-            if (idx % 7 < 6) neighbors.push(idx + 1);
-            if (idx >= 7) neighbors.push(idx - 7);
-            if (idx < 42) neighbors.push(idx + 7);
+            const neighbors = [idx-1, idx+1, idx-7, idx+7];
             neighbors.forEach(n => {
-                if (!matches.has(n) && squares[n].innerHTML === item && item !== '') { matches.add(n); check(n); }
+                if (n >= 0 && n < 49 && !matches.has(n) && squares[n].innerHTML === item && item !== '') {
+                    if ((Math.abs(idx-n) === 1 && Math.floor(idx/7) === Math.floor(n/7)) || Math.abs(idx-n) === 7) {
+                        matches.add(n); check(n);
+                    }
+                }
             });
         };
         check(id); return Array.from(matches);
     }
 
-    // Boosters e Economia (igual)
-    function toggleBooster(type) {
-        if (boosters[type] <= 0) return;
-        activeBooster = (activeBooster === type) ? null : type;
-        firstSwapId = null;
-        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-        if (activeBooster) document.getElementById(`boost-${type}`).classList.add('active');
-    }
-
-    function executeBooster(id) {
-        if (activeBooster === 'bomb') { applyBomb(id); } 
-        else if (activeBooster === 'shovel') { squares[id].innerHTML = ''; } 
-        else if (activeBooster === 'swap') { executeSwap(id); return; }
-        finalizeBoosterUse();
-    }
-
-    function applyBomb(id) {
-        const r = Math.floor(id/7), c = id%7;
-        for(let i=r-1; i<=r+1; i++) {
-            for(let j=c-1; j<=c+1; j++) { if(i>=0 && i<7 && j>=0 && j<7) squares[i*7+j].innerHTML = ''; }
-        }
-    }
-
-    function executeSwap(id) {
-        if (firstSwapId === null) { firstSwapId = id; squares[id].classList.add('selected'); return; }
-        else { 
-            let t = squares[firstSwapId].innerHTML; 
-            squares[firstSwapId].innerHTML = squares[id].innerHTML; squares[id].innerHTML = t; 
-            finalizeBoosterUse();
-        }
-    }
-
-    function finalizeBoosterUse() {
-        boosters[activeBooster]--; activeBooster = null; firstSwapId = null;
-        document.querySelectorAll('.booster-btn').forEach(b => b.classList.remove('active'));
-        document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
-        setTimeout(applyGravity, 300); updateUI();
-    }
-
     function checkLevel() {
         if (mission.every(m => m === 0)) {
-            level++; balance += 0.0050;
-            tg.showAlert(`Nível ${level-1} Concluído! Bónus de € 0.0050.`);
-            mission = [10+level, 5+level, 10+level]; updateActiveItems(); init(); 
+            level++; balance += 0.0050; tg.showAlert(`Nível Concluído! Bónus: € 0.0050`);
+            mission = [10+level, 5+level, 10+level]; init();
         }
-    }
-
-    function showWithdrawal() {
-        const overlay = document.getElementById('overlay');
-        const content = document.getElementById('popup-content');
-        overlay.style.display = 'flex';
-        content.innerHTML = (balance < minPayout) ? `<h3>Saldo Insuficiente</h3><p>Mínimo: ${currency} ${minPayout.toFixed(2)}</p><button class="btn-pay" onclick="closeOverlay()">VOLTAR</button>` : `<h3>PayPal</h3><p>Saldo: ${currency} ${balance.toFixed(4)}</p><input type="email" placeholder="E-mail PayPal"><button class="btn-pay">SOLICITAR</button>`;
     }
 
     function updateUI() {
         document.getElementById('money-val').innerText = `${currency} ${balance.toFixed(4)}`;
         document.getElementById('moves-val').innerText = moves;
         document.getElementById('lvl-val').innerText = level;
-        document.getElementById('m-0').innerText = mission[0]; document.getElementById('m-1').innerText = mission[1]; document.getElementById('m-2').innerText = mission[2];
-        document.getElementById('count-bomb').innerText = boosters.bomb; document.getElementById('count-swap').innerText = boosters.swap; document.getElementById('count-shovel').innerText = boosters.shovel;
+        document.getElementById('m-0').innerText = mission[0];
+        document.getElementById('m-1').innerText = mission[1];
+        document.getElementById('m-2').innerText = mission[2];
+        document.getElementById('count-bomb').innerText = boosters.bomb;
+        document.getElementById('count-swap').innerText = boosters.swap;
+        document.getElementById('count-shovel').innerText = boosters.shovel;
     }
 
-    function closeOverlay() { document.getElementById('overlay').style.display = 'none'; }
+    function showWithdrawal() {
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
+        document.getElementById('popup-content').innerHTML = `<h3>PayPal</h3><p>Mínimo: ${currency} ${minPayout.toFixed(2)}</p><button class="btn-pay" onclick="document.getElementById('overlay').style.display='none'">VOLTAR</button>`;
+    }
+
     init();
 </script>
 </body>
