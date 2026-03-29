@@ -3,58 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ouro da Quinta - Business Edition</title>
+    <title>Ouro da Quinta - Monetized</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fcf3cf; --wood: #5d4037; --accent: #2e7d32; --gold: #ffd700; --panel: #ffffff; }
+        :root { --bg: #fcf3cf; --wood: #5d4037; --accent: #2e7d32; --gold: #ffd700; }
         body { margin: 0; padding: 0; background: var(--bg); font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; color: var(--wood); touch-action: none; }
-        
-        /* Dashboard Financeiro */
-        #header-wallet { width: 95%; background: var(--panel); margin-top: 10px; border-radius: 15px; display: flex; justify-content: space-between; padding: 12px; border: 3px solid var(--wood); box-shadow: 0 4px 0 var(--wood); box-sizing: border-box; }
+
+        /* ESPAÇO PARA ANÚNCIO TOPO */
+        #ad-top { width: 100%; height: 50px; background: #eee; display: flex; align-items: center; justify-content: center; font-size: 10px; border-bottom: 2px solid var(--wood); overflow: hidden; }
+
+        #header-wallet { width: 95%; background: white; margin-top: 10px; border-radius: 15px; display: flex; justify-content: space-between; padding: 10px; border: 3px solid var(--wood); box-shadow: 0 4px 0 var(--wood); box-sizing: border-box; }
         .wallet-item { display: flex; flex-direction: column; align-items: center; }
-        .label { font-size: 10px; font-weight: bold; text-transform: uppercase; color: #8d6e63; }
         .val { font-size: 18px; font-weight: 900; color: var(--accent); }
 
-        /* Barra de Progresso de Levantamento */
-        #payout-container { width: 90%; margin-top: 8px; background: rgba(0,0,0,0.1); height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid var(--wood); }
+        #payout-container { width: 90%; margin-top: 8px; background: rgba(0,0,0,0.1); height: 8px; border-radius: 4px; border: 1px solid var(--wood); }
         #payout-bar { width: 0%; height: 100%; background: var(--accent); transition: width 0.5s; }
 
-        #mission-bar { display: flex; gap: 15px; margin: 15px 0; background: rgba(0,0,0,0.05); padding: 8px 20px; border-radius: 20px; font-weight: bold; border: 1px solid var(--wood); }
+        #mission-bar { display: flex; gap: 15px; margin: 10px 0; background: rgba(0,0,0,0.05); padding: 5px 20px; border-radius: 20px; font-weight: bold; border: 1px solid var(--wood); }
         
         #grid { display: grid; grid-template-columns: repeat(7, 46px); grid-template-rows: repeat(7, 46px); gap: 4px; padding: 10px; background: #a1887f; border: 5px solid var(--wood); border-radius: 12px; }
-        .cell { width: 46px; height: 46px; background: #efebe9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; transition: transform 0.2s; }
-        
-        .match-anim { animation: pulse 0.3s forwards; }
-        @keyframes pulse { 50% { transform: scale(1.4); filter: brightness(1.2); } 100% { transform: scale(0); } }
+        .cell { width: 46px; height: 46px; background: #efebe9; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 26px; }
 
-        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; padding: 20px; text-align: center; }
-        .btn { width: 80%; padding: 15px; font-size: 16px; border: none; border-radius: 50px; font-weight: bold; margin: 10px; cursor: pointer; text-transform: uppercase; }
+        /* ESPAÇO PARA ANÚNCIO RODAPÉ */
+        #ad-bottom { width: 100%; height: 60px; background: #ddd; position: absolute; bottom: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; border-top: 2px solid var(--wood); }
+
+        #overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); flex-direction: column; align-items: center; justify-content: center; z-index: 100; color: white; text-align: center; }
+        .btn { width: 80%; padding: 15px; font-size: 16px; border: none; border-radius: 50px; font-weight: bold; margin: 10px; cursor: pointer; }
         .btn-ad { background: var(--gold); color: black; box-shadow: 0 4px 0 #b8860b; }
-        .btn-reset { background: #757575; color: white; }
     </style>
 </head>
 <body>
 
+    <div id="ad-top">
+        <div id="ad-container-top">PUBLICIDADE</div>
+    </div>
+
     <div id="header-wallet">
-        <div class="wallet-item">
-            <span class="label">Nível</span>
-            <span id="lvl-val" class="val" style="color:var(--wood)">1</span>
-        </div>
-        <div class="wallet-item">
-            <span class="label">Saldo Acumulado</span>
-            <span id="money-val" class="val">€ 0.0000</span>
-        </div>
-        <div class="wallet-item">
-            <span class="label">Ações</span>
-            <span id="moves-val" class="val" style="color:#d32f2f">20</span>
-        </div>
+        <div class="wallet-item"><span style="font-size:9px">Nível</span><span id="lvl-val" class="val" style="color:var(--wood)">1</span></div>
+        <div class="wallet-item"><span style="font-size:9px">Saldo</span><span id="money-val" class="val">€ 0.0000</span></div>
+        <div class="wallet-item"><span style="font-size:9px">Ações</span><span id="moves-val" class="val" style="color:#d32f2f">20</span></div>
     </div>
 
-    <div id="payout-container">
-        <div id="payout-bar"></div>
-    </div>
-    <div style="font-size: 9px; margin-top: 2px;">Progresso para levantamento (Min: € 5.00)</div>
-
+    <div id="payout-container"><div id="payout-bar"></div></div>
+    
     <div id="mission-bar">
         <div>🧀 <span id="m-0">10</span></div>
         <div>🍯 <span id="m-1">5</span></div>
@@ -63,11 +54,15 @@
 
     <div id="grid"></div>
 
+    <div id="ad-bottom">
+        <div id="ad-container-bottom">PUBLICIDADE</div>
+    </div>
+
     <div id="overlay">
-        <h2 id="status-title">ACABARAM AS AÇÕES!</h2>
-        <p>Assista a um vídeo curto para ganhar +5 Ações e continuar a lucrar neste nível.</p>
-        <button class="btn btn-ad" onclick="simulateAd()">🎬 VER VÍDEO (+5 AÇÕES)</button>
-        <button class="btn btn-reset" onclick="resetLevel()">DESISTIR DO NÍVEL</button>
+        <h2>AÇÕES ESGOTADAS!</h2>
+        <p>Assista para ganhar +5 Ações e salvar seu lucro.</p>
+        <button class="btn btn-ad" onclick="showRewardedAd()">🎬 VER VÍDEO (+5 AÇÕES)</button>
+        <button class="btn" style="background:#757575" onclick="resetLevel()">DESISTIR</button>
     </div>
 
 <script>
@@ -76,13 +71,24 @@
 
     const products = ['🧀', '🍯', '🥚', '🍞', '🥛'];
     let moves = 20, level = 1, balance = 0.0, currency = "€", minPayout = 5.0;
-    let mission = [10, 5, 15];
-    let squares = [];
+    let mission = [10, 5, 15], squares = [];
 
-    // Detetar Moeda
-    if (tg.initDataUnsafe.user?.language_code === 'pt-br') {
-        currency = "R$";
-        minPayout = 25.0; // Exemplo: 25 Reais mínimo
+    // --- LÓGICA DE ANÚNCIOS REAIS ---
+    // Se usar AdsGram, você colocaria o script deles aqui.
+    function showRewardedAd() {
+        tg.showConfirm("Ver anúncio para ganhar ações?", (ok) => {
+            if(ok) {
+                // Simula o carregamento do anúncio em vídeo
+                tg.showScanQrPopup({text: "Carregando vídeo..."});
+                setTimeout(() => {
+                    tg.closeScanQrPopup();
+                    moves += 5;
+                    document.getElementById('overlay').style.display = 'none';
+                    updateUI();
+                    tg.HapticFeedback.notificationOccurred('success');
+                }, 3000);
+            }
+        });
     }
 
     function init() {
@@ -90,20 +96,14 @@
         grid.innerHTML = ''; squares = [];
         moves = 20;
         mission = [10 + level, 5 + Math.floor(level/2), 15 + level];
-        
-        // Gera tabuleiro inicial
         for (let i = 0; i < 49; i++) {
             const square = document.createElement('div');
-            square.id = i;
-            square.classList.add('cell');
+            square.id = i; square.classList.add('cell');
             square.innerHTML = products[Math.floor(Math.random() * products.length)];
-            grid.appendChild(square);
-            squares.push(square);
+            grid.appendChild(square); squares.push(square);
             square.addEventListener('touchstart', dragStart, {passive: false});
             square.addEventListener('touchend', dragEnd, {passive: false});
         }
-
-        // CORREÇÃO: Limpa alinhamentos automáticos antes de começar
         cleanInitialMatches();
         updateUI();
     }
@@ -127,13 +127,7 @@
     }
 
     let startX, startY, startId;
-    function dragStart(e) { 
-        startId = parseInt(this.id); 
-        startX = e.touches[0].clientX; 
-        startY = e.touches[0].clientY;
-        this.style.transform = "scale(1.2)";
-    }
-
+    function dragStart(e) { startId = parseInt(this.id); startX = e.touches[0].clientX; startY = e.touches[0].clientY; this.style.transform = "scale(1.1)"; }
     function dragEnd(e) {
         this.style.transform = "scale(1)";
         const diffX = e.changedTouches[0].clientX - startX;
@@ -146,7 +140,6 @@
             if (diffY > 30 && startId < 42) targetId = startId + 7;
             else if (diffY < -30 && startId >= 7) targetId = startId - 7;
         }
-
         if (targetId !== startId && moves > 0) {
             let temp = squares[startId].innerHTML;
             squares[startId].innerHTML = squares[targetId].innerHTML;
@@ -173,21 +166,17 @@
     }
 
     function collect() {
-        tg.HapticFeedback.impactOccurred('light');
         squares.forEach(s => {
             if (s.getAttribute('match')) {
-                s.classList.add('match-anim');
                 let type = s.innerHTML;
                 if (type === '🧀') mission[0]--;
                 if (type === '🍯') mission[1]--;
                 if (type === '🥚') mission[2]--;
-                balance += 0.0001; // Equivalente a 1€ CPM
+                balance += 0.0001;
+                s.innerHTML = ''; s.removeAttribute('match');
             }
         });
-        setTimeout(() => {
-            squares.forEach(s => { if (s.getAttribute('match')) { s.innerHTML = ''; s.classList.remove('match-anim'); s.removeAttribute('match'); } });
-            applyGravity();
-        }, 300);
+        setTimeout(applyGravity, 300);
     }
 
     function applyGravity() {
@@ -204,29 +193,11 @@
         updateUI();
     }
 
-    function simulateAd() {
-        tg.showConfirm("Assistir vídeo para ganhar mais ações?", (ok) => {
-            if (ok) {
-                tg.showScanQrPopup({ text: "Processando Anúncio..." });
-                setTimeout(() => {
-                    tg.closeScanQrPopup();
-                    moves += 5;
-                    document.getElementById('overlay').style.display = 'none';
-                    updateUI();
-                }, 2000);
-            }
-        });
-    }
-
     function updateUI() {
         document.getElementById('moves-val').innerText = moves;
         document.getElementById('lvl-val').innerText = level;
         document.getElementById('money-val').innerText = `${currency} ${balance.toFixed(4)}`;
-        
-        // Atualiza Barra de Progresso
-        const progress = (balance / minPayout) * 100;
-        document.getElementById('payout-bar').style.width = Math.min(progress, 100) + "%";
-
+        document.getElementById('payout-bar').style.width = Math.min((balance/minPayout)*100, 100) + "%";
         document.getElementById('m-0').innerText = Math.max(0, mission[0]);
         document.getElementById('m-1').innerText = Math.max(0, mission[1]);
         document.getElementById('m-2').innerText = Math.max(0, mission[2]);
@@ -241,12 +212,8 @@
         }
     }
 
-    function resetLevel() {
-        document.getElementById('overlay').style.display = 'none';
-        init();
-    }
+    function resetLevel() { document.getElementById('overlay').style.display = 'none'; init(); }
 
-    // Carregar Saldo Salvo
     tg.CloudStorage.getItems(['farm_lvl', 'farm_bal'], (err, values) => {
         if (!err) {
             level = parseInt(values.farm_lvl) || 1;
