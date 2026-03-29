@@ -3,119 +3,155 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.51 - FIX TOQUE</title>
+    <title>Ouro da Quinta v33.52 - FINAL THEME</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: manipulation; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: flex-start; }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; padding-bottom: 25px; }
 
-        .mock-ad { width: 320px; height: 50px; background: #ddd; border: 1px dashed #999; color: #777; font-size: 9px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 5px 0; }
+        /* MOCK ADS OTIMIZADOS */
+        .mock-ad { width: 320px; height: 50px; background: #eee; border: 1px dashed #bbb; color: #999; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 5px; }
 
-        #stats-row { width: 95%; background: var(--white); border-radius: 10px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-top: 5px; }
-        .v { font-size: 14px; font-weight: 800; color: var(--accent); display: block; }
-        .l { font-size: 8px; text-transform: uppercase; color: #888; }
+        /* DASHBOARD COMPACTO */
+        #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin: 5px 0; }
+        .v { font-size: 16px; font-weight: 800; color: var(--accent); display: block; }
+        .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        #resource-bar { font-size: 11px; font-weight: bold; margin: 8px 0; background: rgba(255,255,255,0.5); padding: 4px 15px; border-radius: 15px; }
+        #res-bar { font-size: 12px; font-weight: bold; padding: 4px 15px; background: rgba(255,255,255,0.6); border-radius: 20px; }
 
-        #game-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        /* JOGO SEM ESPAÇOS VAZIOS */
+        #game-area { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
         
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
-            gap: 4px; padding: 8px; background: var(--brown); border-radius: 10px;
+            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
+            gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15); touch-action: none;
         }
         .cell { 
-            width: 42px; height: 42px; background: #fff9c4; border-radius: 5px; 
-            display: flex; align-items: center; justify-content: center;
+            width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; 
+            display: flex; align-items: center; justify-content: center; position: relative;
         }
-        .cell img { width: 34px; height: 34px; pointer-events: none; }
-        .selected { outline: 3px solid var(--accent); transform: scale(1.1); z-index: 5; background: #fff; }
+        .cell img { width: 34px; height: 34px; pointer-events: none; transition: transform 0.2s; }
+        .dragging { opacity: 0.5; transform: scale(0.8); }
 
-        #action-bar { display: flex; gap: 8px; margin: 10px 0; }
-        .btn { background: var(--white); padding: 10px 15px; border-radius: 10px; border: 1px solid #ccc; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 0 #ddd; }
-        .btn:active { transform: translateY(2px); box-shadow: none; }
+        /* BOOSTERS */
+        #boosters { display: flex; gap: 10px; margin-top: 15px; }
+        .b-btn { background: var(--white); padding: 8px 14px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 3px 0 #eee; }
 
-        #footer-admin { width: 100%; background: #222; color: #777; font-size: 9px; text-align: center; padding: 5px 0; position: fixed; bottom: 0; }
+        #admin-footer { width: 100%; background: #202124; color: #fff; padding: 6px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; z-index: 100; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
-    <div class="mock-ad">PUB TOPO (320x50)</div>
+    <div class="mock-ad">BANNER TOPO</div>
 
-    <div id="stats-row">
+    <div id="stats">
         <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
-        <div style="text-align:center"><span class="l">Saldo</span><span class="v" id="bal">€ 0.0000</span></div>
-        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)" id="acts">21</span></div>
+        <div style="text-align:center"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
+        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)" id="act-ui">21</span></div>
     </div>
 
-    <div id="resource-bar">🥛 0 | 🥚 0 | 🧶 0 | 🍯 0</div>
+    <div id="res-bar">🥛 0 | 🥚 0 | 🧶 0 | 🍯 0</div>
 
-    <div id="game-container">
+    <div id="game-area">
         <div id="grid"></div>
-        <div id="action-bar">
-            <div class="btn">💣 BOMBA</div>
-            <div class="btn">🚜 TRATOR</div>
-            <div class="btn">⛏️ PÁ</div>
+        <div id="boosters">
+            <div class="btn b-btn">💣 BOMBA</div>
+            <div class="btn b-btn">🚜 TRATOR</div>
+            <div class="btn b-btn">⛏️ PÁ</div>
         </div>
     </div>
 
-    <div class="mock-ad" style="margin-bottom: 30px;">PUB FUNDO (320x50)</div>
-    <div id="footer-admin">ID: 5401881400 | v33.51 | TOQUE ATIVO</div>
+    <div class="mock-ad" style="margin-bottom: 30px;">BANNER FUNDO</div>
+
+    <div id="admin-footer">ADMIN: 5401881400 | v33.52 | ANIMALS THEME FIX</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const items = [
+    // ÍCONES OFICIAIS DA QUINTA
+    const farmIcons = [
         'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca
         'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // Galinha
         'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // Ovelha
         'https://cdn-icons-png.flaticon.com/128/1998/1998601.png', // Porco
         'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // Abelha
     ];
-    
-    let firstCell = null;
-    let balance = 0.0;
-    let actions = 21;
 
-    function createGrid() {
+    let cells = [];
+    let actions = 21;
+    let balance = 0.0000;
+    let draggedItem = null;
+
+    function init() {
+        tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
         for (let i = 0; i < 49; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.idx = i;
-            cell.dataset.type = Math.floor(Math.random() * items.length);
-            cell.innerHTML = `<img src="${items[cell.dataset.type]}">`;
-            cell.onclick = () => handleCellClick(cell);
+            const type = Math.floor(Math.random() * farmIcons.length);
+            cell.dataset.type = type;
+            cell.innerHTML = `<img src="${farmIcons[type]}" draggable="false">`;
+            
+            // Eventos de Toque/Arrasto para Telemóvel
+            cell.addEventListener('touchstart', handleStart);
+            cell.addEventListener('touchmove', handleMove);
+            cell.addEventListener('touchend', handleEnd);
+            
             grid.appendChild(cell);
+            cells.push(cell);
         }
     }
 
-    function handleCellClick(cell) {
+    let startX, startY;
+
+    function handleStart(e) {
         if (actions <= 0) return;
+        draggedItem = this;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        this.querySelector('img').classList.add('dragging');
+        tg.HapticFeedback.impactOccurred('medium');
+    }
 
-        if (!firstCell) {
-            firstCell = cell;
-            cell.classList.add('selected');
-            tg.HapticFeedback.impactOccurred('light');
+    function handleMove(e) { e.preventDefault(); }
+
+    function handleEnd(e) {
+        if (!draggedItem) return;
+        draggedItem.querySelector('img').classList.remove('dragging');
+        
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const diffX = endX - startX;
+        const diffY = endY - startY;
+        
+        let targetIdx = -1;
+        const currentIdx = parseInt(draggedItem.dataset.idx);
+
+        if (Math.abs(diffX) > Math.abs(diffY)) {
+            if (Math.abs(diffX) > 20) targetIdx = diffX > 0 ? currentIdx + 1 : currentIdx - 1;
         } else {
-            const idx1 = parseInt(firstCell.dataset.idx);
-            const idx2 = parseInt(cell.dataset.idx);
-            const dist = Math.abs(idx1 - idx2);
-            const isNeighbor = dist === 1 || dist === 7;
-
-            if (isNeighbor && firstCell !== cell) {
-                swap(firstCell, cell);
-                actions--;
-                document.getElementById('acts').innerText = actions;
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-            
-            firstCell.classList.remove('selected');
-            firstCell = null;
+            if (Math.abs(diffY) > 20) targetIdx = diffY > 0 ? currentIdx + 7 : currentIdx - 7;
         }
+
+        if (targetIdx >= 0 && targetIdx < 49) {
+            const targetCell = cells[targetIdx];
+            // Validar se é vizinho real (evitar saltos de linha)
+            const isNeighbor = [1, -1, 7, -7].includes(currentIdx - targetIdx);
+            if (isNeighbor) {
+                swap(draggedItem, targetCell);
+                actions--;
+                updateUI();
+                tg.HapticFeedback.notificationOccurred('success');
+                checkMatches();
+            }
+        }
+        draggedItem = null;
     }
 
     function swap(c1, c2) {
@@ -127,9 +163,19 @@
         c2.innerHTML = h1;
     }
 
-    tg.ready();
-    tg.expand();
-    createGrid();
+    function checkMatches() {
+        // Lógica de Match-3 básica para explosão
+        let toExplode = new Set();
+        // (Lógica simplificada para feedback imediato)
+        // ... (será expandida na próxima versão de gravidade)
+    }
+
+    function updateUI() {
+        document.getElementById('act-ui').innerText = actions;
+        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
+    }
+
+    init();
 </script>
 </body>
 </html>
