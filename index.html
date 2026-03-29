@@ -3,91 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.41 - Lateral Boosters</title>
+    <title>Ouro da Quinta v33.42 - Final Polish</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <script async src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
 
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --gray: #5f6368; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; }
 
-        #game-canvas {
-            display: flex; flex-direction: column; align-items: center;
-            height: 100vh; position: relative;
-        }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; position: relative; }
 
-        /* Topo Fixo */
-        #top-ui { width: 95%; margin-top: 10px; z-index: 10; }
-        .stats { background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .val { font-size: 15px; font-weight: 800; color: var(--accent); }
-        .label { font-size: 9px; text-transform: uppercase; color: #5f6368; font-weight: 700; }
-        #mission { background: var(--white); padding: 4px 12px; border-radius: 20px; margin: 5px auto; font-size: 11px; font-weight: 800; display: table; }
+        /* Dashboard Superior */
+        #top-nav { width: 100%; padding: 10px 15px 5px; flex-shrink: 0; z-index: 10; }
+        .stats-grid { background: var(--white); border-radius: 16px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .stat-box { text-align: center; }
+        .stat-val { font-size: 17px; font-weight: 800; color: var(--accent); display: block; }
+        .stat-label { font-size: 10px; text-transform: uppercase; color: var(--gray); font-weight: 700; letter-spacing: 0.5px; }
 
-        /* Área Central: Grelha + Boosters Laterais */
-        #mid-section { 
+        #mission-pill { background: var(--white); padding: 6px 16px; border-radius: 20px; margin: 8px auto; font-size: 12px; font-weight: 800; display: table; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+
+        /* Área de Jogo (Tabuleiro + Boosters) */
+        #game-area { 
             display: flex; align-items: center; justify-content: center; 
-            gap: 10px; width: 100%; padding: 0 10px; flex-grow: 1;
+            gap: 12px; width: 100%; flex-grow: 1; padding: 0 10px;
         }
 
-        /* Tabuleiro Corrigido */
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 38px); grid-template-rows: repeat(7, 38px); 
-            gap: 4px; padding: 8px; background: #8d6e63; border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); 
+            gap: 4px; padding: 10px; background: #8d6e63; border-radius: 14px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .cell { width: 38px; height: 38px; background: #fff9c4; border-radius: 5px; display: flex; align-items: center; justify-content: center; }
-        .cell img { width: 28px; height: 28px; }
+        .cell { width: 40px; height: 40px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
+        .cell:active { transform: scale(0.9); }
+        .cell img { width: 30px; height: 30px; }
 
-        /* Boosters Laterais (Pequenos) */
-        #side-boosters { display: flex; flex-direction: column; gap: 8px; }
-        .b-side { 
-            background: var(--white); width: 45px; height: 45px; border-radius: 10px;
+        /* Boosters Laterais Dinâmicos */
+        #side-panel { display: flex; flex-direction: column; gap: 10px; }
+        .booster-item { 
+            background: var(--white); width: 50px; height: 50px; border-radius: 12px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 1px solid #ddd; position: relative; box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #eee; position: relative; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
         }
-        .b-side img { width: 20px; height: 20px; }
-        .b-side span { font-size: 7px; font-weight: 900; margin-top: 2px; }
-        .badge { position: absolute; top: -3px; right: -3px; background: var(--red); color: white; font-size: 8px; padding: 1px 4px; border-radius: 6px; }
+        .booster-item img { width: 22px; height: 22px; }
+        .booster-item b { font-size: 7px; color: #333; margin-top: 3px; }
+        .b-count { position: absolute; top: -4px; right: -4px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: 900; }
 
-        /* RODAPÉ: ESPAÇO EXCLUSIVO PARA O ANÚNCIO */
-        #bottom-ad-zone { 
-            width: 100%; height: 110px; background: rgba(255,255,255,0.5);
-            display: flex; justify-content: center; align-items: center;
-            margin-bottom: 45px; border-top: 1px solid #eee; overflow: hidden;
+        /* Rodapé de Anúncios */
+        #ad-footer-container { 
+            width: 100%; min-height: 100px; padding-bottom: 50px;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            flex-shrink: 0;
         }
 
-        #admin-info { position: fixed; bottom: 0; width: 100%; background: #202124; color: white; padding: 8px 0; font-size: 10px; text-align: center; z-index: 100; }
+        #admin-footer { position: fixed; bottom: 0; width: 100%; background: #202124; color: #bdc1c6; padding: 10px 0; font-size: 10px; text-align: center; z-index: 100; letter-spacing: 0.3px; }
     </style>
 </head>
 <body>
 
-<div id="game-canvas">
-    <div id="top-ui">
-        <div class="stats">
-            <div style="text-align:center"><div class="label">Nível</div><div class="val">1</div></div>
-            <div style="text-align:center"><div class="label">Saldo</div><div class="val">€ 0.0000</div></div>
-            <div style="text-align:center"><div class="label">Ações</div><div class="val" style="color:var(--red)">21</div></div>
+<div id="app-shell">
+    <header id="top-nav">
+        <div class="stats-grid">
+            <div class="stat-box"><span class="stat-label">Nível</span><span class="stat-val">1</span></div>
+            <div class="stat-box"><span class="stat-label">Saldo</span><span class="stat-val">€ 0.0000</span></div>
+            <div class="stat-box"><span class="stat-label">Ações</span><span class="stat-val" style="color:var(--red)">21</span></div>
         </div>
-        <div id="mission">🧀 10 | 🍯 5 | 🥚 12</div>
-    </div>
+        <div id="mission-pill">🧀 10 | 🍯 5 | 🥚 12</div>
+    </header>
 
-    <div id="mid-section">
+    <main id="game-area">
         <div id="grid"></div>
 
-        <div id="side-boosters">
-            <div class="b-side"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"><span>BOMBA</span><div class="badge">2</div></div>
-            <div class="b-side"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"><span>TROCA</span><div class="badge">2</div></div>
-            <div class="b-side"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"><span>PÁ</span><div class="badge">3</div></div>
-        </div>
-    </div>
+        <aside id="side-panel">
+            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"><b>BOMBA</b><div class="b-count">2</div></div>
+            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"><b>TROCA</b><div class="b-count">2</div></div>
+            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"><b>PÁ</b><div class="b-count">3</div></div>
+        </aside>
+    </main>
 
-    <div id="bottom-ad-zone">
+    <footer id="ad-footer-container">
         <div id="container-5a080aa61604cd40501f4a250aa83ca6"></div>
         <script async="async" data-cfasync="false" src="https://pl29012865.profitablecpmratenetwork.com/5a080aa61604cd40501f4a250aa83ca6/invoke.js"></script>
-    </div>
+    </footer>
 
-    <div id="admin-info">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
+    <div id="admin-footer">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
 </div>
 
 <script>
