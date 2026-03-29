@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.49 - Farm Animals</title>
+    <title>Ouro da Quinta v33.50 - Full Features</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script async src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
 
@@ -12,34 +12,34 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', Roboto, sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: flex-start; }
 
-        /* Anúncios Fixos */
-        #top-ad, #bottom-ad { width: 320px; height: 50px; overflow: hidden; flex-shrink: 0; }
-        #top-ad { margin-top: 5px; }
-        #bottom-ad { margin-bottom: 35px; }
+        /* MONETIZAÇÃO SEM ESPAÇOS VAZIOS */
+        #top-ad { width: 320px; height: 50px; margin-top: 5px; flex-shrink: 0; background: #eee; }
 
-        /* Dashboard */
-        #stats { width: 95%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 10; }
-        .v { font-size: 16px; font-weight: 800; color: var(--accent); }
-        .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
+        /* DASHBOARD COMPACTO */
+        #stats { width: 95%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 8px; margin: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); z-index: 10; }
+        .v { font-size: 14px; font-weight: 800; color: var(--accent); display: block; }
+        .l { font-size: 8px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        /* Área de Jogo Centralizada */
-        #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; position: relative; }
+        /* TABELA DE RECURSOS ATIVA */
+        #resource-bar { display: flex; gap: 10px; background: rgba(255,255,255,0.7); padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; margin-bottom: 5px; }
+
+        /* ÁREA DE JOGO OTIMIZADA */
+        #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
         
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 38px); grid-template-rows: repeat(7, 38px); 
-            gap: 4px; padding: 10px; background: #8d6e63; border-radius: 12px;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.15); position: relative;
+            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
+            gap: 4px; padding: 8px; background: #8d6e63; border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
         }
         .cell { 
-            width: 38px; height: 38px; background: #fff9c4; border-radius: 6px; 
+            width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; 
             display: flex; align-items: center; justify-content: center; 
-            transition: transform 0.2s, opacity 0.3s; position: relative;
+            transition: transform 0.2s, opacity 0.3s;
         }
-        .cell img { width: 28px; height: 28px; pointer-events: none; }
+        .cell img { width: 32px; height: 32px; pointer-events: none; }
 
-        /* EFEITO DE EXPLOSÃO */
         @keyframes explode {
             0% { transform: scale(1); opacity: 1; }
             50% { transform: scale(1.4); opacity: 0.8; filter: brightness(1.5); }
@@ -47,12 +47,15 @@
         }
         .exploding { animation: explode 0.4s ease-out forwards; z-index: 10; }
 
-        /* Boosters */
-        #boosters { display: flex; gap: 8px; margin-top: 10px; }
-        .b-btn { background: var(--white); padding: 6px 14px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
+        /* BOOSTERS E AÇÕES */
+        #controls { width: 100%; display: flex; flex-direction: column; align-items: center; margin-bottom: 5px; }
+        #boosters { display: flex; gap: 8px; margin-bottom: 8px; }
+        .b-btn { background: var(--white); padding: 8px 16px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .b-btn img { width: 18px; height: 18px; }
 
-        #admin { position: fixed; bottom: 0; width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 10px; text-align: center; z-index: 100; }
+        #bottom-ad { width: 320px; height: 50px; margin-bottom: 30px; flex-shrink: 0; background: #eee; }
+
+        #admin { position: fixed; bottom: 0; width: 100%; background: #202124; color: #fff; padding: 6px 0; font-size: 9px; text-align: center; z-index: 100; letter-spacing: 1px; }
     </style>
 </head>
 <body>
@@ -64,17 +67,24 @@
     </div>
 
     <div id="stats">
-        <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
-        <div style="text-align:center"><span class="l">Saldo EUR</span><span class="v">€ 0.0000</span></div>
-        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)">21</span></div>
+        <div style="text-align:center"><span class="l">Nível</span><span class="v" id="level-val">1</span></div>
+        <div style="text-align:center"><span class="l">Saldo EUR</span><span class="v" id="balance-val">€ 0.0000</span></div>
+        <div style="text-align:center"><span class="l">Ações</span><span class="v" id="actions-val" style="color:var(--red)">21</span></div>
+    </div>
+
+    <div id="resource-bar">
+        <span>🥛 <span id="r1">0</span></span> | <span>🥚 <span id="r2">0</span></span> | <span>🧶 <span id="r3">0</span></span> | <span>🍯 <span id="r4">0</span></span>
     </div>
 
     <div id="game-zone">
         <div id="grid"></div>
+    </div>
+
+    <div id="controls">
         <div id="boosters">
-            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png">BOMBA</div>
-            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png">TROCA</div>
-            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png">PÁ</div>
+            <div class="b-btn" onclick="useBooster('bomb')"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"> BOMBA</div>
+            <div class="b-btn" onclick="useBooster('swap')"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"> TROCA</div>
+            <div class="b-btn" onclick="useBooster('shovel')"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"> PÁ</div>
         </div>
     </div>
 
@@ -83,22 +93,23 @@
         <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
     </div>
 
-    <div id="admin">ADMIN: 5401881400 | ANIMALS V1</div>
+    <div id="admin">ADMIN: 5401881400 | v33.50 PRODUCTION | 50MB LIMIT</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // NOVO CONJUNTO DE ÍCONES: ANIMAIS DA QUINTA
     const farmAnimals = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca (Leite)
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // Galinha (Ovo)
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // Ovelha (Lã)
-        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png', // Porco (Trufas/Ouro)
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // Abelha (Mel Premiado)
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca
+        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // Galinha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // Ovelha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png', // Porco
+        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // Abelha
     ];
     
     let dragSrcEl = null;
     let cells = [];
+    let balance = 0.0000;
+    let actions = 21;
 
     function init() {
         tg.ready(); tg.expand();
@@ -110,7 +121,6 @@
             cell.dataset.type = Math.floor(Math.random() * farmAnimals.length);
             cell.innerHTML = `<img src="${farmAnimals[cell.dataset.type]}">`;
             
-            // Ativar Drag and Drop
             cell.draggable = true;
             cell.addEventListener('dragstart', handleDragStart);
             cell.addEventListener('dragover', handleDragOver);
@@ -120,56 +130,52 @@
             grid.appendChild(cell);
             cells.push(cell);
         }
+        checkMatches(); // Limpa matches iniciais
     }
 
-    // MECÂNICA DRAG AND DROP
     function handleDragStart(e) {
+        if(actions <= 0) return;
         dragSrcEl = this;
         e.dataTransfer.effectAllowed = 'move';
-        this.style.opacity = '0.5';
+        this.style.opacity = '0.4';
         tg.HapticFeedback.impactOccurred('medium');
     }
 
-    function handleDragOver(e) {
-        if (e.preventDefault) e.preventDefault();
-        return false;
-    }
+    function handleDragOver(e) { if (e.preventDefault) e.preventDefault(); return false; }
 
     function handleDrop(e) {
         if (e.stopPropagation) e.stopPropagation();
-        
-        if (dragSrcEl !== this) {
+        if (dragSrcEl !== this && actions > 0) {
             const idx1 = parseInt(dragSrcEl.dataset.idx);
             const idx2 = parseInt(this.dataset.idx);
             const isNeighbor = [1, -1, 7, -7].includes(idx1 - idx2);
 
             if (isNeighbor) {
-                // Troca visual e de dados
-                const tempType = dragSrcEl.dataset.type;
-                const tempImg = dragSrcEl.innerHTML;
-
-                dragSrcEl.dataset.type = this.dataset.type;
-                dragSrcEl.innerHTML = this.innerHTML;
-
-                this.dataset.type = tempType;
-                this.innerHTML = tempImg;
-
-                tg.HapticFeedback.notificationOccurred('success');
-                checkMatches(); // Verifica matches após a troca
+                swapPieces(dragSrcEl, this);
+                actions--;
+                updateUI();
+                if (!checkMatches()) {
+                    setTimeout(() => swapPieces(this, dragSrcEl), 400); // Reverte se não houver match
+                }
             }
         }
         return false;
     }
 
-    function handleDragEnd() {
-        this.style.opacity = '1';
+    function handleDragEnd() { this.style.opacity = '1'; }
+
+    function swapPieces(a, b) {
+        const tempType = a.dataset.type;
+        const tempImg = a.innerHTML;
+        a.dataset.type = b.dataset.type;
+        a.innerHTML = b.innerHTML;
+        b.dataset.type = tempType;
+        b.innerHTML = tempImg;
     }
 
-    // LÓGICA DE EXPLOSÃO (MATCHES)
     function checkMatches() {
         let matches = new Set();
-
-        // Verificar Horizontais
+        // Horizontais
         for (let r = 0; r < 7; r++) {
             for (let c = 0; c < 5; c++) {
                 let i = r * 7 + c;
@@ -178,8 +184,7 @@
                 }
             }
         }
-
-        // Verificar Verticais
+        // Verticais
         for (let c = 0; c < 7; c++) {
             for (let r = 0; r < 5; r++) {
                 let i = r * 7 + c;
@@ -190,19 +195,38 @@
         }
 
         if (matches.size > 0) {
-            tg.HapticFeedback.notificationOccurred('warning');
-            matches.forEach(i => {
-                cells[i].classList.add('exploding');
-                // Remove a peça após a animação
-                setTimeout(() => {
-                    cells[i].classList.remove('exploding');
-                    cells[i].dataset.type = Math.floor(Math.random() * farmAnimals.length);
-                    cells[i].innerHTML = `<img src="${farmAnimals[cells[i].dataset.type]}">`;
-                }, 400);
-            });
-            // Recarrega o tabuleiro (queda de peças) simplificado
-            setTimeout(checkMatches, 600); 
+            processMatches(matches);
+            return true;
         }
+        return false;
+    }
+
+    function processMatches(matches) {
+        tg.HapticFeedback.notificationOccurred('success');
+        balance += (matches.size * 0.0005);
+        
+        matches.forEach(i => {
+            cells[i].classList.add('exploding');
+            setTimeout(() => {
+                cells[i].classList.remove('exploding');
+                cells[i].dataset.type = Math.floor(Math.random() * farmAnimals.length);
+                cells[i].innerHTML = `<img src="${farmAnimals[cells[i].dataset.type]}">`;
+            }, 400);
+        });
+        
+        updateUI();
+        setTimeout(checkMatches, 600);
+    }
+
+    function updateUI() {
+        document.getElementById('balance-val').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('actions-val').innerText = actions;
+        if(actions <= 0) tg.showAlert("Ações esgotadas! Aguarde o próximo ciclo.");
+    }
+
+    function useBooster(type) {
+        tg.HapticFeedback.impactOccurred('heavy');
+        tg.showConfirm(`Usar ${type.toUpperCase()}?`);
     }
 
     init();
