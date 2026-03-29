@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.57 - DRAG & DROP RESTORED</title>
+    <title>Ouro da Quinta v33.58 - MATCH & EXPLODE FIXED</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
@@ -24,12 +24,14 @@
             gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
-        .cell img { width: 34px; height: 34px; transition: transform 0.2s; pointer-events: none; }
-        .active-drag { transform: scale(1.2); z-index: 10; filter: brightness(1.2); }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cell img { width: 34px; height: 34px; transition: all 0.3s; pointer-events: none; }
+        
+        /* Efeito de Explosão */
+        .exploding img { transform: scale(0); opacity: 0; }
 
         #boosters { display: flex; gap: 10px; margin-top: 15px; }
-        .b-btn { background: var(--white); padding: 10px 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; position: relative; }
+        .b-btn { background: var(--white); padding: 10px 14px; border-radius: 12px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; }
 
         #admin-footer { width: 100%; background: #202124; color: #fff; padding: 6px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; }
     </style>
@@ -46,7 +48,7 @@
     </div>
 
     <div id="goals-bar">
-        <span>🥛 10</span> | <span>🍯 5</span> | <span>🥚 12</span>
+        <span id="g0">🥛 10</span> | <span id="g3">🍯 5</span> | <span id="g1">🥚 12</span>
     </div>
 
     <div id="game-area">
@@ -59,20 +61,22 @@
     </div>
 
     <div class="mock-ad" style="margin-bottom: 30px;">BANNER EXEMPLO</div>
-    <div id="admin-footer">ADMIN: 5401881400 | v33.57 | DRAG FIXED</div>
+    <div id="admin-footer">ADMIN: 5401881400 | v33.58 | MATCH ENGINE ACTIVE</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const farmIcons = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // Galinha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // Ovelha
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // Abelha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca
+        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // 2: Ovelha
+        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // 3: Abelha
     ];
 
     let cells = [];
     let actions = 21;
+    let balance = 0.0000;
+    let goals = { 0: 10, 1: 12, 3: 5 };
     let startCell = null;
     let startX, startY;
 
@@ -106,11 +110,9 @@
                 startCell = cell;
                 startX = e.touches[0].clientX;
                 startY = e.touches[0].clientY;
-                cell.querySelector('img').classList.add('active-drag');
             });
 
             cell.addEventListener('touchend', handleDragEnd);
-
             grid.appendChild(cell);
             cells.push(cell);
         }
@@ -118,8 +120,6 @@
 
     function handleDragEnd(e) {
         if (!startCell) return;
-        startCell.querySelector('img').classList.remove('active-drag');
-        
         const endX = e.changedTouches[0].clientX;
         const endY = e.changedTouches[0].clientY;
         const dx = endX - startX;
@@ -132,9 +132,12 @@
 
         if (targetIdx >= 0 && targetIdx < 49 && isNeighbor(idx, targetIdx)) {
             swap(cells[idx], cells[targetIdx]);
-            actions--;
-            document.getElementById('act-ui').innerText = actions;
-            tg.HapticFeedback.impactOccurred('light');
+            if (!checkMatches()) {
+                setTimeout(() => swap(cells[idx], cells[targetIdx]), 300); // Reverte se não houver match
+            } else {
+                actions--;
+                updateUI();
+            }
         }
         startCell = null;
     }
@@ -153,6 +156,64 @@
         c1.innerHTML = c2.innerHTML;
         c2.dataset.type = t1;
         c2.innerHTML = h1;
+    }
+
+    function checkMatches() {
+        let matched = new Set();
+        // Verificação Horizontal
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 5; c++) {
+                let i = r * 7 + c;
+                if (cells[i].dataset.type === cells[i+1].dataset.type && cells[i].dataset.type === cells[i+2].dataset.type) {
+                    matched.add(i); matched.add(i+1); matched.add(i+2);
+                }
+            }
+        }
+        // Verificação Vertical
+        for (let c = 0; c < 7; c++) {
+            for (let r = 0; r < 5; r++) {
+                let i = r * 7 + c;
+                if (cells[i].dataset.type === cells[i+7].dataset.type && cells[i].dataset.type === cells[i+14].dataset.type) {
+                    matched.add(i); matched.add(i+7); matched.add(i+14);
+                }
+            }
+        }
+
+        if (matched.size > 0) {
+            processMatches(Array.from(matched));
+            return true;
+        }
+        return false;
+    }
+
+    function processMatches(indices) {
+        tg.HapticFeedback.notificationOccurred('success');
+        indices.forEach(idx => {
+            const type = cells[idx].dataset.type;
+            if (goals[type] !== undefined && goals[type] > 0) goals[type]--;
+            balance += 0.0005;
+            cells[idx].classList.add('exploding');
+        });
+
+        updateUI();
+
+        setTimeout(() => {
+            indices.forEach(idx => {
+                cells[idx].classList.remove('exploding');
+                const newType = Math.floor(Math.random() * farmIcons.length);
+                cells[idx].dataset.type = newType;
+                cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
+            });
+            checkMatches(); // Verifica combos em cascata
+        }, 400);
+    }
+
+    function updateUI() {
+        document.getElementById('act-ui').innerText = actions;
+        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
+        if(goals[0] !== undefined) document.getElementById('g0').innerText = `🥛 ${goals[0]}`;
+        if(goals[3] !== undefined) document.getElementById('g3').innerText = `🍯 ${goals[3]}`;
+        if(goals[1] !== undefined) document.getElementById('g1').innerText = `🥚 ${goals[1]}`;
     }
 
     init();
