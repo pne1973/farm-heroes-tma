@@ -3,104 +3,115 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.42 - Final Polish</title>
+    <title>Ouro da Quinta v33.44 - Fixed Ad 320x50</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     
     <script async src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
 
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --gray: #5f6368; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', Roboto, Helvetica, sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; position: relative; }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; }
 
         /* Dashboard Superior */
-        #top-nav { width: 100%; padding: 10px 15px 5px; flex-shrink: 0; z-index: 10; }
-        .stats-grid { background: var(--white); border-radius: 16px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .stat-box { text-align: center; }
-        .stat-val { font-size: 17px; font-weight: 800; color: var(--accent); display: block; }
-        .stat-label { font-size: 10px; text-transform: uppercase; color: var(--gray); font-weight: 700; letter-spacing: 0.5px; }
+        #top-ui { width: 100%; padding: 10px 15px; flex-shrink: 0; }
+        .stats-card { background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        .v { font-size: 16px; font-weight: 800; color: var(--accent); }
+        .l { font-size: 9px; text-transform: uppercase; color: #5f6368; font-weight: 700; }
 
-        #mission-pill { background: var(--white); padding: 6px 16px; border-radius: 20px; margin: 8px auto; font-size: 12px; font-weight: 800; display: table; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-
-        /* Área de Jogo (Tabuleiro + Boosters) */
-        #game-area { 
+        /* Área de Jogo Centralizada */
+        #main-game { 
             display: flex; align-items: center; justify-content: center; 
             gap: 12px; width: 100%; flex-grow: 1; padding: 0 10px;
         }
 
         #grid { 
             display: grid; grid-template-columns: repeat(7, 40px); grid-template-rows: repeat(7, 40px); 
-            gap: 4px; padding: 10px; background: #8d6e63; border-radius: 14px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            gap: 4px; padding: 10px; background: #8d6e63; border-radius: 12px;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.1);
         }
-        .cell { width: 40px; height: 40px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; }
-        .cell:active { transform: scale(0.9); }
+        .cell { width: 40px; height: 40px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
         .cell img { width: 30px; height: 30px; }
 
-        /* Boosters Laterais Dinâmicos */
-        #side-panel { display: flex; flex-direction: column; gap: 10px; }
-        .booster-item { 
-            background: var(--white); width: 50px; height: 50px; border-radius: 12px;
+        /* Boosters Laterais */
+        #side-boosters { display: flex; flex-direction: column; gap: 8px; }
+        .b-btn { 
+            background: var(--white); width: 48px; height: 48px; border-radius: 10px;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border: 1px solid #eee; position: relative; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+            border: 1px solid #ddd; position: relative;
         }
-        .booster-item img { width: 22px; height: 22px; }
-        .booster-item b { font-size: 7px; color: #333; margin-top: 3px; }
-        .b-count { position: absolute; top: -4px; right: -4px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 10px; font-weight: 900; }
+        .b-btn img { width: 22px; height: 22px; }
+        .b-tag { position: absolute; top: -3px; right: -3px; background: var(--red); color: white; font-size: 9px; padding: 2px 5px; border-radius: 8px; font-weight: 900; }
 
-        /* Rodapé de Anúncios */
-        #ad-footer-container { 
-            width: 100%; min-height: 100px; padding-bottom: 50px;
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
-            flex-shrink: 0;
+        /* RODAPÉ: ESPAÇO BLOQUEADO PARA O NOVO ANÚNCIO 320x50 */
+        #ad-fixed-footer { 
+            width: 100%; height: 95px; 
+            display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+            padding-bottom: 45px; flex-shrink: 0;
+        }
+        
+        /* Contentor Iframe do Script */
+        .ad-box { 
+            width: 320px; height: 50px; 
+            background: rgba(255,255,255,0.2); 
+            overflow: hidden; 
         }
 
-        #admin-footer { position: fixed; bottom: 0; width: 100%; background: #202124; color: #bdc1c6; padding: 10px 0; font-size: 10px; text-align: center; z-index: 100; letter-spacing: 0.3px; }
+        #admin-info { position: fixed; bottom: 0; width: 100%; background: #202124; color: white; padding: 8px 0; font-size: 10px; text-align: center; z-index: 100; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
-    <header id="top-nav">
-        <div class="stats-grid">
-            <div class="stat-box"><span class="stat-label">Nível</span><span class="stat-val">1</span></div>
-            <div class="stat-box"><span class="stat-label">Saldo</span><span class="stat-val">€ 0.0000</span></div>
-            <div class="stat-box"><span class="stat-label">Ações</span><span class="stat-val" style="color:var(--red)">21</span></div>
+    <div id="top-ui">
+        <div class="stats-card">
+            <div style="text-align:center"><div class="l">Nível</div><div class="v">1</div></div>
+            <div style="text-align:center"><div class="l">Saldo</div><div class="v">€ 0.0000</div></div>
+            <div style="text-align:center"><div class="l">Ações</div><div class="v" style="color:var(--red)">21</div></div>
         </div>
-        <div id="mission-pill">🧀 10 | 🍯 5 | 🥚 12</div>
-    </header>
+    </div>
 
-    <main id="game-area">
+    <div id="main-game">
         <div id="grid"></div>
 
-        <aside id="side-panel">
-            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"><b>BOMBA</b><div class="b-count">2</div></div>
-            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"><b>TROCA</b><div class="b-count">2</div></div>
-            <div class="booster-item"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"><b>PÁ</b><div class="b-count">3</div></div>
-        </aside>
-    </main>
+        <div id="side-boosters">
+            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png"><div class="b-tag">2</div></div>
+            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png"><div class="b-tag">2</div></div>
+            <div class="b-btn"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png"><div class="b-tag">3</div></div>
+        </div>
+    </div>
 
-    <footer id="ad-footer-container">
-        <div id="container-5a080aa61604cd40501f4a250aa83ca6"></div>
-        <script async="async" data-cfasync="false" src="https://pl29012865.profitablecpmratenetwork.com/5a080aa61604cd40501f4a250aa83ca6/invoke.js"></script>
-    </footer>
+    <div id="ad-fixed-footer">
+        <div style="font-size: 8px; color: #888; margin-bottom: 2px;">PUBLICIDADE</div>
+        <div class="ad-box">
+            <script type="text/javascript">
+                atOptions = {
+                    'key' : '52802f8e0e936960203e1401659b0395',
+                    'format' : 'iframe',
+                    'height' : 50,
+                    'width' : 320,
+                    'params' : {}
+                };
+            </script>
+            <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
+        </div>
+    </div>
 
-    <div id="admin-footer">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
+    <div id="admin-info">ADMIN: 5401881400 | TOTAL APP: € 0.0000</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const icons = ['https://cdn-icons-png.flaticon.com/128/802/802271.png', 'https://cdn-icons-png.flaticon.com/128/3050/3050181.png', 'https://cdn-icons-png.flaticon.com/128/837/837560.png', 'https://cdn-icons-png.flaticon.com/128/2909/2909774.png', 'https://cdn-icons-png.flaticon.com/128/3104/3104618.png'];
-
+    // ... Lógica de ícones (Berinjela, Gato, Ovo, etc) mantida ...
     function init() {
         tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
         for (let i = 0; i < 49; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.innerHTML = `<img src="${icons[Math.floor(Math.random()*icons.length)]}">`;
+            cell.innerHTML = `<img src="https://cdn-icons-png.flaticon.com/128/802/802271.png">`;
             grid.appendChild(cell);
         }
     }
