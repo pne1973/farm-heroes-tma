@@ -3,36 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.19 - HD Swipe</title>
+    <title>Ouro da Quinta v33.20 - HD SVG</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --wood: #5d4037; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; --gray: #f1f3f4; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --google-blue: #4285F4; --red: #d93025; --white: #ffffff; --gray: #bdc1c6; }
         body { margin: 0; padding: 0; background: var(--bg); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; height: 100vh; overflow: hidden; touch-action: none; }
         
+        /* Dashboard */
         #header-wallet { width: 94%; background: white; margin: 10px 0; border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); flex-shrink: 0; }
         .val { font-size: 18px; font-weight: bold; color: var(--accent); }
         .label { font-size: 10px; text-transform: uppercase; color: #666; }
+        #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: white; padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; }
+        .m-icon { width: 18px; height: 18px; vertical-align: middle; }
 
-        #mission-bar { display: flex; gap: 12px; margin-bottom: 5px; background: var(--white); padding: 5px 20px; border-radius: 20px; font-size: 14px; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #dadce0; }
-
-        /* GRID HD - CORREÇÃO DE DESFOQUE */
+        /* GRID HD - USANDO IMAGENS SVG */
         #grid { 
             display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
-            gap: 4px; padding: 10px; background: #bdc1c6; border-radius: 10px;
+            gap: 4px; padding: 10px; background: #9da3a8; border-radius: 10px;
             touch-action: none; user-select: none;
         }
         .cell { 
             width: 42px; height: 42px; background: #f8f9fa; border-radius: 6px; 
-            display: flex; align-items: center; justify-content: center; font-size: 26px; 
-            cursor: pointer; transition: transform 0.1s;
-            /* Forçar nitidez máxima */
-            text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: transform 0.15s ease-out, opacity 0.15s ease-out;
         }
+        
+        /* Ícones HD Cristais */
+        .icon { width: 32px; height: 32px; pointer-events: none; }
 
+        /* ANIMAÇÃO DE EXPLOSÃO */
+        .explode { transform: scale(0); opacity: 0; }
+
+        /* Resto do Layout */
         #booster-container { display: flex; gap: 15px; margin-top: 20px; margin-bottom: 80px; }
         .booster-btn { background: white; padding: 8px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; min-width: 65px; border: 1px solid #ddd; position: relative; }
-        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; border-radius: 50%; padding: 2px 6px; font-size: 10px; font-weight: bold; }
-
+        .b-icon { width: 24px; height: 24px; margin-bottom: 3px; }
         #admin-panel { position: fixed; bottom: 55px; width: 100%; background: #222; color: white; padding: 8px; font-size: 12px; display: none; text-align: center; }
     </style>
 </head>
@@ -44,24 +49,32 @@
     </div>
 
     <div id="mission-bar">
-        <div>🧀 <span id="m0">10</span></div>
-        <div>🍯 <span id="m1">5</span></div>
-        <div>🥚 <span id="m2">12</span></div>
+        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9c0.svg" class="m-icon"> <span id="m0">10</span></div>
+        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f36f.svg" class="m-icon"> <span id="m1">5</span></div>
+        <div><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95a.svg" class="m-icon"> <span id="m2">12</span></div>
     </div>
 
     <div id="grid"></div>
 
     <div id="booster-container">
-        <div class="booster-btn">💣<span>BOMBA</span><div class="b-count">2</div></div>
-        <div class="booster-btn">🔄<span>TROCA</span><div class="b-count">2</div></div>
-        <div class="booster-btn">🧹<span>PÁ</span><div class="b-count">3</div></div>
+        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f4a3.svg" class="b-icon"><span>BOMBA</span></div>
+        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f504.svg" class="b-icon"><span>TROCA</span></div>
+        <div class="booster-btn"><img src="https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9f9.svg" class="b-icon"><span>PÁ</span></div>
     </div>
 
     <div id="admin-panel">ADMIN: 5401881400 | TOTAL APP: € <span id="adm-t">0.0000</span></div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const items = ['🧀', '🍯', '🥚', '🍞', '🥛'];
+    // URLs dos Ícones SVG Cristais (usando repositório oficial Google Noto Emoji)
+    const itemSvgs = [
+        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f9c0.svg', // 🧀
+        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f36f.svg', // 🍯
+        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95a.svg', // 🥚
+        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f35e.svg', // 🍞
+        'https://raw.githubusercontent.com/googlefonts/noto-emoji/main/svg/emoji_u1f95b.svg'  // 🥛
+    ];
+    
     let moves = 21, balance = 0, level = 1, squares = [], mission = [10, 5, 12];
     let startId = null, isDragging = false;
 
@@ -69,23 +82,27 @@
         const container = document.getElementById('grid');
         container.innerHTML = ''; squares = [];
         
-        // Geração Anti-Match Inicial
         const temp = [];
         for (let i = 0; i < 49; i++) {
-            let item;
+            let svgIdx;
             do {
-                item = items[Math.floor(Math.random() * items.length)];
+                svgIdx = Math.floor(Math.random() * itemSvgs.length);
             } while (
-                (i % 7 >= 2 && temp[i-1] === item && temp[i-2] === item) ||
-                (i >= 14 && temp[i-7] === item && temp[i-14] === item)
+                (i % 7 >= 2 && temp[i-1] === svgIdx && temp[i-2] === svgIdx) ||
+                (i >= 14 && temp[i-7] === svgIdx && temp[i-14] === svgIdx)
             );
-            temp[i] = item;
+            temp[i] = svgIdx;
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.innerHTML = item;
             cell.dataset.id = i;
+            cell.dataset.svgIdx = svgIdx;
             
-            // Eventos de Toque e Arrastar
+            // Injeta a imagem SVG HD
+            const img = document.createElement('img');
+            img.src = itemSvgs[svgIdx];
+            img.className = 'icon';
+            cell.appendChild(img);
+            
             cell.addEventListener('touchstart', handleStart);
             cell.addEventListener('touchmove', handleMove);
             cell.addEventListener('touchend', handleEnd);
@@ -97,95 +114,98 @@
         updateUI();
     }
 
-    function handleStart(e) {
-        startId = parseInt(e.target.dataset.id);
-        isDragging = true;
-    }
-
+    function handleStart(e) { startId = parseInt(e.currentTarget.dataset.id); isDragging = true; }
+    function handleEnd() { isDragging = false; }
     function handleMove(e) {
         if (!isDragging) return;
         const touch = e.touches[0];
         const target = document.elementFromPoint(touch.clientX, touch.clientY);
         if (!target || !target.dataset.id) return;
-        
         const endId = parseInt(target.dataset.id);
         if (endId !== startId) {
-            // Verifica se é vizinho direto
             const diff = Math.abs(startId - endId);
-            const isNeighbor = (diff === 1 && Math.floor(startId/7) === Math.floor(endId/7)) || diff === 7;
-            
-            if (isNeighbor) {
-                isDragging = false;
-                swap(startId, endId);
+            if ((diff === 1 && Math.floor(startId/7) === Math.floor(endId/7)) || diff === 7) {
+                isDragging = false; swap(startId, endId);
             }
         }
     }
 
-    function handleEnd() { isDragging = false; }
-
     function swap(id1, id2) {
-        const val1 = squares[id1].innerHTML;
-        const val2 = squares[id2].innerHTML;
+        const idx1 = squares[id1].dataset.svgIdx;
+        const idx2 = squares[id2].dataset.svgIdx;
         
-        squares[id1].innerHTML = val2;
-        squares[id2].innerHTML = val1;
+        // Troca visual e de dados
+        updateCell(id1, idx2);
+        updateCell(id2, idx1);
 
         if (!checkMatches()) {
-            // Se não der match, desfaz a troca após 200ms
-            setTimeout(() => {
-                squares[id1].innerHTML = val1;
-                squares[id2].innerHTML = val2;
-            }, 300);
+            setTimeout(() => { updateCell(id1, idx1); updateCell(id2, idx2); }, 300);
         } else {
-            moves--;
-            updateUI();
+            moves--; updateUI();
         }
+    }
+
+    function updateCell(id, svgIdx) {
+        squares[id].dataset.svgIdx = svgIdx;
+        squares[id].querySelector('.icon').src = itemSvgs[svgIdx];
     }
 
     function checkMatches() {
         let matched = false;
         let toRemove = new Set();
 
-        // Linhas
         for (let i = 0; i < 49; i++) {
             if (i % 7 < 5) {
-                if (squares[i].innerHTML === squares[i+1].innerHTML && squares[i].innerHTML === squares[i+2].innerHTML) {
-                    [i, i+1, i+2].forEach(idx => toRemove.add(idx));
-                    matched = true;
+                if (squares[i].dataset.svgIdx === squares[i+1].dataset.svgIdx && squares[i].dataset.svgIdx === squares[i+2].dataset.svgIdx) {
+                    [i, i+1, i+2].forEach(idx => toRemove.add(idx)); matched = true;
                 }
             }
-        }
-        // Colunas
-        for (let i = 0; i < 28; i++) {
-            if (squares[i].innerHTML === squares[i+7].innerHTML && squares[i].innerHTML === squares[i+14].innerHTML) {
-                [i, i+7, i+14].forEach(idx => toRemove.add(idx));
-                matched = true;
+            if (i < 35) {
+                if (squares[i].dataset.svgIdx === squares[i+7].dataset.svgIdx && squares[i].dataset.svgIdx === squares[i+14].dataset.svgIdx) {
+                    [i, i+7, i+14].forEach(idx => toRemove.add(idx)); matched = true;
+                }
             }
         }
 
         if (matched) {
             toRemove.forEach(idx => {
-                const icon = squares[idx].innerHTML;
-                if (icon === '🧀') mission[0] = Math.max(0, mission[0]-1);
-                if (icon === '🍯') mission[1] = Math.max(0, mission[1]-1);
-                if (icon === '🥚') mission[2] = Math.max(0, mission[2]-1);
-                squares[idx].innerHTML = '';
+                const svgIdx = squares[idx].dataset.svgIdx;
+                // Atualiza missão
+                if (svgIdx == 0) mission[0] = Math.max(0, mission[0]-1);
+                if (svgIdx == 1) mission[1] = Math.max(0, mission[1]-1);
+                if (svgIdx == 2) mission[2] = Math.max(0, mission[2]-1);
+                
+                // APLICA EFEITO DE EXPLOSÃO VISUAL (Shrink + Fade)
+                squares[idx].classList.add('explode');
             });
             balance += 0.0005;
-            setTimeout(gravity, 300);
+            // Aguarda a animação (150ms) antes de remover e aplicar gravidade
+            setTimeout(gravity, 160);
         }
         return matched;
     }
 
     function gravity() {
+        // Remove os ícones marcados e limpa a classe explode
+        squares.forEach(s => {
+            if (s.classList.contains('explode')) {
+                s.classList.remove('explode');
+                s.dataset.svgIdx = ''; // Limpa o dado
+                s.querySelector('.icon').src = ''; // Limpa a imagem
+            }
+        });
+
         for (let i = 41; i >= 0; i--) {
-            if (squares[i+7].innerHTML === '') {
-                squares[i+7].innerHTML = squares[i].innerHTML;
-                squares[i].innerHTML = '';
+            if (squares[i+7].dataset.svgIdx === '') {
+                updateCell(i+7, squares[i].dataset.svgIdx);
+                squares[i].dataset.svgIdx = '';
+                squares[i].querySelector('.icon').src = '';
             }
         }
         squares.forEach(s => {
-            if (s.innerHTML === '') s.innerHTML = items[Math.floor(Math.random() * items.length)];
+            if (s.dataset.svgIdx === '') {
+                updateCell(s.dataset.id, Math.floor(Math.random() * itemSvgs.length));
+            }
         });
         if (checkMatches()) { setTimeout(gravity, 300); }
         updateUI();
