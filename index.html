@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Farm Heroes Saga - Telegram Edition</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --sky: #4fc3f7;
+            --grass: #8bc34a;
+            --border: #5d4037;
+            --panel: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            margin: 0; padding: 0; background: var(--sky);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh; overflow: hidden; color: white;
+        }
+
+        /* Top Header */
+        #header {
+            width: 90%; background: var(--panel);
+            margin-top: 10px; border-radius: 15px;
+            display: flex; justify-content: space-around;
+            padding: 10px; border: 3px solid var(--border);
+        }
+
+        .stat { text-align: center; }
+        .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-value { font-size: 20px; font-weight: bold; color: #fff; }
+
+        /* Missions */
+        #mission-bar {
+            display: flex; gap: 15px; margin: 10px 0;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 20px; border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .mission-item { display: flex; align-items: center; gap: 5px; font-size: 18px; font-weight: bold; }
+
+        /* Game Board */
+        #grid {
+            display: grid;
+            grid-template-columns: repeat(7, 46px);
+            grid-template-rows: repeat(7, 46px);
+            gap: 4px; padding: 8px;
+            background: var(--border); border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+        }
+
+        .cell {
+            width: 46px; height: 46px; background: #9ccc65;
+            border-radius: 8px; display: flex; align-items: center;
+            justify-content: center; font-size: 26px; cursor: pointer;
+            transition: transform 0.1s, background 0.2s;
+            user-select: none; position: relative;
+        }
+
+        .cell:active { transform: scale(0.9); }
+        .selected { background: #fff !important; transform: scale(1.1); box-shadow: 0 0 15px #fff; z-index: 2; }
+
+        /* Popups */
+        #overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); flex-direction: column;
+            align-items: center; justify-content: center; z-index: 100; text-align: center;
+        }
+
+        .btn {
+            padding: 15px 40px; font-size: 18px; border: none;
+            border-radius: 30px; background: #ff9800; color: white;
+            font-weight: bold; cursor: pointer; margin-top: 20px;
+            box-shadow: 0 4px 0 #e68a00;
+        }
+
+        .btn:active { transform: translateY(2px); box-shadow: none; }
+    </style>
+</head>
+<body>
+
+    <div id="header">
+        <div class="stat">
+            <div class="stat-label">Moves</div>
+            <div id="moves-val" class="stat-value">20</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Score</div>
+            <div id="score-val" class="stat-value">0</div>
+        </div>
+        <div class="stat">
+            <div class="stat-label">Best</div>
+            <div id="best-val" class="stat-value">0</div>
+        </div>
+    </div>
+
+    <div id="mission-bar">
+        <div class="mission-item">🍎 <span id="m-apple">15</span></div>
+        <div class="mission-item">🥕 <span id="m-carrot">15</span></div>
+        <div class="mission-item">💧 <span id="m-water">15</span></div>
+    </div>
+
+    <div id="grid"></div>
+
+    <div id="overlay">
+        <h1 id="status-msg" style="font-size: 40px; margin-bottom: 10px;">Vitória!</h1>
+        <p style="font-size: 20px;">Você colheu tudo!</p>
+        <button class="btn" onclick="location.reload()">JOGAR DE NOVO</button>
+    </div>
+
+<script>
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    const grid = document.querySelector('#grid');
+    const crops = ['🍎', '🥕', '💧', '🍓', '☀️'];
+    const width = 7;
+    let squares = [];
+    let moves = 20;
+    let score = 0;
+    let highScore = 0;
+    
+    let mission = { '🍎': 15, '🥕': 15, '💧': 15 };
+
+    // Carregar HighScore do CloudStorage do Telegram
+    tg.CloudStorage.getItem('highScore', (err, value) => {
+        if (!err && value) {
+            highScore = parseInt(value);
+            document.getElementById('best-val').innerText = highScore;
+        }
+    });
+
+    function init() {
+        for (let i = 0; i < width * width; i++) {
+            const square = document.createElement('div');
+            square.setAttribute('id', i);
+            square.classList.add('cell');
+            square.innerHTML = crops[Math.floor(Math.random() * crops.length)];
+            grid.appendChild(square);
+            squares.push(square);
+            square.onclick = () => handleSelect(i);
+        }
+        updateUI();
+    }
+
+    let firstId = null;
+
+    function handleSelect(id) {
+        if (moves <= 0) return;
+
+        if (firstId === null) {
+            firstId = id;
+            squares[firstId].classList.add('selected');
+        } else {
+            let secondId = id;
+            if (isAdjacent(firstId, secondId)) {
+                swap(firstId, secondId);
+                moves--;
+                checkAllMatches();
+                updateUI();
+            }
+            if(squares[firstId]) squares[firstId].classList.remove('selected');
+            firstId = null;
+        }
+    }
+
+    function isAdjacent(id1, id2) {
+        const movesArr = [id1-1, id1+1, id1-width, id1+width];
+        return movesArr.includes(id2);
+    }
+
+    function swap(id1, id2) {
+        let temp = squares[id1].innerHTML;
+        squares[id1].innerHTML = squares[id2].innerHTML;
+        squares[id2].innerHTML = temp;
+    }
+
+    function updateUI() {
+        document.getElementById('moves-val').innerText = moves;
+        document.getElementById('score-val').innerText = score;
+        document.getElementById('m-apple').innerText = Math.max(0, mission['🍎']);
+        document.getElementById('m-carrot').innerText = Math.max(0, mission['🥕']);
+        document.getElementById('m-water').innerText = Math.max(0, mission['💧']);
+
+        // Checar Recorde
+        if (score > highScore) {
+            highScore = score;
+            document.getElementById('best-val').innerText = highScore;
+            tg.CloudStorage.setItem('highScore', highScore.toString());
+        }
+
+        // Condições de Fim
+        if (mission['🍎'] <= 0 && mission['🥕'] <= 0 && mission['💧'] <= 0) {
+            endGame(true);
+        } else if (moves <= 0) {
+            endGame(false);
+        }
+    }
+
+    function checkAllMatches() {
+        let matched = false;
+        
+        for (let i = 0; i < 49; i++) {
+            let color = squares[i].innerHTML;
+            if (color === '') continue;
+
+            // Horizontal
+            if (i % width < 5) {
+                if (squares[i+1].innerHTML === color && squares[i+2].innerHTML === color) {
+                    [i, i+1, i+2].forEach(idx => squares[idx].setAttribute('match', true));
+                    matched = true;
+                }
+            }
+            // Vertical
+            if (i < 35) {
+                if (squares[i+width].innerHTML === color && squares[i+width*2].innerHTML === color) {
+                    [i, i+width, i+width*2].forEach(idx => squares[idx].setAttribute('match', true));
+                    matched = true;
+                }
+            }
+        }
+
+        if (matched) {
+            tg.HapticFeedback.notificationOccurred('success');
+            collect();
+        }
+    }
+
+    function collect() {
+        squares.forEach(s => {
+            if (s.getAttribute('match')) {
+                let type = s.innerHTML;
+                if (mission[type] !== undefined) mission[type]--;
+                s.innerHTML = '';
+                s.removeAttribute('match');
+                score += 15;
+            }
+        });
+        setTimeout(applyGravity, 200);
+    }
+
+    function applyGravity() {
+        for (let i = 0; i < width; i++) {
+            let col = [];
+            for (let j = 0; j < width; j++) {
+                let val = squares[i + (j * width)].innerHTML;
+                if (val !== '') col.push(val);
+            }
+            while (col.length < width) {
+                col.unshift(crops[Math.floor(Math.random() * crops.length)]);
+            }
+            for (let j = 0; j < width; j++) {
+                squares[i + (j * width)].innerHTML = col[j];
+            }
+        }
+        setTimeout(checkAllMatches, 300);
+        updateUI();
+    }
+
+    function endGame(win) {
+        const overlay = document.getElementById('overlay');
+        overlay.style.display = 'flex';
+        document.getElementById('status-msg').innerText = win ? "VITÓRIA! 🌻" : "SEM MOVES! ⛈️";
+        tg.HapticFeedback.impactOccurred('heavy');
+    }
+
+    init();
+</script>
+</body>
+</html>
