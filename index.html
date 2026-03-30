@@ -3,111 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.82 - CASCADE ENGINE</title>
+    <title>Ouro da Quinta v33.86 - PURE GAME ENGINE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
-        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        #game-header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        #stats-row { width: 95%; display: flex; justify-content: space-between; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; flex: 1; text-align: center; margin: 0 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        #header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,0.8); }
+        .stats-row { width: 100%; display: flex; justify-content: space-around; }
+        .stat-card { background: var(--white); padding: 8px 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 9px; text-transform: uppercase; color: #999; display: block; }
-
-        #mission-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; display: flex; gap: 15px; font-weight: 800; font-size: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin: 10px 0; }
         
-        #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px; }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.2s; }
-        .selected { outline: 3px solid var(--accent); transform: scale(1.1); z-index: 5; }
-        .match-anim { transform: scale(0); opacity: 0; transition: 0.3s; }
+        #mission-bar { background: var(--white); padding: 10px 25px; border-radius: 30px; display: flex; gap: 20px; font-weight: 800; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
 
-        #footer { background: #000; color: #fff; padding: 12px; text-align: center; font-size: 9px; font-weight: bold; }
+        #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
+        .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
+        
+        #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="game-header">
-    <div id="stats-row">
-        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0042</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">8</span></div>
+<div id="header">
+    <div class="stats-row">
+        <div class="stat-card"><span>Saldo:</span> <span class="stat-v" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span>Ações:</span> <span class="stat-v" id="act-ui">20</span></div>
     </div>
     <div id="mission-bar">
-        <div class="m-item">🥛 <span id="m1">5</span></div>
-        <div class="m-item">🥚 <span id="m2">5</span></div>
-        <div class="m-item">🍯 <span id="m3">5</span></div>
+        <span>🥛 <span id="m1">10</span></span>
+        <span>🥚 <span id="m2">12</span></span>
+        <span>🍯 <span id="m3">5</span></span>
     </div>
 </div>
 
-<div id="grid-area">
+<div id="grid-container">
     <div id="grid"></div>
 </div>
 
-<div id="footer">ADMIN: 5401881400 | v33.82 | CASCADE & MATCH ENGINE</div>
+<div id="footer">OURO DA QUINTA v33.86 | ENGINE: SWAP & GRAVITY</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let mission = { '🥛': 5, '🥚': 5, '🍯': 5 };
-    let balance = 0.0042, actions = 8;
-    let selectedCell = null;
-    let gridArray = [];
+    let mission = { '🥛': 10, '🥚': 12, '🍯': 5 };
+    let balance = 0.0000, actions = 20, gridArray = [], selectedIdx = null;
 
     function initGrid() {
         const gridEl = document.getElementById('grid');
         gridEl.innerHTML = '';
         gridArray = [];
         for (let i = 0; i < 49; i++) {
-            let icon = icons[Math.floor(Math.random() * icons.length)];
-            gridArray.push(icon);
+            gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.innerText = icon;
-            cell.dataset.id = i;
-            cell.onclick = () => handleCellClick(cell, i);
+            cell.dataset.idx = i;
+            cell.onclick = () => handleCellClick(i);
             gridEl.appendChild(cell);
         }
-        // Limpar matches iniciais sem cobrar [cite: 2026-03-30]
-        checkAndResolveMatches(true);
+        checkAndResolve(true); // Limpa matches iniciais sem cobrar ações [cite: 2026-03-30]
     }
 
-    function handleCellClick(cell, index) {
+    function handleCellClick(idx) {
         if (actions <= 0) return;
-        if (!selectedCell) {
-            selectedCell = { cell, index };
-            cell.classList.add('selected');
+        const cells = document.querySelectorAll('.cell');
+
+        if (selectedIdx === null) {
+            selectedIdx = idx;
+            cells[idx].classList.add('selected');
         } else {
-            if (isAdjacent(selectedCell.index, index)) {
-                executeSwap(selectedCell.index, index);
+            if (isAdjacent(selectedIdx, idx)) {
+                swap(selectedIdx, idx);
             }
-            selectedCell.cell.classList.remove('selected');
-            selectedCell = null;
+            cells[selectedIdx].classList.remove('selected');
+            selectedIdx = null;
         }
     }
 
     function isAdjacent(i1, i2) {
-        return Math.abs(Math.floor(i1/7) - Math.floor(i2/7)) + Math.abs((i1%7) - (i2%7)) === 1;
+        const r1 = Math.floor(i1/7), c1 = i1%7;
+        const r2 = Math.floor(i2/7), c2 = i2%7;
+        return (Math.abs(r1-r2) + Math.abs(c1-c2)) === 1;
     }
 
-    async function executeSwap(i1, i2) {
-        swapData(i1, i2);
+    async function swap(i1, i2) {
+        let temp = gridArray[i1];
+        gridArray[i1] = gridArray[i2];
+        gridArray[i2] = temp;
+        render();
+
         let matches = findMatches();
         if (matches.length > 0) {
             actions--;
             await resolveMatches();
         } else {
-            swapData(i1, i2); // Reverte se não houver match [cite: 2026-03-30]
+            // Reverte se não houver match [cite: 2026-03-30]
+            temp = gridArray[i1];
+            gridArray[i1] = gridArray[i2];
+            gridArray[i2] = temp;
+            setTimeout(render, 200);
         }
-        updateUI();
-    }
-
-    function swapData(i1, i2) {
-        const temp = gridArray[i1];
-        gridArray[i1] = gridArray[i2];
-        gridArray[i2] = temp;
-        renderGrid();
     }
 
     function findMatches() {
@@ -115,79 +111,80 @@
         // Horizontal
         for (let r = 0; r < 7; r++) {
             for (let c = 0; c < 5; c++) {
-                let idx = r * 7 + c;
-                if (gridArray[idx] === gridArray[idx+1] && gridArray[idx] === gridArray[idx+2]) {
-                    matchSet.add(idx); matchSet.add(idx+1); matchSet.add(idx+2);
+                let i = r * 7 + c;
+                if (gridArray[i] === gridArray[i+1] && gridArray[i] === gridArray[i+2]) {
+                    matchSet.add(i); matchSet.add(i+1); matchSet.add(i+2);
                 }
             }
         }
         // Vertical
         for (let c = 0; c < 7; c++) {
             for (let r = 0; r < 5; r++) {
-                let idx = r * 7 + c;
-                if (gridArray[idx] === gridArray[idx+7] && gridArray[idx] === gridArray[idx+14]) {
-                    matchSet.add(idx); matchSet.add(idx+7); matchSet.add(idx+14);
+                let i = r * 7 + c;
+                if (gridArray[i] === gridArray[i+7] && gridArray[i] === gridArray[i+14]) {
+                    matchSet.add(i); matchSet.add(i+7); matchSet.add(i+14);
                 }
             }
         }
         return Array.from(matchSet);
     }
 
-    async function resolveMatches() {
+    async function resolveMatches(isInitial = false) {
         let matches = findMatches();
         if (matches.length === 0) return;
 
         matches.forEach(idx => {
             const icon = gridArray[idx];
-            if (mission[icon] > 0) {
+            if (!isInitial && mission[icon] > 0) {
                 mission[icon]--;
                 balance += 0.0001;
             }
             gridArray[idx] = null;
         });
 
-        renderGrid();
+        render();
         await new Promise(r => setTimeout(r, 300));
         applyGravity();
-        await resolveMatches(); // Recurso para matches em cadeia [cite: 2026-03-30]
+        await resolveMatches(isInitial);
     }
 
     function applyGravity() {
         for (let c = 0; c < 7; c++) {
-            let emptySpaces = 0;
+            let empty = 0;
             for (let r = 6; r >= 0; r--) {
-                let idx = r * 7 + c;
-                if (gridArray[idx] === null) {
-                    emptySpaces++;
-                } else if (emptySpaces > 0) {
-                    gridArray[idx + (emptySpaces * 7)] = gridArray[idx];
-                    gridArray[idx] = null;
+                let i = r * 7 + c;
+                if (gridArray[i] === null) empty++;
+                else if (empty > 0) {
+                    gridArray[i + (empty * 7)] = gridArray[i];
+                    gridArray[i] = null;
                 }
             }
-            for (let i = 0; i < emptySpaces; i++) {
+            for (let i = 0; i < empty; i++) {
                 gridArray[i * 7 + c] = icons[Math.floor(Math.random() * icons.length)];
             }
         }
-        renderGrid();
+        render();
     }
 
-    function renderGrid() {
+    function render() {
         const cells = document.querySelectorAll('.cell');
         gridArray.forEach((icon, i) => {
             cells[i].innerText = icon || "";
+            cells[i].style.opacity = icon ? "1" : "0";
         });
-    }
-
-    function updateUI() {
+        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('act-ui').innerText = actions;
         document.getElementById('m1').innerText = mission['🥛'];
         document.getElementById('m2').innerText = mission['🥚'];
         document.getElementById('m3').innerText = mission['🍯'];
-        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('act-ui').innerText = actions;
+    }
+
+    async function checkAndResolve(init) {
+        await resolveMatches(init);
+        updateUI();
     }
 
     initGrid();
-    updateUI();
 </script>
 </body>
 </html>
