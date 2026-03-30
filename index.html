@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.67 - AD REWARD FIX</title>
+    <title>Ouro da Quinta v33.68 - ADMIN PANEL ACTIVE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; --admin-bg: #1a1a1a; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
         body { margin: 0; padding: 0; width: 100%; height: 100vh; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: space-between; padding: 10px 0 30px 0; }
+        #app-shell { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: space-between; padding: 10px 0 40px 0; }
+
+        /* BANNERS REPOSTOS [cite: 2026-03-30] */
+        .game-ad-slot { width: 92%; height: 60px; background: rgba(0,0,0,0.05); border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; border-radius: 8px; color: #999; font-size: 10px; font-weight: bold; }
 
         #stats-row { width: 92%; display: flex; justify-content: space-between; gap: 8px; }
         .stat-card { background: var(--white); padding: 8px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
@@ -33,18 +36,31 @@
         .b-btn { background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; position: relative; }
         .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 8px; padding: 2px 5px; border-radius: 10px; }
 
-        /* MODAL COM ESPAÇO 300x250 [cite: 2026-03-30] */
-        #ad-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
-        .ad-container-300x250 { width: 300px; height: 250px; background: #333; border: 1px solid #555; display: flex; align-items: center; justify-content: center; color: #888; font-size: 12px; margin-bottom: 20px; border-radius: 4px; }
-        .ad-box { background: var(--white); padding: 20px; border-radius: 24px; width: 85%; text-align: center; }
-        .btn-ad { background: var(--accent); color: white; padding: 14px; border-radius: 12px; border: none; font-weight: 800; width: 100%; font-size: 14px; cursor: pointer; }
+        /* FOOTER CLICÁVEL [cite: 2026-03-30] */
+        #admin-trigger { width: 100%; background: #202124; color: #fff; padding: 10px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; cursor: pointer; text-decoration: underline; z-index: 500; }
 
-        #admin-footer { width: 100%; background: #202124; color: #fff; padding: 6px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; }
+        /* PAINEL ADMIN DETALHADO [cite: 2026-03-22, 2026-03-30] */
+        #admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 2000; display: none; flex-direction: column; overflow-y: auto; padding: 20px; font-size: 14px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 15px; margin-bottom: 20px; }
+        .admin-stat-box { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+        .a-card { background: #f8f9fa; padding: 15px; border-radius: 10px; border-left: 4px solid var(--accent); }
+        .admin-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 12px; }
+        .admin-table th { text-align: left; background: #eee; padding: 8px; }
+        .admin-table td { padding: 8px; border-bottom: 1px solid #eee; }
+        .pay-btn { background: #0070ba; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 10px; }
+        .close-admin { background: var(--red); color: white; border: none; padding: 8px 15px; border-radius: 8px; }
+
+        /* MODAL ANÚNCIO (300x250) */
+        #ad-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .ad-container-300x250 { width: 300px; height: 250px; background: #333; display: flex; align-items: center; justify-content: center; color: #888; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; }
+        .ad-box { background: var(--white); padding: 20px; border-radius: 24px; width: 85%; text-align: center; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
+    <div class="game-ad-slot">BANNER PUBLICITÁRIO (TOP)</div>
+
     <div id="stats-row">
         <div class="stat-card"><span class="l">Vidas</span><span class="v" id="life-ui" style="color:var(--red)">❤️ 1</span></div>
         <div class="stat-card"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
@@ -65,15 +81,44 @@
         <div class="b-btn">⛏️ PÁ <span class="b-count">3</span></div>
     </div>
 
-    <div id="admin-footer">ADMIN: 5401881400 | v33.67 | AD 300x250 & REWARD: ACTIONS ONLY</div>
+    <div class="game-ad-slot">BANNER PUBLICITÁRIO (BOTTOM)</div>
+
+    <div id="admin-trigger" onclick="toggleAdmin(true)">
+        ADMIN: 5401881400 | v33.68 | CLIQUE PARA PAINEL DETALHADO
+    </div>
+</div>
+
+<div id="admin-panel">
+    <div class="admin-header">
+        <h2 style="margin:0">Painel de Controlo Apex Social</h2>
+        <button class="close-admin" onclick="toggleAdmin(false)">FECHAR</button>
+    </div>
+
+    <div class="admin-stat-box">
+        <div class="a-card"><strong>Total Utilizadores</strong><br><span style="font-size:20px">1,240</span></div>
+        <div class="a-card"><strong>Total Posts</strong><br><span style="font-size:20px">8,432</span></div>
+    </div>
+
+    <h3>Solicitações de Saque (PayPal)</h3>
+    <table class="admin-table">
+        <tr><th>ID</th><th>User</th><th>Valor</th><th>Ação</th></tr>
+        <tr><td>#991</td><td>@joao_silva</td><td>€ 15.50</td><td><button class="pay-btn">PAY</button></td></tr>
+        <tr><td>#992</td><td>@maria_farm</td><td>€ 52.00</td><td><button class="pay-btn">PAY</button></td></tr>
+    </table>
+
+    <h3 style="margin-top:25px">Gestão de Posts (Moderação)</h3>
+    <table class="admin-table">
+        <tr><th>ID Post</th><th>Autor</th><th>Denúncias</th><th>Ação</th></tr>
+        <tr><td>5401...</td><td>@bot_01</td><td>🚩 5</td><td><button style="background:var(--red); color:white; border:none; border-radius:4px; font-size:10px">DELETE</button></td></tr>
+    </table>
 </div>
 
 <div id="ad-modal">
-    <div class="ad-container-300x250">ESPAÇO PARA ANÚNCIO 300x250</div>
+    <div class="ad-container-300x250">ESPAÇO PUBLICITÁRIO 300x250</div>
     <div class="ad-box">
-        <h3 style="margin:0 0 10px 0">Ações Esgotadas!</h3>
-        <p style="font-size: 13px; color: #666; margin-bottom: 20px;">Vê o anúncio acima para ganhar <b>+5 ações</b> e continuar o nível.</p>
-        <button class="btn-ad" onclick="watchAd()">🎥 OBTER +5 AÇÕES</button>
+        <h3>Ações Esgotadas!</h3>
+        <p>Vê o anúncio para ganhar <b>+5 ações</b>.</p>
+        <button style="background:var(--accent); color:white; width:100%; padding:15px; border-radius:12px; border:none; font-weight:800" onclick="watchAd()">🎥 VER AGORA</button>
     </div>
 </div>
 
@@ -85,24 +130,21 @@
         'https://cdn-icons-png.flaticon.com/128/10432/10432551.png'
     ];
 
-    let actions = 1; 
-    let lives = 1;   
-    let balance = 0.0000;
-    let selected = null;
-    let cells = [];
-    let goals = [10, 12, 5];
+    let actions = 1, lives = 1, balance = 0.0000, selected = null, cells = [], goals = [10, 12, 5];
+
+    function toggleAdmin(show) {
+        document.getElementById('admin-panel').style.display = show ? 'flex' : 'none';
+    }
 
     function init() {
         tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        cells = [];
+        grid.innerHTML = ''; cells = [];
         for (let i = 0; i < 49; i++) {
             let type = Math.floor(Math.random() * farmIcons.length);
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.dataset.idx = i;
-            cell.dataset.type = type;
+            cell.dataset.idx = i; cell.dataset.type = type;
             cell.innerHTML = `<img src="${farmIcons[type]}">`;
             cell.onclick = () => handleMove(cell);
             grid.appendChild(cell);
@@ -112,29 +154,20 @@
 
     function handleMove(cell) {
         if (actions <= 0) return;
-        if (!selected) {
-            selected = cell;
-            cell.classList.add('selected');
-        } else {
-            const idx1 = parseInt(selected.dataset.idx);
-            const idx2 = parseInt(cell.dataset.idx);
+        if (!selected) { selected = cell; cell.classList.add('selected'); }
+        else {
+            const idx1 = parseInt(selected.dataset.idx), idx2 = parseInt(cell.dataset.idx);
             if ([1, -1, 7, -7].includes(idx1 - idx2)) {
                 swap(selected, cell);
-                if (!checkMatches()) {
-                    setTimeout(() => swap(selected, cell), 250);
-                } else {
-                    actions--;
-                    updateUI();
-                    if (actions <= 0) setTimeout(showAdModal, 500);
-                }
+                if (!checkMatches()) setTimeout(() => swap(selected, cell), 250);
+                else { actions--; updateUI(); if (actions <= 0) setTimeout(() => document.getElementById('ad-modal').style.display='flex', 500); }
             }
-            selected.classList.remove('selected');
-            selected = null;
+            selected.classList.remove('selected'); selected = null;
         }
     }
 
     function swap(c1, c2) {
-        const t = c1.dataset.type; const h = c1.innerHTML;
+        const t = c1.dataset.type, h = c1.innerHTML;
         c1.dataset.type = c2.dataset.type; c1.innerHTML = c2.innerHTML;
         c2.dataset.type = t; c2.innerHTML = h;
     }
@@ -142,24 +175,18 @@
     function checkMatches() {
         let matched = new Set();
         for (let i = 0; i < 49; i++) {
-            let row = Math.floor(i/7), col = i%7;
-            if (col < 5 && cells[i].dataset.type == cells[i+1].dataset.type && cells[i].dataset.type == cells[i+2].dataset.type) {
-                matched.add(i); matched.add(i+1); matched.add(i+2);
-            }
-            if (row < 5 && cells[i].dataset.type == cells[i+7].dataset.type && cells[i].dataset.type == cells[i+14].dataset.type) {
-                matched.add(i); matched.add(i+7); matched.add(i+14);
-            }
+            let col = i%7, row = Math.floor(i/7);
+            if (col < 5 && cells[i].dataset.type == cells[i+1].dataset.type && cells[i].dataset.type == cells[i+2].dataset.type) { matched.add(i); matched.add(i+1); matched.add(i+2); }
+            if (row < 5 && cells[i].dataset.type == cells[i+7].dataset.type && cells[i].dataset.type == cells[i+14].dataset.type) { matched.add(i); matched.add(i+7); matched.add(i+14); }
         }
         if (matched.size > 0) {
             matched.forEach(idx => {
-                const type = cells[idx].dataset.type;
-                if (goals[type] > 0) goals[type]--;
+                if (goals[cells[idx].dataset.type] > 0) goals[cells[idx].dataset.type]--;
                 balance += 0.0005;
-                const newType = Math.floor(Math.random() * farmIcons.length);
-                cells[idx].dataset.type = newType;
-                cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
+                let newType = Math.floor(Math.random() * farmIcons.length);
+                cells[idx].dataset.type = newType; cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
             });
-            return true;
+            updateUI(); return true;
         }
         return false;
     }
@@ -168,21 +195,12 @@
         document.getElementById('act-ui').innerText = actions;
         document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
         document.getElementById('life-ui').innerText = `❤️ ${lives}`;
-        document.getElementById('g0').innerText = goals[0];
-        document.getElementById('g1').innerText = goals[1];
-        document.getElementById('g2').innerText = goals[2];
-    }
-
-    function showAdModal() {
-        document.getElementById('ad-modal').style.display = 'flex';
+        document.getElementById('g0').innerText = goals[0]; document.getElementById('g1').innerText = goals[1]; document.getElementById('g2').innerText = goals[2];
     }
 
     function watchAd() {
-        // RECOMPENSA: APENAS AÇÕES [cite: 2026-03-30]
         document.getElementById('ad-modal').style.display = 'none';
-        actions = 5;
-        updateUI();
-        tg.showPopup({ title: 'Sucesso!', message: 'Recebeste +5 ações pelo anúncio.' });
+        actions = 5; updateUI();
     }
 
     init();
