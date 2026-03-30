@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.81 - GRAVITY ENGINE</title>
+    <title>Ouro da Quinta v33.82 - CASCADE ENGINE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; }
@@ -20,8 +20,9 @@
         
         #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
         #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px; }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.2s; }
         .selected { outline: 3px solid var(--accent); transform: scale(1.1); z-index: 5; }
+        .match-anim { transform: scale(0); opacity: 0; transition: 0.3s; }
 
         #footer { background: #000; color: #fff; padding: 12px; text-align: center; font-size: 9px; font-weight: bold; }
     </style>
@@ -31,13 +32,13 @@
 <div id="game-header">
     <div id="stats-row">
         <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0027</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">10</span></div>
+        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0042</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">8</span></div>
     </div>
     <div id="mission-bar">
-        <div class="m-item">🥛 <span id="m1">0</span></div>
-        <div class="m-item">🥚 <span id="m2">0</span></div>
-        <div class="m-item">🍯 <span id="m3">0</span></div>
+        <div class="m-item">🥛 <span id="m1">5</span></div>
+        <div class="m-item">🥚 <span id="m2">5</span></div>
+        <div class="m-item">🍯 <span id="m3">5</span></div>
     </div>
 </div>
 
@@ -45,12 +46,12 @@
     <div id="grid"></div>
 </div>
 
-<div id="footer">ADMIN: 5401881400 | v33.81 | GRAVITY & MATCH SYSTEM</div>
+<div id="footer">ADMIN: 5401881400 | v33.82 | CASCADE & MATCH ENGINE</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
     let mission = { '🥛': 5, '🥚': 5, '🍯': 5 };
-    let balance = 0.0027, actions = 10;
+    let balance = 0.0042, actions = 8;
     let selectedCell = null;
     let gridArray = [];
 
@@ -68,60 +69,112 @@
             cell.onclick = () => handleCellClick(cell, i);
             gridEl.appendChild(cell);
         }
+        // Limpar matches iniciais sem cobrar [cite: 2026-03-30]
+        checkAndResolveMatches(true);
     }
 
     function handleCellClick(cell, index) {
         if (actions <= 0) return;
-
         if (!selectedCell) {
             selectedCell = { cell, index };
             cell.classList.add('selected');
         } else {
             if (isAdjacent(selectedCell.index, index)) {
-                swapCells(selectedCell.index, index);
-                actions--;
-                checkMatches();
+                executeSwap(selectedCell.index, index);
             }
             selectedCell.cell.classList.remove('selected');
             selectedCell = null;
-            updateUI();
         }
     }
 
-    function isAdjacent(idx1, idx2) {
-        const r1 = Math.floor(idx1 / 7), c1 = idx1 % 7;
-        const r2 = Math.floor(idx2 / 7), c2 = idx2 % 7;
-        return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+    function isAdjacent(i1, i2) {
+        return Math.abs(Math.floor(i1/7) - Math.floor(i2/7)) + Math.abs((i1%7) - (i2%7)) === 1;
     }
 
-    function swapCells(i1, i2) {
-        const cells = document.querySelectorAll('.cell');
+    async function executeSwap(i1, i2) {
+        swapData(i1, i2);
+        let matches = findMatches();
+        if (matches.length > 0) {
+            actions--;
+            await resolveMatches();
+        } else {
+            swapData(i1, i2); // Reverte se não houver match [cite: 2026-03-30]
+        }
+        updateUI();
+    }
+
+    function swapData(i1, i2) {
         const temp = gridArray[i1];
         gridArray[i1] = gridArray[i2];
         gridArray[i2] = temp;
-        cells[i1].innerText = gridArray[i1];
-        cells[i2].innerText = gridArray[i2];
+        renderGrid();
     }
 
-    function checkMatches() {
-        const cells = document.querySelectorAll('.cell');
-        let matchedIndices = new Set();
-
-        // Verificação horizontal e vertical simplificada
-        for (let i = 0; i < 49; i++) {
-            const icon = gridArray[i];
-            if (mission[icon] !== undefined && mission[icon] > 0) {
-                matchedIndices.add(i);
-                mission[icon] = Math.max(0, mission[icon] - 1);
-                balance += 0.0001;
+    function findMatches() {
+        let matchSet = new Set();
+        // Horizontal
+        for (let r = 0; r < 7; r++) {
+            for (let c = 0; c < 5; c++) {
+                let idx = r * 7 + c;
+                if (gridArray[idx] === gridArray[idx+1] && gridArray[idx] === gridArray[idx+2]) {
+                    matchSet.add(idx); matchSet.add(idx+1); matchSet.add(idx+2);
+                }
             }
         }
+        // Vertical
+        for (let c = 0; c < 7; c++) {
+            for (let r = 0; r < 5; r++) {
+                let idx = r * 7 + c;
+                if (gridArray[idx] === gridArray[idx+7] && gridArray[idx] === gridArray[idx+14]) {
+                    matchSet.add(idx); matchSet.add(idx+7); matchSet.add(idx+14);
+                }
+            }
+        }
+        return Array.from(matchSet);
+    }
 
-        matchedIndices.forEach(idx => {
-            gridArray[idx] = icons[Math.floor(Math.random() * icons.length)];
-            cells[idx].innerText = gridArray[idx];
-            cells[idx].style.transform = 'scale(1.2)';
-            setTimeout(() => cells[idx].style.transform = 'scale(1)', 200);
+    async function resolveMatches() {
+        let matches = findMatches();
+        if (matches.length === 0) return;
+
+        matches.forEach(idx => {
+            const icon = gridArray[idx];
+            if (mission[icon] > 0) {
+                mission[icon]--;
+                balance += 0.0001;
+            }
+            gridArray[idx] = null;
+        });
+
+        renderGrid();
+        await new Promise(r => setTimeout(r, 300));
+        applyGravity();
+        await resolveMatches(); // Recurso para matches em cadeia [cite: 2026-03-30]
+    }
+
+    function applyGravity() {
+        for (let c = 0; c < 7; c++) {
+            let emptySpaces = 0;
+            for (let r = 6; r >= 0; r--) {
+                let idx = r * 7 + c;
+                if (gridArray[idx] === null) {
+                    emptySpaces++;
+                } else if (emptySpaces > 0) {
+                    gridArray[idx + (emptySpaces * 7)] = gridArray[idx];
+                    gridArray[idx] = null;
+                }
+            }
+            for (let i = 0; i < emptySpaces; i++) {
+                gridArray[i * 7 + c] = icons[Math.floor(Math.random() * icons.length)];
+            }
+        }
+        renderGrid();
+    }
+
+    function renderGrid() {
+        const cells = document.querySelectorAll('.cell');
+        gridArray.forEach((icon, i) => {
+            cells[i].innerText = icon || "";
         });
     }
 
