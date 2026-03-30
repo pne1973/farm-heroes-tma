@@ -3,25 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.80 - DRAG & DROP</title>
+    <title>Ouro da Quinta v33.81 - GRAVITY ENGINE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; touch-action: none; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         #game-header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-        #stats-row { width: 95%; display: flex; justify-content: space-between; gap: 5px; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-v { font-size: 13px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 8px; text-transform: uppercase; color: #999; display: block; }
+        #stats-row { width: 95%; display: flex; justify-content: space-between; }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; flex: 1; text-align: center; margin: 0 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
+        .stat-l { font-size: 9px; text-transform: uppercase; color: #999; display: block; }
 
-        #mission-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; display: flex; gap: 15px; font-weight: 800; font-size: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin: 5px 0; }
+        #mission-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; display: flex; gap: 15px; font-weight: 800; font-size: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin: 10px 0; }
         
-        #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; padding: 10px; background: var(--brown); border-radius: 12px; position: relative; }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; position: relative; transition: transform 0.2s, top 0.3s; }
-        .dragging { opacity: 0.5; transform: scale(1.1); z-index: 10; }
+        #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; }
+        .selected { outline: 3px solid var(--accent); transform: scale(1.1); z-index: 5; }
 
         #footer { background: #000; color: #fff; padding: 12px; text-align: center; font-size: 9px; font-weight: bold; }
     </style>
@@ -31,13 +31,13 @@
 <div id="game-header">
     <div id="stats-row">
         <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0007</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">11</span></div>
+        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0027</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">10</span></div>
     </div>
     <div id="mission-bar">
-        <div class="m-item">🥛 <span id="m1">8</span></div>
-        <div class="m-item">🥚 <span id="m2">8</span></div>
-        <div class="m-item">🍯 <span id="m3">4</span></div>
+        <div class="m-item">🥛 <span id="m1">0</span></div>
+        <div class="m-item">🥚 <span id="m2">0</span></div>
+        <div class="m-item">🍯 <span id="m3">0</span></div>
     </div>
 </div>
 
@@ -45,60 +45,83 @@
     <div id="grid"></div>
 </div>
 
-<div id="footer">ADMIN: 5401881400 | v33.80 | DRAG & DROP ENGINE</div>
+<div id="footer">ADMIN: 5401881400 | v33.81 | GRAVITY & MATCH SYSTEM</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let mission = { '🥛': 8, '🥚': 8, '🍯': 4 };
-    let balance = 0.0007, actions = 11;
-    let draggedElement = null;
+    let mission = { '🥛': 5, '🥚': 5, '🍯': 5 };
+    let balance = 0.0027, actions = 10;
+    let selectedCell = null;
+    let gridArray = [];
 
-    function createGrid() {
+    function initGrid() {
         const gridEl = document.getElementById('grid');
         gridEl.innerHTML = '';
+        gridArray = [];
         for (let i = 0; i < 49; i++) {
+            let icon = icons[Math.floor(Math.random() * icons.length)];
+            gridArray.push(icon);
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.draggable = true;
-            cell.innerText = icons[Math.floor(Math.random() * icons.length)];
-            
-            // Eventos de Drag and Drop [cite: 2026-03-30]
-            cell.addEventListener('touchstart', (e) => { draggedElement = cell; cell.classList.add('dragging'); });
-            cell.addEventListener('touchend', (e) => {
-                cell.classList.remove('dragging');
-                const touch = e.changedTouches[0];
-                const target = document.elementFromPoint(touch.clientX, touch.clientY);
-                if (target && target.classList.contains('cell') && target !== cell) {
-                    swap(cell, target);
-                }
-            });
+            cell.innerText = icon;
+            cell.dataset.id = i;
+            cell.onclick = () => handleCellClick(cell, i);
             gridEl.appendChild(cell);
         }
     }
 
-    function swap(c1, c2) {
+    function handleCellClick(cell, index) {
         if (actions <= 0) return;
-        
-        const temp = c1.innerText;
-        c1.innerText = c2.innerText;
-        c2.innerText = temp;
-        
-        actions--;
-        checkMatches();
-        updateUI();
+
+        if (!selectedCell) {
+            selectedCell = { cell, index };
+            cell.classList.add('selected');
+        } else {
+            if (isAdjacent(selectedCell.index, index)) {
+                swapCells(selectedCell.index, index);
+                actions--;
+                checkMatches();
+            }
+            selectedCell.cell.classList.remove('selected');
+            selectedCell = null;
+            updateUI();
+        }
+    }
+
+    function isAdjacent(idx1, idx2) {
+        const r1 = Math.floor(idx1 / 7), c1 = idx1 % 7;
+        const r2 = Math.floor(idx2 / 7), c2 = idx2 % 7;
+        return (Math.abs(r1 - r2) + Math.abs(c1 - c2)) === 1;
+    }
+
+    function swapCells(i1, i2) {
+        const cells = document.querySelectorAll('.cell');
+        const temp = gridArray[i1];
+        gridArray[i1] = gridArray[i2];
+        gridArray[i2] = temp;
+        cells[i1].innerText = gridArray[i1];
+        cells[i2].innerText = gridArray[i2];
     }
 
     function checkMatches() {
-        // Lógica simplificada de match para teste de drag
         const cells = document.querySelectorAll('.cell');
-        cells.forEach(cell => {
-            const icon = cell.innerText;
-            if (mission[icon] > 0) {
-                // Simula a colheita no match [cite: 2026-03-30]
-                mission[icon]--;
+        let matchedIndices = new Set();
+
+        // Verificação horizontal e vertical simplificada
+        for (let i = 0; i < 49; i++) {
+            const icon = gridArray[i];
+            if (mission[icon] !== undefined && mission[icon] > 0) {
+                matchedIndices.add(i);
+                mission[icon] = Math.max(0, mission[icon] - 1);
                 balance += 0.0001;
-                cell.innerText = icons[Math.floor(Math.random() * icons.length)]; // Substitui por novo
             }
+        }
+
+        matchedIndices.forEach(idx => {
+            gridArray[idx] = icons[Math.floor(Math.random() * icons.length)];
+            cells[idx].innerText = gridArray[idx];
+            cells[idx].style.transform = 'scale(1.2)';
+            setTimeout(() => cells[idx].style.transform = 'scale(1)', 200);
         });
     }
 
@@ -110,7 +133,7 @@
         document.getElementById('act-ui').innerText = actions;
     }
 
-    createGrid();
+    initGrid();
     updateUI();
 </script>
 </body>
