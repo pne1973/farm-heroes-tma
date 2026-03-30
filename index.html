@@ -3,138 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v34.04 - PURE ECONOMY</title>
+    <title>Ouro da Quinta v34.05 - MASTER ADMIN</title>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --gray: #f4f4f4; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        #top-ad { background: #fff; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; border-bottom: 1px solid #ddd; }
-        #admin-trigger { position: fixed; top: 60px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 11px; }
+        #admin-trigger { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
 
-        #header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .stats-row { width: 100%; display: flex; justify-content: space-around; gap: 8px; }
-        .stat-card { background: var(--white); padding: 10px; border-radius: 15px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-v { font-size: 15px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
+        #game-ui { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: 0.3s; }
+        .grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; background: var(--brown); padding: 10px; border-radius: 15px; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
 
-        #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 18px; }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+        /* PAINEL ADMIN ULTRA DETALHADO [cite: 2026-03-22] */
+        #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; overflow-y: auto; padding: 20px; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
+        
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
+        .card h4 { margin: 0 0 10px 0; font-size: 11px; color: #888; text-transform: uppercase; }
+        .card b { font-size: 18px; color: var(--accent); }
 
-        /* MODAL ANÚNCIOS SEQUENCIAIS [cite: 2026-03-30] */
-        #ad-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
-        .ad-window { width: 300px; height: 250px; background: white; border: 5px solid #fbbc05; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .ad-btn { margin-top: 20px; padding: 12px 30px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; visibility: hidden; }
-
-        /* ADMIN SIMPLIFICADO [cite: 2026-03-22] */
-        #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; padding: 20px; overflow-y: auto; }
-        .admin-section { background: white; padding: 15px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .admin-table-container { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
+        th { text-align: left; padding: 10px; border-bottom: 2px solid #f0f0f0; color: #666; }
+        td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
+        
+        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .status-pending { background: #fff3e0; color: #ef6c00; }
+        .status-paid { background: #e8f5e9; color: #2e7d32; }
 
-        #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
+        .admin-actions { display: flex; gap: 10px; margin-top: 10px; }
+        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-red { background: var(--red); color: white; }
+        .btn-dark { background: #333; color: white; width: 100%; padding: 15px; font-size: 14px; }
     </style>
 </head>
 <body>
 
-<div id="top-ad">PUBLICIDADE GOOGLE</div>
-<button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
+<button id="admin-trigger" onclick="toggleAdmin()">PAINEL MASTER ⚙️</button>
 
-<div id="header">
-    <div class="stats-row">
-        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
+<div id="game-ui">
+    <div style="margin-bottom:20px; text-align:center;">
+        <span style="font-size:12px; color:#666;">SALDO ATUAL</span><br>
+        <b style="font-size:24px; color:var(--accent);" id="game-bal">€ 0.0000</b>
     </div>
-</div>
-
-<div id="grid-container"><div id="grid"></div></div>
-
-<div id="ad-overlay">
-    <div id="ad-count-txt" style="color:white; font-weight:bold; margin-bottom:10px;"></div>
-    <div class="ad-window">
-        <b>ANÚNCIO OBRIGATÓRIO</b><br><small>300x250</small>
-    </div>
-    <button id="ad-close-btn" class="ad-btn" onclick="processNextAd()">FECHAR ANÚNCIO</button>
+    <div class="grid" id="grid"></div>
 </div>
 
 <div id="admin-panel">
-    <h2 style="color:var(--accent);">PAINEL FINANCEIRO: 5401881400</h2>
-    
-    <div class="admin-section">
-        <h4>Resumo de Rede</h4>
-        <p>Jogadores Ativos: <b>1</b></p>
-        <p>Receita Estimada: <b style="color:green;" id="adm-rev">€ 0.0020</b></p>
+    <div class="admin-header">
+        <div>
+            <h2 style="margin:0;">COMANDO CENTRAL</h2>
+            <small>ID ADMIN: 5401881400</small>
+        </div>
+        <div style="text-align:right;">
+            <span class="status-badge status-paid">SERVIDOR ONLINE</span>
+        </div>
     </div>
 
-    <div class="admin-section">
-        <h4>Pagamentos PayPal Pendentes</h4>
+    <div class="admin-grid">
+        <div class="card">
+            <h4>Receita de Anúncios</h4>
+            <b id="adm-rev">€ 0.0020</b>
+            <div style="font-size:9px; margin-top:5px; color:#999;">CPM Médio: € 0.50</div>
+        </div>
+        <div class="card">
+            <h4>Utilizadores Ativos</h4>
+            <b>1 Jogador</b>
+            <div style="font-size:9px; margin-top:5px; color:#999;">Sessão: 04m 12s</div>
+        </div>
+        <div class="card">
+            <h4>Total em Carteiras</h4>
+            <b id="adm-total-wallets">€ 0.0000</b>
+        </div>
+        <div class="card">
+            <h4>Boosters em Jogo</h4>
+            <b>7 Unidades</b>
+        </div>
+    </div>
+
+    <div class="admin-table-container">
+        <h4>Fila de Pagamentos PayPal</h4>
         <table>
-            <thead><tr><th>ID Utilizador</th><th>Saldo</th><th>Ação</th></tr></thead>
-            <tbody>
-                <tr><td>#5401881400</td><td>€ 15.4200</td><td><button style="background:var(--blue); color:white; border:none; padding:5px; border-radius:3px;">PAGAR</button></td></tr>
+            <thead>
+                <tr><th>Utilizador</th><th>Data Pedido</th><th>Montante</th><th>Estado</th><th>Ação</th></tr>
+            </thead>
+            <tbody id="pay-table">
+                <tr>
+                    <td>#5401881400</td>
+                    <td>30/03/2026</td>
+                    <td><b>€ 15.4200</b></td>
+                    <td><span class="status-badge status-pending">PENDENTE</span></td>
+                    <td><button class="btn btn-blue">PAGAR</button></td>
+                </tr>
             </tbody>
         </table>
     </div>
 
-    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; font-weight:bold;">VOLTAR</button>
+    <div class="admin-table-container">
+        <h4>Editor de Recursos (Real-Time)</h4>
+        <div class="admin-actions">
+            <div style="flex:1;">
+                <label style="font-size:10px;">ADICIONAR SALDO (€)</label>
+                <input type="number" id="edit-bal" value="0.50" step="0.10" style="width:100%; padding:8px;">
+            </div>
+            <button class="btn btn-blue" style="align-self:flex-end;" onclick="addBal()">APLICAR</button>
+            <button class="btn btn-red" style="align-self:flex-end;" onclick="resetGame()">RESET TOTAL</button>
+        </div>
+    </div>
+
+    <button class="btn btn-dark" onclick="toggleAdmin()">FECHAR E VOLTAR AO JOGO</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v34.04 | EUR ONLY</div>
-
 <script>
+    let balance = 0, rev = 0.0020;
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let actions=20, balance=0, rev=0.0020, adsLeft=0, adsTotal=0, rewardType='';
 
     function init() {
         const g = document.getElementById('grid');
         g.innerHTML = '';
         for(let i=0; i<49; i++) {
-            let cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.innerText = icons[Math.floor(Math.random()*4)];
-            cell.onclick = () => {
-                if(actions > 0) { actions--; balance += 0.0001; updateUI(); } 
-                else { startAdFlow('actions', 3); } // 3 anúncios por +10 ações
-            };
-            g.appendChild(cell);
+            let c = document.createElement('div');
+            c.className = 'cell';
+            c.innerText = icons[Math.floor(Math.random()*4)];
+            c.onclick = () => { balance += 0.0005; updateUI(); };
+            g.appendChild(c);
         }
         updateUI();
     }
 
-    // FLUXO DE ANÚNCIOS SEQUENCIAIS [cite: 2026-03-30]
-    function startAdFlow(type, count) {
-        rewardType = type; adsLeft = count; adsTotal = count;
-        document.getElementById('ad-overlay').style.display = 'flex';
-        showSingleAd();
-    }
-
-    function showSingleAd() {
-        const btn = document.getElementById('ad-close-btn');
-        btn.style.visibility = 'hidden';
-        document.getElementById('ad-count-txt').innerText = `Anúncio ${(adsTotal-adsLeft)+1} de ${adsTotal}`;
-        setTimeout(() => { btn.style.visibility = 'visible'; }, 2000);
-    }
-
-    function processNextAd() {
-        adsLeft--; rev += 0.0005;
-        if(adsLeft > 0) { showSingleAd(); } 
-        else {
-            if(rewardType === 'actions') actions += 10;
-            document.getElementById('ad-overlay').style.display = 'none';
-        }
+    function addBal() {
+        let val = parseFloat(document.getElementById('edit-bal').value);
+        balance += val;
         updateUI();
+        alert("Saldo atualizado para o utilizador!");
+    }
+
+    function resetGame() {
+        if(confirm("Deseja apagar todos os dados de jogo?")) {
+            balance = 0; rev = 0; init();
+        }
     }
 
     function toggleAdmin() {
         const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        const ui = document.getElementById('game-ui');
+        if(p.style.display === 'block') {
+            p.style.display = 'none'; ui.style.opacity = '1';
+        } else {
+            p.style.display = 'block'; ui.style.opacity = '0.2';
+        }
     }
 
     function updateUI() {
-        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('act-ui').innerText = actions;
+        document.getElementById('game-bal').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('adm-total-wallets').innerText = `€ ${balance.toFixed(4)}`;
         document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
     }
 
