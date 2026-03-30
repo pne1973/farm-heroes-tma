@@ -178,6 +178,26 @@ h1 {
     max-width: 320px;
   }
 }
+  /* ============================
+   FORÇAR MODO MOBILE NO TELEGRAM
+   ============================ */
+
+body.telegram .app-shell {
+  grid-template-columns: 1fr !important;
+}
+
+body.telegram #admin-panel {
+  display: none !important;
+}
+
+body.telegram #game-panel {
+  width: 100% !important;
+}
+
+body.telegram .right-panel {
+  width: 100% !important;
+}
+
 </style>
 </head>
 <body>
@@ -285,6 +305,10 @@ h1 {
 </div>
 
 <script>
+  // Detectar Telegram WebApp
+if (navigator.userAgent.includes("Telegram")) {
+  document.body.classList.add("telegram");
+}
 /* ============================
    ESTADO GLOBAL
    ============================ */
@@ -603,20 +627,24 @@ function updateUI() {
    NAVEGAÇÃO JOGO / ADMIN
    ============================ */
 function showGame() {
-  document.getElementById("game-panel").style.display = "block";
-  document.getElementById("admin-panel").style.display = "block";
-
-  // em mobile, mostramos só jogo por defeito?
-  if (window.innerWidth <= 700) {
+  if (document.body.classList.contains("telegram")) {
+    document.getElementById("game-panel").style.display = "block";
     document.getElementById("admin-panel").style.display = "none";
+  } else {
+    document.getElementById("game-panel").style.display = "block";
+    document.getElementById("admin-panel").style.display = "block";
   }
 }
 
 function showAdmin() {
-  document.getElementById("game-panel").style.display = "none";
-  document.getElementById("admin-panel").style.display = "block";
+  if (document.body.classList.contains("telegram")) {
+    document.getElementById("game-panel").style.display = "none";
+    document.getElementById("admin-panel").style.display = "block";
+  } else {
+    document.getElementById("game-panel").style.display = "block";
+    document.getElementById("admin-panel").style.display = "block";
+  }
 }
-
 /* ============================
    START
    ============================ */
