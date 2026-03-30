@@ -18,19 +18,27 @@ body {
   overflow-x: hidden;
 }
 
-/* Escala inteligente baseada na largura */
+/* Escala inteligente baseada na largura (DESKTOP) */
 :root {
-  --scale: calc(100vw / 430); /* 430px = largura base */
+  --scale: calc(100vw / 430);
 }
 
 * {
   transform-origin: top left;
 }
 
-/* Wrapper que escala tudo */
+/* Wrapper que escala tudo (DESKTOP) */
 .scaled-ui {
   transform: scale(var(--scale));
   width: calc(100vw / var(--scale));
+}
+
+/* ============================
+   DESATIVAR SCALE NO TELEGRAM (MOBILE)
+   ============================ */
+body.telegram .scaled-ui {
+  transform: none !important;
+  width: 100% !important;
 }
 
 /* ============================
@@ -184,6 +192,7 @@ body.telegram #game-panel {
 }
 </style>
 </head>
+
 <body>
 
 <div class="scaled-ui">
@@ -275,6 +284,7 @@ body.telegram #game-panel {
 
 </div>
 </div>
+
 <script>
 /* Detectar Telegram */
 if (navigator.userAgent.includes("Telegram")) {
@@ -366,6 +376,7 @@ function verAnuncioVidas(qtd) {
     alert("Anúncio concluído! +" + qtd + " vidas.");
   }, 1500);
 }
+
 /* ============================
    GRID / MATCH-3
    ============================ */
