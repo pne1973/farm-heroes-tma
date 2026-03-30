@@ -3,185 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.98 - ICON FIX</title>
+    <title>Ouro da Quinta v34.00 - PRODUÇÃO</title>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         #top-ad { background: #fff; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; border-bottom: 1px solid #ddd; }
-        #admin-trigger { position: fixed; top: 60px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+        #admin-trigger { position: fixed; top: 60px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; font-size: 11px; }
 
         #header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .stats-row { width: 100%; display: flex; justify-content: space-around; gap: 8px; padding: 0 10px; }
-        .stat-card { background: var(--white); padding: 10px; border-radius: 15px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .stat-v { font-size: 15px; font-weight: 800; color: var(--accent); }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 15px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
         .stat-l { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
+        
+        #mission-bar { background: var(--white); padding: 8px 20px; border-radius: 30px; display: flex; gap: 15px; font-weight: 800; border: 1px solid #eee; margin-top: 5px; }
 
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 18px; }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 18px; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
         .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.1s; }
         .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
         
-        .powers { display: flex; justify-content: center; gap: 10px; padding: 15px; }
-        .p-btn { background: white; padding: 8px 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .powers { display: flex; justify-content: center; gap: 10px; padding: 10px; }
+        .p-btn { background: white; padding: 8px 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
         .p-count { background: var(--red); color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
 
-        #ad-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
-        .ad-window { width: 300px; height: 250px; background: white; border: 6px solid #fbbc05; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        #ad-counter-label { margin-bottom: 15px; color: white; font-weight: bold; font-size: 16px; }
-        .ad-close-btn { margin-top: 25px; padding: 12px 30px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; visibility: hidden; }
+        #ad-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.96); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
+        .ad-window { width: 300px; height: 250px; background: white; border: 6px solid #fbbc05; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 20px; }
+        #ad-label { margin-bottom: 15px; color: white; font-weight: bold; font-size: 16px; }
+        .ad-btn { margin-top: 25px; padding: 12px 35px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; visibility: hidden; }
 
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; }
-        #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; overflow-y: auto; }
+        .admin-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
+        #footer { background: #000; color: #fff; padding: 8px; text-align: center; font-size: 9px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-<div id="top-ad">BANNER v33.98 | FIXING ICONS</div>
+<div id="top-ad">PUBLICIDADE: GOOGLE ADSENSE SLOT 1</div>
 <button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
 
 <div id="header">
     <div class="stats-row">
-        <div class="stat-card"><span class="stat-l">Fase</span><span class="stat-v">TESTE</span></div>
-        <div class="stat-card"><span class="stat-l">Vidas</span><span class="stat-v" id="life-ui">❤️</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">1</span></div>
+        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
+        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span class="stat-l">Vidas</span><span class="stat-v" id="life-ui">❤️ ❤️ ❤️</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
     </div>
-    <div style="background:white; padding:5px 25px; border-radius:20px; margin-top:5px; font-weight:bold; border:1px solid #ddd;">
-        🥛<span id="m1">5</span> 🥚<span id="m2">5</span> 🍯<span id="m3">5</span>
+    <div id="mission-bar">
+        <span>🥛 <span id="m1">5</span></span> <span>🥚 <span id="m2">5</span></span> <span>🍯 <span id="m3">5</span></span>
     </div>
 </div>
 
 <div id="grid-container"><div id="grid"></div></div>
 
 <div class="powers">
-    <button class="p-btn" onclick="useBooster('bomb')">💣 <span class="p-count" id="b-bomb">1</span></button>
-    <button class="p-btn" onclick="useBooster('tractor')">🚜 <span class="p-count" id="b-tractor">1</span></button>
-    <button class="p-btn" onclick="useBooster('shovel')">⛏️ <span class="p-count" id="b-shovel">1</span></button>
+    <button class="p-btn" onclick="useBooster('bomb')">💣 <span class="p-count" id="b-bomb">2</span></button>
+    <button class="p-btn" onclick="useBooster('tractor')">🚜 <span class="p-count" id="b-tractor">2</span></button>
+    <button class="p-btn" onclick="useBooster('shovel')">⛏️ <span class="p-count" id="b-shovel">3</span></button>
 </div>
 
 <div id="ad-overlay">
-    <div id="ad-counter-label">A carregar anúncio...</div>
+    <div id="ad-label">A carregar anúncio...</div>
     <div class="ad-window">
-        <b style="font-size: 20px; color: #333;">PUBLICIDADE</b>
-        <span style="font-size: 14px; color: #666; margin-top: 10px;">Format: 300x250</span>
+        <b style="font-size: 18px;">ANÚNCIO PATROCINADO</b><br>
+        <small>300 x 250 pixels</small><br><br>
+        <p style="font-size: 12px; color: #666;">A visualização completa deste anúncio garante a tua recompensa.</p>
     </div>
-    <button id="btn-next-ad" class="ad-close-btn" onclick="processAdQueue()">CONTINUAR</button>
+    <button id="ad-btn" class="ad-btn" onclick="nextInQueue()">FECHAR ANÚNCIO</button>
 </div>
 
 <div id="admin-panel">
-    <h2>MODO ADMIN: 5401881400</h2>
-    <p>Receita: <span style="color:green" id="adm-rev">€ 0.0020</span></p>
-    <button onclick="toggleAdmin()" style="padding:10px; width:100%;">FECHAR</button>
+    <h2>PAINEL: 5401881400</h2>
+    <div class="admin-card">
+        <h3>Receita Estimada</h3>
+        <p style="color:green; font-size: 20px; font-weight: bold;" id="adm-rev">€ 0.0020</p>
+    </div>
+    <div class="admin-card">
+        <p>Próxima Vida Grátis em: <b id="timer">--:--:--</b></p>
+    </div>
+    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#444; color:white; border:none; border-radius:10px;">VOLTAR AO JOGO</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.98 | ICON RENDER RECOVERY</div>
+<div id="footer">OURO DA QUINTA v34.00 | PRODUCTION READY</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let actions=1, lives=1, boosters={bomb:1, tractor:1, shovel:1}, mission={'🥛':5,'🥚':5,'🍯':5};
-    let gridArray=[], rev=0.0020, selectedIdx=null;
-    let adsRemaining=0, totalAdsInSequence=0, currentRewardType=null;
+    let level=1, balance=0, actions=20, lives=3, selectedIdx=null;
+    let mission={'🥛':5,'🥚':5,'🍯':5}, boosters={bomb:2, tractor:2, shovel:3};
+    let gridArray=[], rev=0.0020, nextLifeTime=Date.now()+10800000;
+    let adsRem=0, adsTotal=0, pendingReward=null;
 
     function initGrid() {
-        const gridEl = document.getElementById('grid');
-        gridEl.innerHTML = ''; 
-        gridArray = [];
-        for (let i = 0; i < 49; i++) {
-            const icon = icons[Math.floor(Math.random() * icons.length)];
+        const gridEl=document.getElementById('grid');
+        gridEl.innerHTML=''; gridArray=[];
+        for(let i=0;i<49;i++){
+            let icon=icons[Math.floor(Math.random()*icons.length)];
             gridArray.push(icon);
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.innerText = icon; // Injeção direta do ícone
-            cell.onclick = () => handleCell(i);
+            let cell=document.createElement('div');
+            cell.className='cell'; cell.innerText=icon;
+            cell.onclick=()=>handleCell(i);
             gridEl.appendChild(cell);
         }
-        updateUI();
+        resolveMatches(true);
     }
 
     function handleCell(i) {
-        if (lives <= 0) { startAdSequence('life', 1); return; }
-        if (actions <= 0) { triggerAdOptions(); return; }
-        
-        const cells = document.querySelectorAll('.cell');
-        if (selectedIdx === null) {
-            selectedIdx = i;
-            cells[i].classList.add('selected');
+        if(lives<=0){ startAds('life', 1); return; }
+        if(actions<=0){ showActionMenu(); return; }
+        if(selectedIdx===null){
+            selectedIdx=i; document.querySelectorAll('.cell')[i].classList.add('selected');
         } else {
-            cells[selectedIdx].classList.remove('selected');
-            // Simula movimento para teste
-            actions--; 
-            updateUI();
-            selectedIdx = null;
-            if (actions <= 0) setTimeout(triggerAdOptions, 400);
+            if(isAdj(selectedIdx, i)) swap(selectedIdx, i);
+            document.querySelectorAll('.cell')[selectedIdx].classList.remove('selected');
+            selectedIdx=null;
         }
     }
 
-    function triggerAdOptions() {
-        let opt = prompt("Escolha o bónus:\n1: +5 Ações (2 Ads)\n2: +10 Ações (3 Ads)\n3: +15 Ações (4 Ads)");
-        if (opt=="1") startAdSequence('act5', 2);
-        else if (opt=="2") startAdSequence('act10', 3);
-        else if (opt=="3") startAdSequence('act15', 4);
-        else { lives--; actions=1; updateUI(); if(lives<=0) startAdSequence('life', 1); }
+    function isAdj(i1,i2){ return Math.abs(Math.floor(i1/7)-Math.floor(i2/7)) + Math.abs((i1%7)-(i2%7)) === 1; }
+
+    async function swap(i1,i2){
+        let t=gridArray[i1]; gridArray[i1]=gridArray[i2]; gridArray[i2]=t;
+        if(find().length>0){ actions--; await resolveMatches(); checkLevel(); }
+        else { t=gridArray[i1]; gridArray[i1]=gridArray[i2]; gridArray[i2]=t; }
+        updateUI();
+        if(actions<=0 && !missionComplete()) showActionMenu();
     }
 
-    function startAdSequence(type, count) {
-        currentRewardType = type;
-        adsRemaining = count;
-        totalAdsInSequence = count;
-        document.getElementById('ad-overlay').style.display = 'flex';
-        showNextAd();
-    }
-
-    function showNextAd() {
-        const btn = document.getElementById('btn-next-ad');
-        btn.style.visibility = 'hidden';
-        document.getElementById('ad-counter-label').innerText = `Anúncio ${(totalAdsInSequence - adsRemaining) + 1} de ${totalAdsInSequence}`;
-        setTimeout(() => {
-            btn.style.visibility = 'visible';
-            btn.innerText = adsRemaining > 1 ? "PRÓXIMO" : "RECEBER RECOMPENSA";
-        }, 2000);
-    }
-
-    function processAdQueue() {
-        adsRemaining--;
-        rev += 0.0005;
-        if (adsRemaining > 0) showNextAd();
-        else {
-            applyReward();
-            document.getElementById('ad-overlay').style.display = 'none';
+    function find(){
+        let s=new Set();
+        for(let r=0;r<7;r++) for(let c=0;c<5;c++){
+            let i=r*7+c; if(gridArray[i]===gridArray[i+1]&&gridArray[i]===gridArray[i+2]){ s.add(i); s.add(i+1); s.add(i+2); }
         }
+        for(let c=0;c<7;c++) for(let r=0;r<5;r++){
+            let i=r*7+c; if(gridArray[i]===gridArray[i+7]&&gridArray[i]===gridArray[i+14]){ s.add(i); s.add(i+7); s.add(i+14); }
+        }
+        return Array.from(s);
+    }
+
+    async function resolveMatches(init=false){
+        let m=find(); if(m.length===0) return;
+        m.forEach(i=>{ if(!init && mission[gridArray[i]]>0){ mission[gridArray[i]]--; balance+=0.0001; } gridArray[i]=null; });
+        render(); await new Promise(r=>setTimeout(r,250));
+        gravity(); await resolveMatches(init);
+    }
+
+    function gravity(){
+        for(let c=0;c<7;c++){
+            let e=0; for(let r=6;r>=0;r--){
+                let i=r*7+c; if(!gridArray[i]) e++; else if(e>0){ gridArray[i+e*7]=gridArray[i]; gridArray[i]=null; }
+            }
+            for(let i=0;i<e;i++) gridArray[i*7+c]=icons[Math.floor(Math.random()*4)];
+        }
+        render();
+    }
+
+    function startAds(type, count){
+        pendingReward=type; adsRem=count; adsTotal=count;
+        document.getElementById('ad-overlay').style.display='flex';
+        showAd();
+    }
+
+    function showAd(){
+        const btn=document.getElementById('ad-btn'); btn.style.visibility='hidden';
+        document.getElementById('ad-label').innerText=`Anúncio ${(adsTotal-adsRem)+1} de ${adsTotal}`;
+        setTimeout(()=>{ btn.style.visibility='visible'; btn.innerText=adsRem>1?"PRÓXIMO":"RECOLHER"; }, 2500);
+    }
+
+    function nextInQueue(){
+        adsRem--; rev+=0.0005;
+        if(adsRem>0) showAd();
+        else { applyReward(); document.getElementById('ad-overlay').style.display='none'; }
         updateUI();
     }
 
-    function applyReward() {
-        if (currentRewardType === 'life') { lives = 1; actions = 1; }
-        if (currentRewardType.startsWith('act')) actions = parseInt(currentRewardType.replace('act',''));
-        if (currentRewardType === 'boosters') { boosters.bomb++; boosters.tractor++; boosters.shovel++; }
-        currentRewardType = null;
+    function applyReward(){
+        if(pendingReward==='life') lives=1;
+        if(pendingReward==='act5') actions=5;
+        if(pendingReward==='act10') actions=10;
+        if(pendingReward==='act15') actions=15;
+        if(pendingReward==='boosters'){ boosters.bomb+=1; boosters.tractor+=1; boosters.shovel+=1; }
     }
 
-    function useBooster(type) {
-        if (boosters[type] > 0) { boosters[type]--; updateUI(); alert("Booster Usado!"); }
-        else startAdSequence('boosters', 2);
+    function showActionMenu(){
+        let o=prompt("Ações esgotadas! 1:+5(2 Ads) 2:+10(3 Ads) 3:+15(4 Ads) 4:Perder Vida");
+        if(o=="1") startAds('act5',2); else if(o=="2") startAds('act10',3); else if(o=="3") startAds('act15',4);
+        else { lives--; actions=20; if(lives<=0) startAds('life',1); }
+        updateUI();
     }
 
-    function updateUI() {
-        document.getElementById('act-ui').innerText = actions;
-        document.getElementById('life-ui').innerText = lives > 0 ? "❤️" : "💔";
-        document.getElementById('b-bomb').innerText = boosters.bomb;
-        document.getElementById('b-tractor').innerText = boosters.tractor;
-        document.getElementById('b-shovel').innerText = boosters.shovel;
-        document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
+    function useBooster(t){ if(boosters[t]>0){ boosters[t]--; alert("Ativado!"); updateUI(); } else startAds('boosters',2); }
+    function missionComplete(){ return mission['🥛']<=0 && mission['🥚']<=0 && mission['🍯']<=0; }
+    function checkLevel(){ if(missionComplete()){ level++; actions=20; mission={'🥛':5+level,'🥚':5+level,'🍯':5+level}; alert("Nível "+level); initGrid(); } }
+    function render(){ const c=document.querySelectorAll('.cell'); gridArray.forEach((n,i)=>c[i].innerText=n||""); }
+    function toggleAdmin(){ const p=document.getElementById('admin-panel'); p.style.display=p.style.display==='block'?'none':'block'; }
+
+    setInterval(()=>{
+        let d=nextLifeTime-Date.now();
+        if(d<=0){ if(lives<3) lives++; nextLifeTime=Date.now()+10800000; updateUI(); }
+        let h=Math.floor(d/3600000), m=Math.floor((d%3600000)/60000), s=Math.floor((d%60000)/1000);
+        document.getElementById('timer').innerText=`${h}h ${m}m ${s}s`;
+    }, 1000);
+
+    function updateUI(){
+        document.getElementById('lvl-ui').innerText=level; document.getElementById('bal-ui').innerText=`€ ${balance.toFixed(4)}`;
+        document.getElementById('act-ui').innerText=actions; document.getElementById('life-ui').innerText="❤️ ".repeat(lives);
+        document.getElementById('m1').innerText=mission['🥛']; document.getElementById('m2').innerText=mission['🥚']; document.getElementById('m3').innerText=mission['🍯'];
+        document.getElementById('b-bomb').innerText=boosters.bomb; document.getElementById('b-tractor').innerText=boosters.tractor; document.getElementById('b-shovel').innerText=boosters.shovel;
+        document.getElementById('adm-rev').innerText=`€ ${rev.toFixed(4)}`;
     }
 
-    function toggleAdmin() {
-        const p = document.getElementById('admin-panel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
-    }
-
-    // Inicialização forçada
-    window.onload = initGrid;
+    window.onload=initGrid;
 </script>
 </body>
 </html>
