@@ -3,167 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v34.05 - MASTER ADMIN</title>
+    <title>Ouro da Quinta v34.06 - AUDIT ADMIN</title>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --gray: #f4f4f4; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        #admin-trigger { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        #admin-trigger { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        #game-ui { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 1; transition: 0.3s; }
-        .grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; background: var(--brown); padding: 10px; border-radius: 15px; }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; }
-
-        /* PAINEL ADMIN ULTRA DETALHADO [cite: 2026-03-22] */
+        /* COMANDO CENTRAL AUDIT [cite: 2026-03-22] */
         #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; overflow-y: auto; padding: 20px; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #ddd; padding-bottom: 10px; }
-        
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.08); }
-        .card h4 { margin: 0 0 10px 0; font-size: 11px; color: #888; text-transform: uppercase; }
-        .card b { font-size: 18px; color: var(--accent); }
+        .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+        .card h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
+        .card b { font-size: 16px; display: block; margin-top: 5px; }
 
-        .admin-table-container { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { text-align: left; padding: 10px; border-bottom: 2px solid #f0f0f0; color: #666; }
-        td { padding: 10px; border-bottom: 1px solid #f0f0f0; }
-        
-        .status-badge { padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
-        .status-pending { background: #fff3e0; color: #ef6c00; }
-        .status-paid { background: #e8f5e9; color: #2e7d32; }
+        .section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
+        .section-title { font-weight: 800; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; }
 
-        .admin-actions { display: flex; gap: 10px; margin-top: 10px; }
-        .btn { border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 11px; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-red { background: var(--red); color: white; }
-        .btn-dark { background: #333; color: white; width: 100%; padding: 15px; font-size: 14px; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        th { text-align: left; padding: 8px; color: #666; background: #fafafa; }
+        td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
+
+        .log-entry { font-size: 10px; padding: 5px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; }
+        .log-earn { color: var(--accent); font-weight: bold; }
+        .log-spend { color: var(--red); font-weight: bold; }
+
+        .btn-close { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-<button id="admin-trigger" onclick="toggleAdmin()">PAINEL MASTER ⚙️</button>
+<button id="admin-trigger" onclick="toggleAdmin()">COMANDO CENTRAL ⚙️</button>
 
-<div id="game-ui">
-    <div style="margin-bottom:20px; text-align:center;">
-        <span style="font-size:12px; color:#666;">SALDO ATUAL</span><br>
-        <b style="font-size:24px; color:var(--accent);" id="game-bal">€ 0.0000</b>
+<div id="game-preview" style="padding: 60px 20px; text-align: center;">
+    <div class="card" style="display:inline-block; padding: 20px;">
+        <small>AÇÕES RESTANTES</small><br><b id="g-act" style="font-size: 30px;">20</b>
     </div>
-    <div class="grid" id="grid"></div>
+    <p onclick="simulateAction()" style="cursor:pointer; background:var(--brown); color:white; padding:15px; border-radius:10px; margin-top:20px;">SIMULAR MATCH-3 (GANHO €0.0005)</p>
 </div>
 
 <div id="admin-panel">
-    <div class="admin-header">
-        <div>
-            <h2 style="margin:0;">COMANDO CENTRAL</h2>
-            <small>ID ADMIN: 5401881400</small>
+    <div class="section-title" style="font-size: 18px;">
+        <span>AUDITORIA DE SISTEMA</span>
+        <span style="color:var(--accent); font-size: 10px;">SERVIDOR: ONLINE</span>
+    </div>
+
+    <div class="card-row">
+        <div class="card"><h4>Receita Total (Ads)</h4><b id="total-rev">€ 0.0020</b></div>
+        <div class="card"><h4>Passivo (Saldos Users)</h4><b id="total-wallets">€ 0.0000</b></div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">DETALHE POR UTILIZADOR [ID: 5401881400]</div>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+            <div style="flex:1;">Ganhos: <span class="log-earn" id="u-earn">€ 0.0000</span></div>
+            <div style="flex:1;">Gastos: <span class="log-spend" id="u-spend">€ 0.0000</span></div>
+            <div style="flex:1;">Saldo: <b id="u-bal">€ 0.0000</b></div>
         </div>
-        <div style="text-align:right;">
-            <span class="status-badge status-paid">SERVIDOR ONLINE</span>
+        
+        <div id="user-logs" style="max-height: 150px; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 8px;">
+            <div class="log-entry"><span>Sessão iniciada</span> <span>${new Date().toLocaleTimeString()}</span></div>
         </div>
     </div>
 
-    <div class="admin-grid">
-        <div class="card">
-            <h4>Receita de Anúncios</h4>
-            <b id="adm-rev">€ 0.0020</b>
-            <div style="font-size:9px; margin-top:5px; color:#999;">CPM Médio: € 0.50</div>
-        </div>
-        <div class="card">
-            <h4>Utilizadores Ativos</h4>
-            <b>1 Jogador</b>
-            <div style="font-size:9px; margin-top:5px; color:#999;">Sessão: 04m 12s</div>
-        </div>
-        <div class="card">
-            <h4>Total em Carteiras</h4>
-            <b id="adm-total-wallets">€ 0.0000</b>
-        </div>
-        <div class="card">
-            <h4>Boosters em Jogo</h4>
-            <b>7 Unidades</b>
-        </div>
-    </div>
-
-    <div class="admin-table-container">
-        <h4>Fila de Pagamentos PayPal</h4>
+    <div class="section">
+        <div class="section-title">FILA PAYPAL & AÇÕES RÁPIDAS</div>
         <table>
-            <thead>
-                <tr><th>Utilizador</th><th>Data Pedido</th><th>Montante</th><th>Estado</th><th>Ação</th></tr>
-            </thead>
-            <tbody id="pay-table">
+            <thead><tr><th>Utilizador</th><th>Montante</th><th>Ação</th></tr></thead>
+            <tbody>
                 <tr>
                     <td>#5401881400</td>
-                    <td>30/03/2026</td>
-                    <td><b>€ 15.4200</b></td>
-                    <td><span class="status-badge status-pending">PENDENTE</span></td>
-                    <td><button class="btn btn-blue">PAGAR</button></td>
+                    <td><b id="tab-bal">€ 0.0000</b></td>
+                    <td><button onclick="alert('Pagamento Processado')" style="background:var(--blue); color:white; border:none; padding:4px 8px; border-radius:4px;">PAGAR</button></td>
                 </tr>
             </tbody>
         </table>
     </div>
 
-    <div class="admin-table-container">
-        <h4>Editor de Recursos (Real-Time)</h4>
-        <div class="admin-actions">
-            <div style="flex:1;">
-                <label style="font-size:10px;">ADICIONAR SALDO (€)</label>
-                <input type="number" id="edit-bal" value="0.50" step="0.10" style="width:100%; padding:8px;">
-            </div>
-            <button class="btn btn-blue" style="align-self:flex-end;" onclick="addBal()">APLICAR</button>
-            <button class="btn btn-red" style="align-self:flex-end;" onclick="resetGame()">RESET TOTAL</button>
-        </div>
-    </div>
-
-    <button class="btn btn-dark" onclick="toggleAdmin()">FECHAR E VOLTAR AO JOGO</button>
+    <button class="btn-close" onclick="toggleAdmin()">VOLTAR AO JOGO</button>
 </div>
 
 <script>
-    let balance = 0, rev = 0.0020;
-    const icons = ['🥛', '🥚', '🍯', '🚜'];
+    let balance = 0, totalEarned = 0, totalSpent = 0, adsRev = 0.0020, actions = 20;
 
-    function init() {
-        const g = document.getElementById('grid');
-        g.innerHTML = '';
-        for(let i=0; i<49; i++) {
-            let c = document.createElement('div');
-            c.className = 'cell';
-            c.innerText = icons[Math.floor(Math.random()*4)];
-            c.onclick = () => { balance += 0.0005; updateUI(); };
-            g.appendChild(c);
-        }
+    function simulateAction() {
+        if(actions <= 0) return;
+        actions--;
+        let gain = 0.0005;
+        balance += gain;
+        totalEarned += gain;
+        addLog(`Match-3 realizado (+€${gain.toFixed(4)})`, 'earn');
         updateUI();
     }
 
-    function addBal() {
-        let val = parseFloat(document.getElementById('edit-bal').value);
-        balance += val;
-        updateUI();
-        alert("Saldo atualizado para o utilizador!");
-    }
-
-    function resetGame() {
-        if(confirm("Deseja apagar todos os dados de jogo?")) {
-            balance = 0; rev = 0; init();
-        }
+    function addLog(msg, type) {
+        const logBox = document.getElementById('user-logs');
+        const entry = document.createElement('div');
+        entry.className = 'log-entry';
+        const colorClass = type === 'earn' ? 'log-earn' : (type === 'spend' ? 'log-spend' : '');
+        entry.innerHTML = `<span class="${colorClass}">${msg}</span> <span>${new Date().toLocaleTimeString()}</span>`;
+        logBox.prepend(entry);
     }
 
     function toggleAdmin() {
         const p = document.getElementById('admin-panel');
-        const ui = document.getElementById('game-ui');
-        if(p.style.display === 'block') {
-            p.style.display = 'none'; ui.style.opacity = '1';
-        } else {
-            p.style.display = 'block'; ui.style.opacity = '0.2';
-        }
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
     function updateUI() {
-        document.getElementById('game-bal').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('adm-total-wallets').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
+        document.getElementById('g-act').innerText = actions;
+        document.getElementById('u-bal').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('u-earn').innerText = `€ ${totalEarned.toFixed(4)}`;
+        document.getElementById('u-spend').innerText = `€ ${totalSpent.toFixed(4)}`;
+        document.getElementById('total-wallets').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('tab-bal').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('total-rev').innerText = `€ ${adsRev.toFixed(4)}`;
     }
 
-    window.onload = init;
+    window.onload = updateUI;
 </script>
 </body>
 </html>
