@@ -3,141 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v34.07 - MASTER AUDIT</title>
+    <title>Ouro da Quinta v35.00 - MULTI-USER AUDIT</title>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --gray: #f4f4f4; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
-        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --gray: #f4f4f4; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-        /* HEADER E TRIGGER */
-        #admin-trigger { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
+        /* HEADER DINÂMICO */
+        #header { background: white; padding: 15px; display: flex; justify-content: space-around; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .stat-box { text-align: center; flex: 1; }
+        .stat-box small { font-size: 10px; color: #999; text-transform: uppercase; }
+        .stat-box b { display: block; color: var(--accent); font-size: 14px; }
 
-        /* PAINEL DE AUDITORIA ULTRA DETALHADO */
-        #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; overflow-y: auto; padding: 15px; color: #333; }
-        .section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .section-h { font-weight: 800; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; color: var(--brown); display: flex; justify-content: space-between; }
+        /* GRELHA DE JOGO */
+        #game-container { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; background: var(--brown); padding: 10px; border-radius: 15px; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+
+        /* BOOSTERS */
+        .booster-bar { display: flex; gap: 15px; margin-top: 20px; }
+        .booster { background: white; padding: 8px 15px; border-radius: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); font-size: 14px; display: flex; align-items: center; gap: 5px; }
+
+        /* LOGIN / ADMIN OVERLAY */
+        #overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal { background: white; width: 100%; max-width: 400px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow-y: auto; }
         
-        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-        .mini-card { background: #fafafa; padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent); }
-        .mini-card small { font-size: 9px; color: #999; display: block; text-transform: uppercase; }
-        .mini-card b { font-size: 14px; }
+        /* ADMIN TABLES */
+        table { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 10px; }
+        th { text-align: left; padding: 8px; background: #f8f8f8; color: #666; }
+        td { padding: 8px; border-bottom: 1px solid #eee; }
+        .log-earn { color: var(--accent); font-weight: bold; }
+        .log-rev { color: var(--blue); font-weight: bold; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 10px; }
-        th { text-align: left; padding: 6px; background: #eee; color: #666; }
-        td { padding: 6px; border-bottom: 1px solid #f0f0f0; }
-
-        .tag { padding: 2px 5px; border-radius: 4px; font-size: 9px; font-weight: bold; }
-        .tag-ad { background: #e3f2fd; color: #1565c0; }
-        .tag-game { background: #e8f5e9; color: #2e7d32; }
-        
-        .val-plus { color: var(--accent); font-weight: bold; }
-        .val-rev { color: var(--blue); font-weight: bold; }
-
-        .btn-back { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
+        .btn { border: none; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%; margin-top: 10px; }
+        .btn-green { background: var(--accent); color: white; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-red { background: var(--red); color: white; }
+        .btn-admin { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; width: auto; padding: 8px 15px; border-radius: 50px; font-size: 11px; }
     </style>
 </head>
 <body>
 
-<button id="admin-trigger" onclick="toggleAdmin()">AUDITORIA MASTER ⚙️</button>
+<button class="btn-admin" onclick="toggleAdmin()">AUDITORIA MASTER ⚙️</button>
 
-<div id="game-view" style="padding: 80px 20px; text-align: center;">
-    <div style="background:white; padding:20px; border-radius:20px; display:inline-block; border:2px solid var(--brown);">
-        <p>Ações: <b id="ui-act">20</b> | Saldo: <b id="ui-bal">€ 0.0000</b></p>
-        <button onclick="doAction('Grelha Match-3', 0.0005, 0)" style="padding:10px; background:var(--accent); color:white; border:none; border-radius:8px;">JOGAR (+€0.0005)</button>
-        <button onclick="doAction('Ad Sequencial 1/3', 0, 0.0010)" style="padding:10px; background:var(--blue); color:white; border:none; border-radius:8px;">VER AD (+€0.0010 Rev)</button>
+<div id="overlay">
+    <div class="modal" id="login-modal">
+        <h2 style="color:var(--accent); margin-bottom:15px;">Entrar no Jogo</h2>
+        <p style="font-size: 12px; color: #666; margin-bottom: 20px;">Insira um ID ou gere um aleatório para testar múltiplos utilizadores.</p>
+        <input type="number" id="user-id-input" placeholder="Ex: 5401881400" style="width:100%; padding:15px; border:1px solid #ddd; border-radius:10px; margin-bottom:10px;">
+        <button class="btn btn-green" onclick="startSession()">GERAR ID ALEATÓRIO E ENTRAR</button>
+        <button class="btn" style="background:#eee;" onclick="startSession('5401881400')">ENTRAR COMO ADMIN</button>
+    </div>
+
+    <div class="modal" id="admin-modal" style="display:none; max-width: 600px;">
+        <h3 style="border-bottom:2px solid var(--accent); padding-bottom:10px;">COMANDO CENTRAL: 5401881400</h3>
+        
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin:15px 0;">
+            <div style="background:#f9f9f9; padding:10px; border-radius:10px;">
+                <small>RECEITA GLOBAL ADS</small><br><b id="adm-total-rev">€ 0.0000</b>
+            </div>
+            <div style="background:#f9f9f9; padding:10px; border-radius:10px;">
+                <small>PASSIVO (SALDOS)</small><br><b id="adm-total-pass">€ 0.0000</b>
+            </div>
+        </div>
+
+        <h4 style="font-size:12px; margin-top:20px;">DETALHE DE TRANSAÇÕES (AUDITORIA)</h4>
+        <div style="max-height: 200px; overflow-y: auto; border: 1px solid #eee; border-radius: 10px;">
+            <table>
+                <thead><tr><th>User ID</th><th>Ação</th><th>Ganho User</th><th>Rev. Admin</th></tr></thead>
+                <tbody id="audit-body"></tbody>
+            </table>
+        </div>
+        
+        <button class="btn btn-red" onclick="resetAll()">RESET TOTAL DE SISTEMA</button>
+        <button class="btn" style="background:#333; color:white;" onclick="toggleAdmin()">FECHAR PAINEL</button>
     </div>
 </div>
 
-<div id="admin-panel">
-    <div class="section-h" style="font-size: 16px;">
-        <span>AUDITORIA DE SISTEMA v34.07</span>
-        <span style="color:var(--accent)">ONLINE</span>
-    </div>
+<div id="header">
+    <div class="stat-box"><small>Nível</small><b id="ui-lvl">1</b></div>
+    <div class="stat-box"><small>Saldo</small><b id="ui-bal">€ 0.0000</b></div>
+    <div class="stat-box"><small>Ações</small><b id="ui-act">20</b></div>
+</div>
 
-    <div class="grid-stats">
-        <div class="mini-card"><small>RECEITA TOTAL ADS</small><b id="adm-total-rev">€ 0.0020</b></div>
-        <div class="mini-card"><small>PASSIVO TOTAL (USERS)</small><b id="adm-total-pass">€ 0.0000</b></div>
+<div id="game-container">
+    <div class="grid" id="grid"></div>
+    
+    <div class="booster-bar">
+        <div class="booster" onclick="useBooster('Bomba')">💣 <span id="b-1">1</span></div>
+        <div class="booster" onclick="useBooster('Trator')">🚜 <span id="b-2">1</span></div>
+        <div class="booster" onclick="useBooster('Picareta')">⛏️ <span id="b-3">1</span></div>
     </div>
-
-    <div class="section">
-        <div class="section-h">RESUMO UTILIZADOR: 5401881400</div>
-        <div class="grid-stats">
-            <div class="mini-card"><small>GANHOS TOTAIS</small><b id="u-total-earn" class="val-plus">€ 0.0000</b></div>
-            <div class="mini-card"><small>ADS VISTOS</small><b id="u-total-ads">0</b></div>
-            <div class="mini-card"><small>REV. GERADA (EST.)</small><b id="u-total-rev" class="val-rev">€ 0.0000</b></div>
-            <div class="mini-card"><small>SALDO ATUAL</small><b id="u-current-bal">€ 0.0000</b></div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-h">HISTÓRICO DE RECOMPENSAS & ANÚNCIOS</div>
-        <div style="max-height: 250px; overflow-y: auto;">
-            <table>
-                <thead>
-                    <tr><th>Hora</th><th>Ação/Fonte</th><th>Tipo</th><th>Ganho User</th><th>Rev. Admin</th></tr>
-                </thead>
-                <tbody id="audit-logs">
-                    </tbody>
-            </table>
-        </div>
-    </div>
-
-    <button class="btn-back" onclick="toggleAdmin()">VOLTAR AO JOGO</button>
+    
+    <button class="btn btn-blue" style="margin-top:20px; width:200px;" onclick="viewAd()">VER ANÚNCIO (+€0.0010 Rev)</button>
 </div>
 
 <script>
-    let balance = 0, totalRev = 0.0020, userRev = 0, userEarned = 0, adsSeen = 0, actions = 20;
+    let currentUser = "", balance = 0, actions = 20, globalRev = 0, globalPass = 0;
+    const icons = ['🥛', '🥚', '🍯', '🚜'];
+    let logs = [];
 
-    function doAction(source, userGain, adminGain) {
-        if(userGain > 0) {
-            balance += userGain;
-            userEarned += userGain;
-        }
-        if(adminGain > 0) {
-            totalRev += adminGain;
-            userRev += adminGain;
-            adsSeen++;
-        }
-        
-        addAuditEntry(source, userGain, adminGain);
+    function startSession(fixedId) {
+        currentUser = fixedId || Math.floor(Math.random() * 9000000000) + 1000000000;
+        document.getElementById('overlay').style.display = 'none';
+        initGrid();
         updateUI();
     }
 
-    function addAuditEntry(source, uGain, aGain) {
-        const tbody = document.getElementById('audit-logs');
-        const row = document.createElement('tr');
-        const type = aGain > 0 ? '<span class="tag tag-ad">AD</span>' : '<span class="tag tag-game">JOGO</span>';
-        
-        row.innerHTML = `
-            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</td>
-            <td>${source}</td>
-            <td>${type}</td>
-            <td class="val-plus">+€${uGain.toFixed(4)}</td>
-            <td class="val-rev">€${aGain.toFixed(4)}</td>
-        `;
-        tbody.prepend(row);
+    function initGrid() {
+        const g = document.getElementById('grid');
+        g.innerHTML = '';
+        for(let i=0; i<49; i++) {
+            let cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.innerText = icons[Math.floor(Math.random()*4)];
+            cell.onclick = () => playCell();
+            g.appendChild(cell);
+        }
+    }
+
+    function playCell() {
+        if(actions <= 0) { alert("Sem ações! Veja um anúncio."); return; }
+        actions--;
+        const gain = 0.0005;
+        balance += gain;
+        globalPass += gain;
+        recordAudit("Match-3 Grelha", gain, 0);
+        updateUI();
+    }
+
+    function viewAd() {
+        const rev = 0.0010;
+        globalRev += rev;
+        actions += 5;
+        recordAudit("Anúncio Sequencial", 0, rev);
+        alert("Anúncio visto! +5 ações ganhas.");
+        updateUI();
+    }
+
+    function useBooster(name) {
+        recordAudit(`Usou Booster ${name}`, 0, 0);
+        alert(`Utilizou ${name}!`);
+    }
+
+    function recordAudit(action, uGain, aRev) {
+        logs.unshift({ id: currentUser, act: action, ug: uGain, ar: aRev });
+        renderAudit();
+    }
+
+    function renderAudit() {
+        const tbody = document.getElementById('audit-body');
+        tbody.innerHTML = logs.map(l => `
+            <tr>
+                <td>#${l.id.toString().slice(-4)}</td>
+                <td>${l.act}</td>
+                <td class="log-earn">+€${l.ug.toFixed(4)}</td>
+                <td class="log-rev">€${l.ar.toFixed(4)}</td>
+            </tr>
+        `).join('');
+        document.getElementById('adm-total-rev').innerText = `€ ${globalRev.toFixed(4)}`;
+        document.getElementById('adm-total-pass').innerText = `€ ${globalPass.toFixed(4)}`;
     }
 
     function toggleAdmin() {
-        const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        const modal = document.getElementById('admin-modal');
+        const overlay = document.getElementById('overlay');
+        if(modal.style.display === 'none') {
+            overlay.style.display = 'flex';
+            modal.style.display = 'block';
+            document.getElementById('login-modal').style.display = 'none';
+        } else {
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+        }
+    }
+
+    function resetAll() {
+        if(confirm("Deseja apagar todos os dados de auditoria e saldos globais?")) {
+            balance = 0; actions = 20; globalRev = 0; globalPass = 0; logs = [];
+            updateUI(); renderAudit(); toggleAdmin();
+        }
     }
 
     function updateUI() {
-        // UI Jogo
-        document.getElementById('ui-act').innerText = actions;
         document.getElementById('ui-bal').innerText = `€ ${balance.toFixed(4)}`;
-        
-        // UI Admin
-        document.getElementById('adm-total-rev').innerText = `€ ${totalRev.toFixed(4)}`;
-        document.getElementById('adm-total-pass').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('u-total-earn').innerText = `€ ${userEarned.toFixed(4)}`;
-        document.getElementById('u-total-ads').innerText = adsSeen;
-        document.getElementById('u-total-rev').innerText = `€ ${userRev.toFixed(4)}`;
-        document.getElementById('u-current-bal').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('ui-act').innerText = actions;
     }
-
-    window.onload = updateUI;
 </script>
 </body>
 </html>
