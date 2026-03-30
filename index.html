@@ -19,58 +19,62 @@ body {
 }
 
 /* ============================
-   LAYOUT BASE
+   GAME SCREEN (compacto agressivo)
 ============================ */
-.app-shell {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 20px;
-  padding: 15px;
+#game-screen {
+  padding: 0 8px;
+  padding-top: 0; /* colado ao topo */
 }
 
-body.telegram .app-shell {
-  grid-template-columns: 1fr !important;
-}
-
-/* ============================
-   INFO BOXES
-============================ */
 .info-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 
 .info-box {
   background: #15151d;
-  padding: 10px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
   border: 1px solid #262636;
-  font-size: 13px;
+  font-size: 12px;
   flex: 1;
-  min-width: 140px;
+  min-width: 120px;
+}
+
+.ad-banner {
+  width: 100%;
+  height: 36px;
+  background: #222;
+  border: 1px solid #444;
+  margin: 6px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
 }
 
 /* ============================
-   GRID RESPONSIVO
+   GRID RESPONSIVO (máximo)
 ============================ */
 .grid {
   width: 100%;
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 4px;
-  margin-top: 15px;
+  gap: 3px;
+  margin-top: 6px;
 }
 
 .cell {
   width: 100%;
   aspect-ratio: 1 / 1;
   background: #1c1c26;
-  border-radius: 6px;
+  border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28px;
+  font-size: 26px;
   cursor: pointer;
   transition: 0.1s;
 }
@@ -82,32 +86,25 @@ body.telegram .app-shell {
 }
 
 /* ============================
-   ADMIN PANEL
+   ADMIN SCREEN (separado)
 ============================ */
-#admin-panel {
-  background: #15151d;
+#admin-screen {
+  display: none;
   padding: 15px;
-  border-radius: 10px;
+  background: #15151d;
+  min-height: 100vh;
+}
+
+#admin-screen h2 {
+  margin-top: 0;
+}
+
+.admin-box {
+  background: #1c1c26;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #262636;
-}
-
-body.telegram #admin-panel {
-  display: none !important;
-}
-
-/* ============================
-   BANNER
-============================ */
-.ad-banner {
-  width: 100%;
-  max-width: 320px;
-  height: 50px;
-  background: #222;
-  border: 1px solid #444;
-  margin: 10px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-bottom: 10px;
 }
 
 /* ============================
@@ -129,97 +126,93 @@ body.telegram #admin-panel {
   background: #222;
   color: #fff;
   border: 1px solid #555;
-  padding: 8px 18px;
+  padding: 6px 14px;
   border-radius: 8px;
-  font-size: 15px;
+  font-size: 14px;
 }
 </style>
 </head>
 
 <body>
 
-<div class="app-shell">
+<!-- ============================
+     GAME SCREEN
+============================ -->
+<div id="game-screen">
 
-  <!-- GAME PANEL -->
-  <div id="game-panel">
-    <h1>FARM MATCH REWARDS</h1>
-
-    <div class="info-row">
-      <div class="info-box">
-        <strong>Saldo:</strong>
-        <span id="saldo">0.0000 €</span><br>
-        <small>Mínimo para levantar: 5,00 €</small>
-      </div>
-
-      <div class="info-box">
-        <strong>Ações restantes:</strong>
-        <span id="acoesRestantes">20</span><br>
-        <small>1 jogada = 1 ação</small>
-      </div>
-
-      <div class="info-box">
-        <strong>Vidas:</strong>
-        <span id="vidasRestantes">5</span><br>
-        <small>Sem vidas? Ver anúncio.</small>
-      </div>
-
-      <div class="info-box">
-        <strong>Matches:</strong>
-        <span id="matchesCount">0</span><br>
-        <small>0.0000005 € por match</small>
-      </div>
+  <div class="info-row">
+    <div class="info-box">
+      <strong>Saldo:</strong>
+      <span id="saldo">0.0000 €</span><br>
+      <small>Mínimo: 5,00 €</small>
     </div>
 
-    <div class="ad-banner">Espaço Publicitário 320×50</div>
-
-    <div class="info-row">
-      <div class="info-box">
-        <strong>Ações extra</strong><br>
-        <button onclick="verAnuncioAcoes(5)">Ver anúncio (+5 ações)</button>
-      </div>
-
-      <div class="info-box">
-        <strong>Vidas extra</strong><br>
-        <button onclick="verAnuncioVidas(3)">Ver anúncio (+3 vidas)</button>
-      </div>
-
-      <div class="info-box">
-        <strong>Login diário</strong><br>
-        <span id="loginStatus">Disponível</span><br>
-        <button onclick="recolherLoginDiario()">Recolher</button>
-      </div>
+    <div class="info-box">
+      <strong>Ações:</strong>
+      <span id="acoesRestantes">20</span><br>
+      <small>1 jogada = 1 ação</small>
     </div>
 
-    <div class="grid" id="gameGrid"></div>
+    <div class="info-box">
+      <strong>Vidas:</strong>
+      <span id="vidasRestantes">5</span><br>
+      <small>Sem vidas? Ver anúncio.</small>
+    </div>
+
+    <div class="info-box">
+      <strong>Matches:</strong>
+      <span id="matchesCount">0</span><br>
+      <small>0.0000005 € por match</small>
+    </div>
   </div>
 
-  <!-- ADMIN PANEL -->
-  <div id="admin-panel">
-    <h2>Painel Admin</h2>
-    <p>Economia · Utilizadores · Estatísticas</p>
+  <div class="ad-banner">Espaço Publicitário 320×36</div>
 
-    <p>
-      Receita Estimada: <span id="adminReceita">0.0000 €</span><br>
-      Saldo Emitido: <span id="adminSaldoEmitido">0.0000 €</span><br>
-      Matches totais: <span id="adminMatchesTotais">0</span><br>
-      Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
-      Anúncios vistos: <span id="adminAnunciosVistos">0</span>
-    </p>
+  <div class="info-row">
+    <div class="info-box">
+      <strong>Ações extra</strong><br>
+      <button onclick="verAnuncioAcoes(5)">Ver anúncio (+5)</button>
+    </div>
+
+    <div class="info-box">
+      <strong>Vidas extra</strong><br>
+      <button onclick="verAnuncioVidas(3)">Ver anúncio (+3)</button>
+    </div>
+
+    <div class="info-box">
+      <strong>Login diário</strong><br>
+      <span id="loginStatus">Disponível</span><br>
+      <button onclick="recolherLoginDiario()">Recolher</button>
+    </div>
   </div>
 
+  <div class="grid" id="gameGrid"></div>
 </div>
 
+<!-- ============================
+     ADMIN SCREEN
+============================ -->
+<div id="admin-screen">
+  <h2>Painel Admin</h2>
+
+  <div class="admin-box">
+    Receita Estimada: <span id="adminReceita">0.0000 €</span><br>
+    Saldo Emitido: <span id="adminSaldoEmitido">0.0000 €</span><br>
+    Matches totais: <span id="adminMatchesTotais">0</span><br>
+    Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
+    Anúncios vistos: <span id="adminAnunciosVistos">0</span>
+  </div>
+</div>
+
+<!-- ============================
+     BOTTOM NAV
+============================ -->
 <div class="bottom-nav">
   <button onclick="showGame()">Jogo</button>
   <button onclick="showAdmin()">Admin</button>
 </div>
 
 <script>
-/* Detectar Telegram */
-if (navigator.userAgent.includes("Telegram")) {
-  document.body.classList.add("telegram");
-}
-
 /* ============================
    ESTADO GLOBAL
 ============================ */
@@ -253,10 +246,8 @@ const loginStatusEl = document.getElementById("loginStatus");
 const adminSaldoEmitidoEl = document.getElementById("adminSaldoEmitido");
 const adminMatchesTotaisEl = document.getElementById("adminMatchesTotais");
 const adminAcoesJogadasEl = document.getElementById("adminAcoesJogadas");
-const adminValorMatchesEl = document.getElementById("adminValorMatches");
 const adminReceitaEl = document.getElementById("adminReceita");
 const adminAnunciosVistosEl = document.getElementById("adminAnunciosVistos");
-const adminValorLoginEl = document.getElementById("adminValorLogin");
 
 /* ============================
    LOGIN DIÁRIO
@@ -482,28 +473,23 @@ function updateUI() {
   adminSaldoEmitidoEl.textContent = saldo.toFixed(4) + " €";
   adminMatchesTotaisEl.textContent = matchesCount;
   adminAcoesJogadasEl.textContent = acoesJogadas;
-  adminValorMatchesEl.textContent = saldo.toFixed(4) + " €";
   adminAnunciosVistosEl.textContent = anunciosVistos;
-  adminValorLoginEl.textContent = valorLoginAcumulado.toFixed(4) + " €";
 
   const receita = (acoesJogadas / 50) * 0.001;
   adminReceitaEl.textContent = receita.toFixed(4) + " €";
 }
 
 /* ============================
-   NAVEGAÇÃO
+   TROCA DE ECRÃS
 ============================ */
 function showGame() {
-  document.getElementById("game-panel").style.display = "block";
-  if (!document.body.classList.contains("telegram")) {
-    document.getElementById("admin-panel").style.display = "block";
-  }
+  document.getElementById("game-screen").style.display = "block";
+  document.getElementById("admin-screen").style.display = "none";
 }
 
 function showAdmin() {
-  if (!document.body.classList.contains("telegram")) {
-    document.getElementById("admin-panel").style.display = "block";
-  }
+  document.getElementById("game-screen").style.display = "none";
+  document.getElementById("admin-screen").style.display = "block";
 }
 
 /* ============================
