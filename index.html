@@ -3,104 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.73 - PER-USER LEDGER</title>
+    <title>Ouro da Quinta v33.74 - FULL SYSTEM TEST</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --black: #1a1a1a; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
-        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --black: #1a1a1a; --brown: #8d6e63; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* UI JOGO */
-        #app-shell { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: space-between; padding: 10px 0 45px 0; }
-        .ad-banner { width: 320px; height: 50px; background: #e0e0e0; border: 1px dashed #999; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #777; }
+        /* HEADER & STATS */
+        #game-header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .ad-slot { width: 320px; height: 50px; background: rgba(0,0,0,0.05); border: 1px dashed #ccc; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; }
         
-        #stats { width: 92%; display: flex; justify-content: space-between; gap: 10px; }
-        .card { background: var(--white); padding: 10px; border-radius: 15px; flex: 1; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-        .val { font-size: 15px; font-weight: 800; color: var(--accent); display: block; }
-        .lbl { font-size: 9px; text-transform: uppercase; color: #888; font-weight: 700; }
+        #stats-grid { width: 92%; display: flex; justify-content: space-between; gap: 8px; }
+        .stat-card { background: var(--white); padding: 10px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+        .stat-val { font-size: 14px; font-weight: 800; color: var(--accent); display: block; }
+        .stat-lbl { font-size: 8px; text-transform: uppercase; color: #999; font-weight: 700; }
 
-        #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 4px; padding: 12px; background: #8d6e63; border-radius: 12px; }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+        /* GRID SYSTEM */
+        #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
+        #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; transition: transform 0.1s; }
+        .cell:active { transform: scale(0.9); }
+        .selected { border: 3px solid var(--accent); background: #b9f6ca; }
 
-        /* PAINEL ADMIN DETALHADO [cite: 2026-03-22, 2026-03-30] */
-        #admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 9999; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .close-btn { background: var(--red); color: #fff; border: none; padding: 12px 20px; border-radius: 10px; font-weight: 800; }
+        /* CONTROLS */
+        #controls { padding: 15px; display: flex; justify-content: center; gap: 10px; }
+        .btn-tool { background: var(--white); border: 1px solid #ddd; padding: 8px 15px; border-radius: 12px; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .badge { background: var(--red); color: white; padding: 2px 6px; border-radius: 10px; font-size: 9px; }
 
-        .user-report { background: #f9f9f9; border-radius: 15px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
-        .user-id { font-size: 12px; font-weight: 800; color: #333; margin-bottom: 10px; display: block; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        /* ADMIN & MODALS */
+        #admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 10000; display: none; flex-direction: column; padding: 20px; overflow-y: auto; }
+        .report-card { background: #f8f9fa; border-radius: 15px; padding: 20px; border: 1px solid #eee; margin-top: 10px; }
+        #footer-admin { background: var(--black); color: #fff; padding: 12px; text-align: center; font-size: 9px; cursor: pointer; }
         
-        .ledger-row { display: flex; justify-content: space-between; margin: 5px 0; font-size: 12px; }
-        .gain-txt { color: var(--accent); font-weight: 700; }
-        .loss-txt { color: var(--red); font-weight: 700; }
-        .profit-box { margin-top: 10px; padding-top: 10px; border-top: 1px dashed #ccc; display: flex; justify-content: space-between; font-weight: 800; }
-
-        #footer-bar { position: fixed; bottom: 0; width: 100%; background: var(--black); color: #fff; padding: 12px; text-align: center; font-size: 10px; cursor: pointer; }
+        #modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; padding: 20px; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 100%; max-width: 320px; }
     </style>
 </head>
 <body>
 
-<div id="app-shell">
-    <div class="ad-banner">BANNER TOPO (€ 0.0010)</div>
-
-    <div id="stats">
-        <div class="card"><span class="lbl">Utilizador</span><span class="val" id="uid-display">#540188...</span></div>
-        <div class="card"><span class="lbl">Ações</span><span class="val" id="act-ui">1</span></div>
-        <div class="card"><span class="lbl">Saldo</span><span class="val" id="bal-ui">€ 0.0000</span></div>
-    </div>
-
-    <div id="grid"></div>
-
-    <div class="ad-banner">BANNER FUNDO (€ 0.0010)</div>
-
-    <div id="footer-bar" onclick="showAdmin()">
-        ADMIN: 5401881400 | v33.73 | VER CONTABILIDADE POR UTILIZADOR
+<div id="game-header">
+    <div class="ad-slot">BANNER EXEMPLO (TOP) - € 0.0010</div>
+    <div id="stats-grid">
+        <div class="stat-card"><span class="stat-lbl">Vidas</span><span class="stat-val" id="life-ui">❤️ 1</span></div>
+        <div class="stat-card"><span class="stat-lbl">Saldo</span><span class="stat-val" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span class="stat-lbl">Ações</span><span class="stat-val" id="act-ui">20</span></div>
     </div>
 </div>
 
+<div id="grid-container">
+    <div id="grid"></div>
+</div>
+
+<div id="controls">
+    <div class="btn-tool">💣 BOMBA <span class="badge">2</span></div>
+    <div class="btn-tool">🚜 TRATOR <span class="badge">2</span></div>
+    <div class="btn-tool">⛏️ PÁ <span class="badge">3</span></div>
+</div>
+
+<div class="ad-slot" style="margin: 0 auto 10px auto;">BANNER EXEMPLO (BOTTOM) - € 0.0010</div>
+
+<div id="footer-admin" onclick="toggleAdmin()">
+    ADMIN: 5401881400 | v33.74 | TODAS AS FUNÇÕES ATIVAS
+</div>
+
 <div id="admin-panel">
-    <div class="admin-header">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
         <h2 style="margin:0">Contabilidade Social</h2>
-        <button class="close-btn" onclick="hideAdmin()">FECHAR</button>
+        <button onclick="toggleAdmin()" style="background:var(--red); color:white; border:none; padding:10px 20px; border-radius:10px; font-weight:800">FECHAR</button>
     </div>
 
-    <div id="user-ledger-list">
-        <div class="user-report">
-            <span class="user-id">UTILIZADOR: @id_5401881400 (ATUAL)</span>
-            <div class="ledger-row">
-                <span>Receita (2 Banners Home):</span>
-                <span class="gain-txt">+ € 0.0020</span>
-            </div>
-            <div class="ledger-row">
-                <span>Receita (Ads de Recompensa):</span>
-                <span class="gain-txt" id="adm-reward-gain">+ € 0.0000</span>
-            </div>
-            <div class="ledger-row">
-                <span>Custo Operacional (Matches):</span>
-                <span class="loss-txt" id="adm-match-loss">- € 0.0000</span>
-            </div>
-            <div class="profit-box">
-                <span>LUCRO LÍQUIDO DO UTILIZADOR:</span>
-                <span id="adm-total-profit">€ 0.0020</span>
-            </div>
+    <div class="report-card">
+        <div style="font-size:11px; font-weight:800; border-bottom:1px solid #ddd; padding-bottom:8px; margin-bottom:12px;">UTILIZADOR: @id_5401881400 (TESTE ATUAL)</div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+            <span>Receita (2 Banners Home):</span>
+            <span style="color:var(--accent); font-weight:800;">+ € 0.0020</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:8px; font-size:13px;">
+            <span>Receita (Rewards Ads):</span>
+            <span style="color:var(--accent); font-weight:800;" id="adm-reward">+ € 0.0000</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; margin-bottom:12px; font-size:13px;">
+            <span>Custo Operacional (Matches):</span>
+            <span style="color:var(--red); font-weight:800;" id="adm-costs">- € 0.0000</span>
+        </div>
+        <div style="padding-top:10px; border-top:1px dashed #ccc; display:flex; justify-content:space-between; font-weight:800; font-size:15px;">
+            <span>LUCRO LÍQUIDO:</span>
+            <span id="adm-profit">€ 0.0020</span>
         </div>
     </div>
+    
+    <div style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+        <button onclick="resetTest()" style="background:#333; color:white; padding:15px; border:none; border-radius:10px; font-weight:800;">REINICIAR TESTE ECONOMIA</button>
+        <button onclick="addActions(50)" style="background:var(--accent); color:white; padding:15px; border:none; border-radius:10px; font-weight:800;">ADICIONAR +50 AÇÕES</button>
+    </div>
+</div>
 
-    <div style="background:#eee; padding:15px; border-radius:10px; font-size:11px; color:#666">
-        <b>Nota de Auditoria:</b> Os ganhos são fixos por visualização (CPM 1€) e os custos são calculados por interação direta com a DB de matches [cite: 2026-03-30].
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h3 style="margin-top:0">Fim de Jogo!</h3>
+        <p style="font-size:13px; color:#666">Estás sem ações. Queres ver um anúncio para continuar a ganhar saldo?</p>
+        <div style="width:100%; height:150px; background:#f0f0f0; margin-bottom:20px; border-radius:10px; display:flex; align-items:center; justify-content:center; color:#aaa; font-size:10px;">AD VIDEO 300x250</div>
+        <button onclick="rewardUser()" style="background:var(--accent); color:white; border:none; width:100%; padding:15px; border-radius:12px; font-weight:800;">🎥 VER ANÚNCIO (+5 AÇÕES)</button>
     </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    const icons = ['🐮', '🦊', '🐝', '🐊'];
+    const assets = ['🐱', '🐮', '🐊', '📊', '🎵'];
     
-    // Motor Financeiro [cite: 2026-03-30]
-    let currentSessionGains = 0.0020; // Entrada automática
-    let rewardAdsViewed = 0;
+    // Ledger Variables [cite: 2026-03-30]
+    let actions = 20;
+    let balance = 0.0000;
     let matchCosts = 0.0000;
-    let userBalance = 0.0000;
-    let actions = 5;
+    let rewardGains = 0.0000;
+    let selected = null;
 
     function init() {
         tg.ready();
@@ -109,51 +126,61 @@
         for (let i = 0; i < 49; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
-            const type = Math.floor(Math.random() * icons.length);
-            cell.innerText = icons[type];
-            cell.onclick = () => processAction();
+            const type = Math.floor(Math.random() * assets.length);
+            cell.innerText = assets[type];
+            cell.dataset.idx = i;
+            cell.onclick = () => handleCellClick(cell);
             grid.appendChild(cell);
         }
         updateUI();
     }
 
-    function processAction() {
-        if (actions <= 0) {
-            simulateRewardAd();
-            return;
+    function handleCellClick(cell) {
+        if (actions <= 0) return;
+        
+        if (!selected) {
+            selected = cell;
+            cell.classList.add('selected');
+        } else {
+            // Simulação de Match e Custo [cite: 2026-03-30]
+            matchCosts += 0.0005; 
+            balance += 0.0001; 
+            actions--;
+            selected.classList.remove('selected');
+            selected = null;
+            updateUI();
+            
+            if (actions <= 0) document.getElementById('modal-overlay').style.display = 'flex';
         }
-        // Cada match tem um custo operacional [cite: 2026-03-30]
-        matchCosts += 0.0005;
-        userBalance += 0.0002; // Fração que vai para o utilizador
-        actions--;
+    }
+
+    function rewardUser() {
+        rewardGains += 0.0010; // Receita de Ad de Recompensa [cite: 2026-03-30]
+        actions = 5;
+        document.getElementById('modal-overlay').style.display = 'none';
         updateUI();
     }
 
-    function simulateRewardAd() {
-        if (confirm("Ações esgotadas. Ver anúncio para ganhar +5?")) {
-            rewardAdsViewed++;
-            currentSessionGains += 0.0010; // Receita por anúncio de recompensa [cite: 2026-03-30]
-            actions = 5;
-            updateUI();
-        }
-    }
-
     function updateUI() {
-        document.getElementById('bal-ui').innerText = `€ ${userBalance.toFixed(4)}`;
         document.getElementById('act-ui').innerText = actions;
+        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
         
-        // Atualiza Relatório Admin Detalhado [cite: 2026-03-22]
-        document.getElementById('adm-reward-gain').innerText = `+ € ${(rewardAdsViewed * 0.0010).toFixed(4)}`;
-        document.getElementById('adm-match-loss').innerText = `- € ${matchCosts.toFixed(4)}`;
-        const totalProfit = (0.0020 + (rewardAdsViewed * 0.0010)) - matchCosts;
-        document.getElementById('adm-total-profit').innerText = `€ ${totalProfit.toFixed(4)}`;
-        
-        // Alerta de Prejuízo
-        document.getElementById('adm-total-profit').style.color = totalProfit < 0 ? 'var(--red)' : 'var(--accent)';
+        // Update Admin Ledger [cite: 2026-03-22, 2026-03-30]
+        document.getElementById('adm-reward').innerText = `+ € ${rewardGains.toFixed(4)}`;
+        document.getElementById('adm-costs').innerText = `- € ${matchCosts.toFixed(4)}`;
+        const profit = (0.0020 + rewardGains) - matchCosts;
+        const profitEl = document.getElementById('adm-profit');
+        profitEl.innerText = `€ ${profit.toFixed(4)}`;
+        profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--accent)';
     }
 
-    function showAdmin() { document.getElementById('admin-panel').style.display = 'flex'; }
-    function hideAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+    function toggleAdmin() {
+        const p = document.getElementById('admin-panel');
+        p.style.display = p.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function addActions(n) { actions += n; updateUI(); }
+    function resetTest() { location.reload(); }
 
     init();
 </script>
