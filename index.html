@@ -7,8 +7,8 @@
 
 <style>
 /* ============================
-   RESET & BASE
-   ============================ */
+   RESET
+============================ */
 body {
   margin: 0;
   padding: 0;
@@ -18,76 +18,89 @@ body {
   overflow-x: hidden;
 }
 
-/* Escala inteligente baseada na largura (DESKTOP) */
-:root {
-  --scale: calc(100vw / 430);
-}
-
-* {
-  transform-origin: top left;
-}
-
-/* Wrapper que escala tudo (DESKTOP) */
-.scaled-ui {
-  transform: scale(var(--scale));
-  width: calc(100vw / var(--scale));
-}
-
 /* ============================
-   DESATIVAR SCALE NO TELEGRAM (MOBILE)
-   ============================ */
-body.telegram .scaled-ui {
-  transform: none !important;
-  width: 100% !important;
-}
-
-/* ============================
-   LAYOUT
-   ============================ */
+   LAYOUT BASE
+============================ */
 .app-shell {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr 340px;
   gap: 20px;
-  padding: 20px;
-  padding-bottom: 90px;
+  padding: 15px;
 }
 
-#game-panel, #admin-panel {
-  width: 100%;
-}
-
-h1 {
-  margin: 0 0 10px 0;
-  font-size: 22px;
+body.telegram .app-shell {
+  grid-template-columns: 1fr !important;
 }
 
 /* ============================
    INFO BOXES
-   ============================ */
+============================ */
 .info-row {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 10px;
 }
 
 .info-box {
   background: #15151d;
-  padding: 8px 10px;
+  padding: 10px;
   border-radius: 8px;
+  border: 1px solid #262636;
   font-size: 13px;
+  flex: 1;
+  min-width: 140px;
+}
+
+/* ============================
+   GRID RESPONSIVO
+============================ */
+.grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 4px;
+  margin-top: 15px;
+}
+
+.cell {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: #1c1c26;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  cursor: pointer;
+  transition: 0.1s;
+}
+
+.cell.selected {
+  background: #252535;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 2px #4caf50;
+}
+
+/* ============================
+   ADMIN PANEL
+============================ */
+#admin-panel {
+  background: #15151d;
+  padding: 15px;
+  border-radius: 10px;
   border: 1px solid #262636;
 }
 
-.info-box strong {
-  display: block;
+body.telegram #admin-panel {
+  display: none !important;
 }
 
 /* ============================
    BANNER
-   ============================ */
+============================ */
 .ad-banner {
-  width: 320px;
+  width: 100%;
+  max-width: 320px;
   height: 50px;
   background: #222;
   border: 1px solid #444;
@@ -95,65 +108,11 @@ h1 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
 }
 
 /* ============================
-   GRID DO JOGO
-   ============================ */
-.grid {
-  display: grid;
-  grid-template-columns: repeat(8, 48px);
-  gap: 4px;
-  margin-top: 10px;
-}
-
-.cell {
-  width: 48px;
-  height: 48px;
-  background: #1c1c26;
-  border-radius: 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  cursor: pointer;
-  transition: transform 0.1s, box-shadow 0.1s, background 0.1s;
-}
-
-.cell.selected {
-  box-shadow: 0 0 0 2px #4caf50;
-  transform: scale(1.05);
-  background: #252535;
-}
-
-/* ============================
-   PAINEL ADMIN
-   ============================ */
-.right-panel {
-  background: #15151d;
-  padding: 15px;
-  border-radius: 10px;
-  font-size: 13px;
-  border: 1px solid #262636;
-}
-
-.table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-  font-size: 12px;
-}
-
-.table th, .table td {
-  border-bottom: 1px solid #262636;
-  padding: 4px 2px;
-  text-align: left;
-}
-
-/* ============================
-   BARRA INFERIOR
-   ============================ */
+   BOTTOM NAV
+============================ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -164,7 +123,6 @@ h1 {
   display: flex;
   justify-content: space-around;
   padding: 8px 0;
-  z-index: 10;
 }
 
 .bottom-nav button {
@@ -175,52 +133,39 @@ h1 {
   border-radius: 8px;
   font-size: 15px;
 }
-
-/* ============================
-   TELEGRAM MOBILE MODE
-   ============================ */
-body.telegram .app-shell {
-  grid-template-columns: 1fr !important;
-}
-
-body.telegram #admin-panel {
-  display: none !important;
-}
-
-body.telegram #game-panel {
-  width: 100% !important;
-}
 </style>
 </head>
 
 <body>
 
-<div class="scaled-ui">
 <div class="app-shell">
 
-  <!-- PAINEL DO JOGO -->
+  <!-- GAME PANEL -->
   <div id="game-panel">
     <h1>FARM MATCH REWARDS</h1>
 
     <div class="info-row">
       <div class="info-box">
         <strong>Saldo:</strong>
-        <span id="saldo">0.0000 €</span>
+        <span id="saldo">0.0000 €</span><br>
         <small>Mínimo para levantar: 5,00 €</small>
       </div>
+
       <div class="info-box">
         <strong>Ações restantes:</strong>
-        <span id="acoesRestantes">20</span>
+        <span id="acoesRestantes">20</span><br>
         <small>1 jogada = 1 ação</small>
       </div>
+
       <div class="info-box">
         <strong>Vidas:</strong>
-        <span id="vidasRestantes">5</span>
+        <span id="vidasRestantes">5</span><br>
         <small>Sem vidas? Ver anúncio.</small>
       </div>
+
       <div class="info-box">
         <strong>Matches:</strong>
-        <span id="matchesCount">0</span>
+        <span id="matchesCount">0</span><br>
         <small>0.0000005 € por match</small>
       </div>
     </div>
@@ -229,60 +174,44 @@ body.telegram #game-panel {
 
     <div class="info-row">
       <div class="info-box">
-        <strong>Ações extra</strong>
-        <button class="btn" onclick="verAnuncioAcoes(5)">Ver anúncio (+5 ações)</button>
+        <strong>Ações extra</strong><br>
+        <button onclick="verAnuncioAcoes(5)">Ver anúncio (+5 ações)</button>
       </div>
+
       <div class="info-box">
-        <strong>Vidas extra</strong>
-        <button class="btn" onclick="verAnuncioVidas(3)">Ver anúncio (+3 vidas)</button>
+        <strong>Vidas extra</strong><br>
+        <button onclick="verAnuncioVidas(3)">Ver anúncio (+3 vidas)</button>
       </div>
+
       <div class="info-box">
-        <strong>Login diário</strong>
+        <strong>Login diário</strong><br>
         <span id="loginStatus">Disponível</span><br>
-        <button class="btn" onclick="recolherLoginDiario()">Recolher</button>
+        <button onclick="recolherLoginDiario()">Recolher</button>
       </div>
     </div>
 
     <div class="grid" id="gameGrid"></div>
   </div>
 
-  <!-- PAINEL ADMIN -->
-  <div id="admin-panel" class="right-panel">
+  <!-- ADMIN PANEL -->
+  <div id="admin-panel">
     <h2>Painel Admin</h2>
     <p>Economia · Utilizadores · Estatísticas</p>
 
     <p>
-      Receita Estimada (simulada): <span id="adminReceita">0.0000 €</span><br>
-      Saldo Emitido (jogadores): <span id="adminSaldoEmitido">0.0000 €</span><br>
+      Receita Estimada: <span id="adminReceita">0.0000 €</span><br>
+      Saldo Emitido: <span id="adminSaldoEmitido">0.0000 €</span><br>
       Matches totais: <span id="adminMatchesTotais">0</span><br>
       Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
       Anúncios vistos: <span id="adminAnunciosVistos">0</span>
     </p>
-
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Tipo</th>
-          <th>Valor Total</th>
-          <th>Detalhe</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>Matches</td>
-          <td><span id="adminValorMatches">0.0000 €</span></td>
-          <td>0.0000005 € por match</td>
-        </tr>
-        <tr>
-          <td>Login diário</td>
-          <td><span id="adminValorLogin">0.0000 €</span></td>
-          <td>0.00025 € por dia</td>
-        </tr>
-      </tbody>
-    </table>
   </div>
 
 </div>
+
+<div class="bottom-nav">
+  <button onclick="showGame()">Jogo</button>
+  <button onclick="showAdmin()">Admin</button>
 </div>
 
 <script>
@@ -293,7 +222,7 @@ if (navigator.userAgent.includes("Telegram")) {
 
 /* ============================
    ESTADO GLOBAL
-   ============================ */
+============================ */
 const items = ["🥚","🍅","🥕","🌽"];
 const gridSize = 8;
 let grid = [];
@@ -331,7 +260,7 @@ const adminValorLoginEl = document.getElementById("adminValorLogin");
 
 /* ============================
    LOGIN DIÁRIO
-   ============================ */
+============================ */
 function isHoje(dateStr) {
   const hoje = new Date();
   const d = new Date(dateStr);
@@ -358,7 +287,7 @@ function recolherLoginDiario() {
 
 /* ============================
    ANÚNCIOS
-   ============================ */
+============================ */
 function verAnuncioAcoes(qtd) {
   anunciosVistos++;
   setTimeout(() => {
@@ -379,7 +308,7 @@ function verAnuncioVidas(qtd) {
 
 /* ============================
    GRID / MATCH-3
-   ============================ */
+============================ */
 function randomItem() {
   return items[Math.floor(Math.random() * items.length)];
 }
@@ -513,7 +442,6 @@ function swapAndResolve(r1, c1, r2, c2) {
 
   let matches = findMatches();
   if (matches.length === 0) {
-    // desfazer
     const t = grid[r1][c1];
     grid[r1][c1] = grid[r2][c2];
     grid[r2][c2] = t;
@@ -544,7 +472,7 @@ function swapAndResolve(r1, c1, r2, c2) {
 
 /* ============================
    UI / ADMIN
-   ============================ */
+============================ */
 function updateUI() {
   acoesEl.textContent = acoesRestantes;
   vidasEl.textContent = vidasRestantes;
@@ -564,30 +492,23 @@ function updateUI() {
 
 /* ============================
    NAVEGAÇÃO
-   ============================ */
+============================ */
 function showGame() {
-  if (document.body.classList.contains("telegram")) {
-    document.getElementById("game-panel").style.display = "block";
-    document.getElementById("admin-panel").style.display = "none";
-  } else {
-    document.getElementById("game-panel").style.display = "block";
+  document.getElementById("game-panel").style.display = "block";
+  if (!document.body.classList.contains("telegram")) {
     document.getElementById("admin-panel").style.display = "block";
   }
 }
 
 function showAdmin() {
-  if (document.body.classList.contains("telegram")) {
-    document.getElementById("game-panel").style.display = "none";
-    document.getElementById("admin-panel").style.display = "block";
-  } else {
-    document.getElementById("game-panel").style.display = "block";
+  if (!document.body.classList.contains("telegram")) {
     document.getElementById("admin-panel").style.display = "block";
   }
 }
 
 /* ============================
    INICIALIZAÇÃO
-   ============================ */
+============================ */
 createInitialGrid();
 renderGrid();
 atualizarLoginStatus();
