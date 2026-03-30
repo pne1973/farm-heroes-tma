@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.87 - LEVEL & ADMIN</title>
+    <title>Ouro da Quinta v33.88 - ADMIN CLICK</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
@@ -12,7 +12,8 @@
 
         #header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,0.9); border-bottom: 1px solid #ddd; }
         .stats-row { width: 100%; display: flex; justify-content: space-around; gap: 8px; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
+        .stat-card:active { transform: scale(0.95); }
         .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
         .stat-l { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
         
@@ -20,12 +21,16 @@
 
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.2); }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
         .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
         
-        /* Admin Modal */
-        #admin-modal { display: none; position: fixed; inset: 0; background: white; z-index: 1000; padding: 20px; }
-        .admin-close { background: var(--red); color: white; padding: 10px; border: none; border-radius: 8px; width: 100%; margin-top: 20px; font-weight: bold; }
+        /* Painel Admin Moderno */
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 2000; padding: 25px; overflow-y: auto; }
+        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
+        .admin-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .admin-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-red { background: var(--red); color: white; }
 
         #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
     </style>
@@ -34,7 +39,7 @@
 
 <div id="header">
     <div class="stats-row">
-        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
+        <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
         <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
         <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
     </div>
@@ -49,18 +54,30 @@
     <div id="grid"></div>
 </div>
 
-<div id="admin-modal">
-    <h2 style="color: var(--accent)">PAINEL ADMIN</h2>
-    <p>ID: 5401881400</p>
-    <div style="background: #f0f0f0; padding: 15px; border-radius: 10px;">
-        <p>Total XP: <span id="adm-xp">0</span></p>
-        <p>Ações Restantes: <span id="adm-act">20</span></p>
-        <button onclick="resetGame()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:5px;">RESET NÍVEL 1</button>
+<div id="admin-panel">
+    <div class="admin-header">
+        <h2 style="margin:0; color:var(--accent);">PAINEL ADMIN</h2>
+        <span style="font-size: 10px; background:#ddd; padding:4px 8px; border-radius:10px;">ID: 5401881400</span>
     </div>
-    <button class="admin-close" onclick="closeAdmin()">VOLTAR AO JOGO</button>
+    
+    <div class="admin-card">
+        <h3>Estatísticas Atuais</h3>
+        <p>Saldo Acumulado: <strong id="adm-bal">€ 0.0000</strong></p>
+        <p>Ações Disponíveis: <strong id="adm-act">20</strong></p>
+        <p>Nível Atual: <strong id="adm-lvl">1</strong></p>
+    </div>
+
+    <div class="admin-card">
+        <h3>Ações Rápidas</h3>
+        <button class="admin-btn btn-blue" onclick="addActions()">+10 AÇÕES (Bónus)</button>
+        <button class="admin-btn btn-blue" onclick="addBalance()">+€ 1.00 (Teste)</button>
+        <button class="admin-btn btn-red" onclick="resetGame()">RESET TOTAL PARA NÍVEL 1</button>
+    </div>
+
+    <button class="admin-btn" style="background:#555; color:white; margin-top:20px;" onclick="closeAdmin()">VOLTAR AO JOGO</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.87 | ID: 5401881400</div>
+<div id="footer">OURO DA QUINTA v33.88 | ADMIN ID: 5401881400</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
@@ -76,7 +93,6 @@
             gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.dataset.idx = i;
             cell.onclick = () => handleCellClick(i);
             gridEl.appendChild(cell);
         }
@@ -112,7 +128,7 @@
             await resolveMatches();
             checkLevelUp();
         } else {
-            swapData(i1, i2); // Reverte
+            swapData(i1, i2); // Reverte se não houver match
         }
         updateUI();
     }
@@ -155,7 +171,7 @@
             gridArray[idx] = null;
         });
         render();
-        await new Promise(r => setTimeout(r, 250));
+        await new Promise(r => setTimeout(r, 200));
         applyGravity();
         await resolveMatches(isInitial);
     }
@@ -191,18 +207,26 @@
     }
 
     function checkLevelUp() {
-        if (mission['🥛'] === 0 && mission['🥚'] === 0 && mission['🍯'] === 0) {
+        if (mission['🥛'] <= 0 && mission['🥚'] <= 0 && mission['🍯'] <= 0) {
             level++;
             actions = 20;
             mission = { '🥛': 5 + level, '🥚': 5 + level, '🍯': 3 + level };
-            alert(`NÍVEL ${level} CONCLUÍDO!`);
+            alert(`EXCELENTE! Nível ${level} iniciado.`);
             initGrid();
         }
     }
 
-    function openAdmin() { document.getElementById('admin-modal').style.display = 'block'; document.getElementById('adm-act').innerText = actions; }
-    function closeAdmin() { document.getElementById('admin-modal').style.display = 'none'; }
-    function resetGame() { level = 1; actions = 20; balance = 0; mission = { '🥛': 5, '🥚': 5, '🍯': 3 }; initGrid(); closeAdmin(); updateUI(); }
+    // FUNÇÕES ADMIN
+    function openAdmin() {
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('adm-bal').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('adm-act').innerText = actions;
+        document.getElementById('adm-lvl').innerText = level;
+    }
+    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
+    function addActions() { actions += 10; updateUI(); openAdmin(); }
+    function addBalance() { balance += 1.0; updateUI(); openAdmin(); }
+    function resetGame() { level = 1; actions = 20; balance = 0; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); closeAdmin(); updateUI(); }
     async function checkAndResolve(init) { await resolveMatches(init); updateUI(); }
 
     initGrid();
