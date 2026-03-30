@@ -2,171 +2,154 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v36.03 - FIX TOTAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ouro da Quinta v36.04 - ULTRA FIX</title>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --blue: #4285f4; --brown: #8d6e63; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --blue: #4285f4; }
+        * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         
-        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; touch-action: none; }
+        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
 
-        /* UI SUPERIOR */
-        #header { background: #fff; padding: 12px; display: flex; justify-content: space-around; border-bottom: 2px solid #eee; z-index: 100; }
+        /* HEADER OFICIAL */
+        #header { background: #fff; padding: 15px; display: flex; justify-content: space-around; border-bottom: 1px solid #ddd; }
         .stat { text-align: center; }
-        .stat small { font-size: 9px; color: #888; display: block; text-transform: uppercase; }
-        .stat b { font-size: 15px; color: var(--accent); }
+        .stat small { font-size: 10px; color: #888; display: block; }
+        .stat b { font-size: 16px; color: var(--accent); }
 
-        /* GRELHA DE JOGO */
-        #game-area { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; z-index: 50; }
+        /* GRELHA REATIVA */
+        #game-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .grid { 
-            display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; 
-            background: var(--brown); padding: 10px; border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            pointer-events: auto !important;
+            display: grid; grid-template-columns: repeat(7, 42px); gap: 4px; 
+            background: #8d6e63; padding: 10px; border-radius: 10px;
+            touch-action: none; /* Impede o scroll de "roubar" o toque */
         }
         .cell { 
-            width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; 
-            display: flex; align-items: center; justify-content: center; font-size: 22px; 
-            cursor: pointer; user-select: none; touch-action: none;
+            width: 42px; height: 42px; background: #fff9c4; border-radius: 4px; 
+            display: flex; align-items: center; justify-content: center; font-size: 20px; 
+            user-select: none;
         }
-        .cell span { pointer-events: none; } /* [cite: 2026-03-22] */
 
-        /* BOTÕES */
-        .btn-ad { background: var(--blue); color: white; border: none; padding: 15px 40px; border-radius: 12px; font-weight: bold; margin-top: 20px; box-shadow: 0 4px 0 #1565c0; cursor: pointer; }
-
-        /* COMANDO CENTRAL */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f6f9; z-index: 1000; overflow-y: auto; padding: 20px; touch-action: auto; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--accent); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .card h4 { font-size: 11px; color: #666; margin-bottom: 8px; text-transform: uppercase; }
+        /* ADMIN STYLE */
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; touch-action: auto; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        table { width: 100%; border-collapse: collapse; font-size: 12px; }
-        th { text-align: left; padding: 8px; color: #999; }
-        td { padding: 8px; border-top: 1px solid #eee; font-weight: bold; }
-
-        .admin-trigger { position: fixed; top: 10px; right: 10px; z-index: 200; background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 10px; font-weight: bold; }
+        .btn-main { background: var(--blue); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; margin-top: 20px; }
+        .btn-cfg { position: fixed; top: 10px; right: 10px; background: var(--accent); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 10px; z-index: 100; }
     </style>
 </head>
 <body>
 
-<button class="admin-trigger" onclick="toggleAdmin()">COMANDO CENTRAL ⚙️</button>
+<button class="btn-cfg" onclick="toggleAdmin()">COMANDO CENTRAL ⚙️</button>
 
 <div id="header">
-    <div class="stat"><small>ID</small><b id="ui-id">5401881400</b></div>
+    <div class="stat"><small>USER ID</small><b id="ui-id">5401881400</b></div>
     <div class="stat"><small>SALDO</small><b id="ui-bal">€ 0.0000</b></div>
     <div class="stat"><small>AÇÕES</small><b id="ui-act">20</b></div>
 </div>
 
-<div id="game-area">
-    <div class="grid" id="main-grid"></div>
-    <button class="btn-ad" onclick="getAd()">VER ANÚNCIO (+10 AÇÕES)</button>
+<div id="game-container">
+    <div class="grid" id="grid"></div>
+    <button class="btn-main" onclick="addActions()">VER ANÚNCIO (+10 AÇÕES)</button>
 </div>
 
 <div id="admin-panel">
-    <h2 style="margin-bottom:20px;">COMANDO CENTRAL v36.03</h2>
-    
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-        <div class="card"><h4>Receita Ads</h4><p id="adm-rev" style="color:var(--blue); font-size:18px;">€ 0.0000</p></div>
-        <div class="card"><h4>Saldos Users</h4><p id="adm-pass" style="color:var(--accent); font-size:18px;">€ 0.0000</p></div>
-    </div>
-
+    <h2>AUDITORIA MASTER</h2>
     <div class="card">
-        <h4>Trocar Utilizador de Teste</h4>
-        <div style="display:flex; gap:10px;">
-            <input type="number" id="new-id" placeholder="Novo ID..." style="flex:1; padding:10px; border:1px solid #ddd; border-radius:8px;">
-            <button onclick="switchUser()" style="padding:10px 20px; background:var(--accent); color:white; border:none; border-radius:8px;">IR</button>
-        </div>
+        <p>Receita Global (Ads): <b id="adm-rev">€ 0.0000</b></p>
+        <p>Passivo (Saldos): <b id="adm-pass">€ 0.0000</b></p>
     </div>
-
     <div class="card">
-        <h4>Monitor de Rede em Real-Time</h4>
-        <table>
-            <thead><tr><th>ID</th><th>SALDO</th><th>AÇÕES</th></tr></thead>
-            <tbody id="admin-table"></tbody>
-        </table>
+        <h4>Simular Outro ID</h4>
+        <input type="number" id="new-id" placeholder="Ex: 808476" style="padding:8px; width:60%;">
+        <button onclick="changeUser()" style="padding:8px;">TROCAR</button>
     </div>
-
-    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:12px; font-weight:bold; margin-top:10px;">VOLTAR AO JOGO</button>
+    <div class="card">
+        <h4>Lista de Utilizadores</h4>
+        <div id="user-list" style="font-size: 12px;"></div>
+    </div>
+    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#333; color:white; border-radius:10px;">VOLTAR</button>
 </div>
 
 <script>
-    const icons = ['🥛', '🥚', '🍯', '🚜'];
+    const items = ['🥛', '🥚', '🍯', '🚜'];
     let currentId = "5401881400";
-    let revTotal = 0;
-    let users = { "5401881400": { bal: 0, act: 20 } };
+    let db = { "5401881400": { bal: 0, act: 20 } };
+    let adRevenue = 0;
 
-    function buildGrid() {
-        const g = document.getElementById('main-grid');
-        g.innerHTML = '';
+    function init() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = '';
         for(let i=0; i<49; i++) {
-            const c = document.createElement('div');
-            c.className = 'cell';
-            c.innerHTML = `<span>${icons[Math.floor(Math.random()*4)]}</span>`;
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.innerText = items[Math.floor(Math.random()*4)];
             
-            // FIX CRÍTICO: Eventos de toque com prevenção de scroll [cite: 2026-03-22]
-            const handleAction = (e) => {
+            // MÉTODO DE TOQUE DIRETO (Ignora cliques fantasmas) [cite: 2026-03-22]
+            cell.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                processPlay();
-            };
+                playGame();
+            }, {passive: false});
             
-            c.addEventListener('touchstart', handleAction, { passive: false });
-            c.addEventListener('mousedown', handleAction);
+            // Compatibilidade para PC
+            cell.addEventListener('mousedown', playGame);
             
-            g.appendChild(c);
+            grid.appendChild(cell);
         }
-        updateUI();
+        refresh();
     }
 
-    function processPlay() {
-        let u = users[currentId];
+    function playGame() {
+        let u = db[currentId];
         if(u.act > 0) {
             u.act--;
             u.bal += 0.0005;
-            updateUI();
+            refresh();
         } else {
-            alert("Ações esgotadas!");
+            alert("Sem ações disponíveis!");
         }
     }
 
-    function getAd() {
-        revTotal += 0.0010;
-        users[currentId].act += 10;
-        updateUI();
-        alert("Publicidade concluída (+10 ações)");
+    function addActions() {
+        adRevenue += 0.0010;
+        db[currentId].act += 10;
+        refresh();
+        alert("Anúncio concluído! +10 Ações.");
     }
 
-    function switchUser() {
-        const id = document.getElementById('new-id').value;
-        if(!id) return;
-        if(!users[id]) users[id] = { bal: 0, act: 20 };
-        currentId = id.toString();
-        updateUI();
+    function changeUser() {
+        const nid = document.getElementById('new-id').value;
+        if(!nid) return;
+        if(!db[nid]) db[nid] = { bal: 0, act: 20 };
+        currentId = nid;
+        refresh();
         toggleAdmin();
     }
 
     function toggleAdmin() {
         const p = document.getElementById('admin-panel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
     }
 
-    function updateUI() {
-        const u = users[currentId];
+    function refresh() {
+        const u = db[currentId];
         document.getElementById('ui-id').innerText = currentId;
         document.getElementById('ui-bal').innerText = `€ ${u.bal.toFixed(4)}`;
         document.getElementById('ui-act').innerText = u.act;
         
-        // ADMIN
-        document.getElementById('adm-rev').innerText = `€ ${revTotal.toFixed(4)}`;
+        // Update Admin
+        document.getElementById('adm-rev').innerText = `€ ${adRevenue.toFixed(4)}`;
         
-        let passivo = 0, rows = "";
-        for(let id in users) {
-            passivo += users[id].bal;
-            rows += `<tr><td>#${id}</td><td>€ ${users[id].bal.toFixed(4)}</td><td>${users[id].act}</td></tr>`;
+        let totalSaldos = 0;
+        let listHtml = "";
+        for(let id in db) {
+            totalSaldos += db[id].bal;
+            listHtml += `<div>ID: #${id} | Saldo: €${db[id].bal.toFixed(4)}</div>`;
         }
-        document.getElementById('adm-pass').innerText = `€ ${passivo.toFixed(4)}`;
-        document.getElementById('admin-table').innerHTML = rows;
+        document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
+        document.getElementById('user-list').innerHTML = listHtml;
     }
-    window.onload = buildGrid;
+
+    window.onload = init;
 </script>
 </body>
 </html>
