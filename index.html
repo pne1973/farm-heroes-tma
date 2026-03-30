@@ -3,120 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.90 - AUDIT & LEVELS</title>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Ouro da Quinta v33.96 - FLASH TEST</title>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --black: #1a1a1a; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Botão Admin Flutuante v33.89 [cite: 2026-03-30] */
-        #admin-trigger { position: fixed; top: 12px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 12px; }
+        #top-ad { background: #fff; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; border-bottom: 1px solid #ddd; }
+        #admin-trigger { position: fixed; top: 60px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        #game-header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: rgba(255,255,255,0.95); border-bottom: 1px solid #eee; z-index: 10; }
-        .stats-row { width: 90%; display: flex; justify-content: space-around; gap: 8px; margin-right: 60px; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        #header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        .stats-row { width: 100%; display: flex; justify-content: space-around; gap: 8px; padding: 0 10px; }
+        .stat-card { background: var(--white); padding: 10px; border-radius: 15px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .stat-v { font-size: 15px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 9px; color: #777; text-transform: uppercase; display: block; }
-        
-        #mission-bar { background: var(--white); padding: 8px 25px; border-radius: 30px; display: flex; gap: 20px; font-weight: 800; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; font-size: 14px; }
-        .m-item { display: flex; align-items: center; gap: 4px; }
+        .stat-l { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
 
-        /* GRID SYSTEM v33.89 [cite: 2026-03-30] */
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.1s; border-bottom: 3px solid rgba(0,0,0,0.1); }
-        .cell:active { transform: scale(0.9); }
-        .selected { outline: 4px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
-        
-        /* DETAILED ADMIN PANEL [cite: 2026-03-30] */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f8f9fa; z-index: 9999; padding: 25px; overflow-y: auto; }
-        .admin-section { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 3px 6px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .admin-section h3 { margin-top: 0; color: #555; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; }
-        .ledger-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #333; }
-        .ledger-val { font-weight: 700; }
-        .profit-positive { color: var(--accent); }
-        .profit-negative { color: var(--red); }
-        
-        .admin-btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; transition: opacity 0.1s; }
-        .admin-btn:active { opacity: 0.8; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-red { background: var(--red); color: white; }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 18px; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+        .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
 
-        /* LEVEL UP ALERT */
-        #level-alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: white; padding: 30px; border-radius: 20px; text-align: center; font-weight: 800; font-size: 20px; z-index: 8000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .powers { display: flex; justify-content: center; gap: 10px; padding: 15px; }
+        .p-btn { background: white; padding: 8px 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .p-count { background: var(--red); color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
 
-        #footer { background: var(--black); color: #fff; padding: 12px; text-align: center; font-size: 10px; font-weight: bold; letter-spacing: 0.5px; }
+        /* Modal Anúncios 300x250 */
+        #ad-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; overflow-y: auto; padding: 20px; }
+        .ad-box { width: 300px; height: 250px; background: white; margin: 10px; border: 4px solid #fbbc05; display: flex; align-items: center; justify-content: center; font-weight: bold; text-align: center; }
+        .ad-close-btn { margin-top: 20px; padding: 15px 30px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; display: none; }
+
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; }
+        #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
+<div id="top-ad">BANNER TESTE v33.96</div>
 <button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
 
-<div id="level-alert">🎉 NÍVEL CONCLUÍDO! 🎉<br><span style="font-size:14px; font-weight:400;">Novas metas definidas.</span></div>
-
-<div id="game-header">
+<div id="header">
     <div class="stats-row">
-        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
+        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">TESTE FLASH</span></div>
+        <div class="stat-card"><span class="stat-l">Vidas</span><span class="stat-v" id="life-ui">❤️</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">1</span></div>
     </div>
-    <div id="mission-bar">
-        <div class="m-item">🥛 <span id="m1">5</span></div>
-        <div class="m-item">🥚 <span id="m2">5</span></div>
-        <div class="m-item">🍯 <span id="m3">5</span></div>
+    <div style="background:white; padding:5px 25px; border-radius:20px; margin-top:5px; font-weight:bold; border:1px solid #ddd;">
+        🥛<span id="m1">5</span> 🥚<span id="m2">5</span> 🍯<span id="m3">5</span>
     </div>
 </div>
 
-<div id="grid-container">
-    <div id="grid"></div>
+<div id="grid-container"><div id="grid"></div></div>
+
+<div class="powers">
+    <button class="p-btn" onclick="useBooster('bomb')">💣 <span class="p-count" id="b-bomb">1</span></button>
+    <button class="p-btn" onclick="useBooster('tractor')">🚜 <span class="p-count" id="b-tractor">1</span></button>
+    <button class="p-btn" onclick="useBooster('shovel')">⛏️ <span class="p-count" id="b-shovel">1</span></button>
+</div>
+
+<div id="ad-modal">
+    <div id="ad-info" style="color:white; margin-bottom:15px; font-weight:bold; text-align:center;"></div>
+    <div id="ad-container"></div>
+    <button id="ad-close-btn" class="ad-close-btn" onclick="rewardUser()">FECHAR E RECEBER BÓNUS</button>
 </div>
 
 <div id="admin-panel">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 style="margin:0; color:var(--accent);">Contabilidade Social Detalhada [cite: 2026-03-30]</h2>
-        <button onclick="toggleAdmin()" style="background:#555; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:bold;">X</button>
+    <h2>ADMIN: 5401881400</h2>
+    <div style="background:white; padding:15px; border-radius:10px;">
+        <p>Receita Banners: <span style="color:green" id="adm-rev">€ 0.0020</span></p>
+        <p>Custo DB: <span id="adm-cost" style="color:red">€ 0.0000</span></p>
     </div>
-    <p style="font-size:12px; color:#666;">ID ADMINISTRADOR: 5401881400 | v33.90</p>
-
-    <div class="admin-section">
-        <h3>1. Livro-Razão de Auditoria</h3>
-        <div class="ledger-row"><span>Receita Bruta (Banners):</span><span class="ledger-val profit-positive">+ € 0.0020</span></div>
-        <div class="ledger-row"><span>Custo Operacional (Matches DB):</span><span class="ledger-val profit-negative" id="adm-cost">- € 0.0000</span></div>
-        <div style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px; font-weight:800; display:flex; justify-content:space-between;">
-            <span>LUCRO LÍQUIDO REAL:</span>
-            <span id="adm-profit" class="profit-positive">€ 0.0020</span>
-        </div>
-    </div>
-
-    <div class="admin-section">
-        <h3>2. Estatísticas do Utilizador</h3>
-        <p>Ações Disponíveis: <strong id="adm-act">20</strong></p>
-        <p>Total Matches Realizados: <strong id="adm-matches">0</strong></p>
-        <p>Nível Atual: <strong id="adm-lvl">1</strong></p>
-    </div>
-
-    <div class="admin-section">
-        <h3>3. Ferramentas de Teste</h3>
-        <button class="admin-btn btn-blue" onclick="forceAddActions(50)">FORÇAR +50 AÇÕES</button>
-        <button class="admin-btn btn-red" onclick="forceResetGame()">RESET TOTAL PARA NÍVEL 1</button>
-    </div>
-
-    <p style="font-size:10px; color:#aaa; text-align:center;">Nota de Auditoria: Os ganhos de match são simbólicos (€ 0.0001) para incentivar o jogo, mas geram custos operacionais na base de dados (€ 0.0005 por match) [cite: 2026-03-30].</p>
+    <button onclick="toggleAdmin()" style="width:100%; padding:15px; margin-top:20px; border-radius:10px; border:none; background:#555; color:white; font-weight:bold;">VOLTAR AO TESTE</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.90 | AUDIT & LEVELS ENABLED | ID: 5401881400</div>
+<div id="footer">OURO DA QUINTA v33.96 | 1 ACTION TEST MODE</div>
 
 <script>
-    const tg = window.Telegram.WebApp;
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let level = 1, balance = 0.0000, actions = 20, selectedIdx = null;
+    let level=1, balance=0, actions=1, lives=1, selectedIdx=null, matchesCount=0;
+    let boosters = { bomb: 1, tractor: 1, shovel: 1 };
     let mission = { '🥛': 5, '🥚': 5, '🍯': 5 };
-    let gridArray = [];
-    
-    // Detailed Ledger Variables [cite: 2026-03-30]
-    let totalMatches = 0;
-    const grossIncomeAds = 0.0020; // Receita fixa simulada de banners
+    let gridArray = [], rev = 0.0020;
+    let pendingReward = null;
 
     function initGrid() {
         const gridEl = document.getElementById('grid');
@@ -125,163 +92,134 @@
             gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.dataset.idx = i;
-            cell.onclick = () => handleCellClick(i);
+            cell.onclick = () => handleCell(i);
             gridEl.appendChild(cell);
         }
-        // Limpar matches iniciais sem cobrar ações ou gerar custos operacionais [cite: 2026-03-30]
-        checkAndResolveMatches(true);
+        resolve(true);
     }
 
-    function handleCellClick(idx) {
-        if (actions <= 0) return;
-        const cells = document.querySelectorAll('.cell');
+    function handleCell(i) {
+        if (lives <= 0) { showAdFlow('life', 1, "RECOMPENSA: +1 VIDA"); return; }
+        if (actions <= 0) { showAdOptions(); return; }
+        
         if (selectedIdx === null) {
-            selectedIdx = idx;
-            cells[idx].classList.add('selected');
+            selectedIdx = i; document.querySelectorAll('.cell')[i].classList.add('selected');
         } else {
-            if (isAdjacent(selectedIdx, idx)) {
-                executeSwap(selectedIdx, idx);
-            }
-            cells[selectedIdx].classList.remove('selected');
+            if (isAdj(selectedIdx, i)) executeSwap(selectedIdx, i);
+            document.querySelectorAll('.cell')[selectedIdx].classList.remove('selected');
             selectedIdx = null;
         }
     }
 
-    function isAdjacent(i1, i2) {
-        return (Math.abs(Math.floor(i1/7)-Math.floor(i2/7)) + Math.abs((i1%7)-(i2%7))) === 1;
-    }
+    function isAdj(i1, i2) { return Math.abs(Math.floor(i1/7)-Math.floor(i2/7)) + Math.abs((i1%7)-(i2%7)) === 1; }
 
     async function executeSwap(i1, i2) {
-        swapData(i1, i2);
-        let matches = findMatches();
-        if (matches.length > 0) {
-            actions--;
-            totalMatches++; // Incrementa custo operacional [cite: 2026-03-30]
-            await resolveMatches(false);
-            checkLevelProgress(); // Nova verificação de nível [cite: 2026-03-30]
+        let t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
+        if (findMatches().length > 0) {
+            actions--; matchesCount++;
+            await resolve(); 
         } else {
-            // Reverte se não houver match [cite: 2026-03-30]
-            swapData(i1, i2);
+            t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
+            render();
         }
         updateUI();
+        if (actions <= 0 && !missionComplete()) setTimeout(showAdOptions, 500);
     }
 
-    function swapData(i1, i2) {
-        let t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
-        renderGrid();
-    }
+    function missionComplete() { return mission['🥛']<=0 && mission['🥚']<=0 && mission['🍯']<=0; }
 
-    function findMatches() {
-        let matchSet = new Set();
-        // Horizontal
-        for (let r = 0; r < 7; r++) {
-            for (let c = 0; c < 5; c++) {
-                let i = r * 7 + c;
-                if (gridArray[i] === gridArray[i+1] && gridArray[i] === gridArray[i+2]) { matchSet.add(i); matchSet.add(i+1); matchSet.add(i+2); }
-            }
-        }
-        // Vertical
-        for (let c = 0; c < 7; c++) {
-            for (let r = 0; r < 5; r++) {
-                let i = r * 7 + c;
-                if (gridArray[i] === gridArray[i+7] && gridArray[i] === gridArray[i+14]) { matchSet.add(i); matchSet.add(i+7); matchSet.add(i+14); }
-            }
-        }
-        return Array.from(matchSet);
-    }
-
-    async function resolveMatches(isInitialCheck = false) {
-        let matches = findMatches();
-        if (matches.length === 0) return;
-        
-        matches.forEach(idx => {
-            // Lógica de colheita/saldo [cite: 2026-03-30]
-            if (!isInitialCheck && mission[gridArray[idx]] > 0) {
-                mission[gridArray[idx]]--;
-                balance += 0.0001; 
-            }
-            gridArray[idx] = null;
-        });
-        
-        renderGrid();
-        await new Promise(r => setTimeout(r, 200));
-        applyGravity();
-        // Verificação recursiva para matches em cadeia [cite: 2026-03-30]
-        await resolveMatches(isInitialCheck);
+    async function resolve(init) {
+        let m = findMatches(); if (m.length === 0) return;
+        m.forEach(i => { if (!init && mission[gridArray[i]] > 0) mission[gridArray[i]]--; gridArray[i] = null; });
+        render(); await new Promise(r => setTimeout(r, 200));
+        applyGravity(); await resolve(init);
     }
 
     function applyGravity() {
-        for (let c = 0; c < 7; c++) {
-            let empty = 0;
-            for (let r = 6; r >= 0; r--) {
-                let i = r * 7 + c;
-                if (gridArray[i] === null) empty++;
-                else if (empty > 0) { gridArray[i+(empty*7)] = gridArray[i]; gridArray[i] = null; }
+        for(let c=0;c<7;c++) {
+            let e=0; for(let r=6;r>=0;r--) {
+                let i=r*7+c; if(!gridArray[i]) e++; else if(e>0) { gridArray[i+e*7]=gridArray[i]; gridArray[i]=null; }
             }
-            for (let i = 0; i < empty; i++) gridArray[i*7+c] = icons[Math.floor(Math.random() * icons.length)];
+            for(let i=0;i<e;i++) gridArray[i*7+c]=icons[Math.floor(Math.random()*4)];
         }
-        renderGrid();
+        render();
     }
 
-    function renderGrid() {
+    function findMatches() {
+        let s = new Set();
+        for(let r=0;r<7;r++) for(let c=0;c<5;c++) {
+            let i=r*7+c; if(gridArray[i]===gridArray[i+1] && gridArray[i]===gridArray[i+2]) { s.add(i); s.add(i+1); s.add(i+2); }
+        }
+        for(let c=0;c<7;c++) for(let r=0;r<5;r++) {
+            let i=r*7+c; if(gridArray[i]===gridArray[i+7] && gridArray[i]===gridArray[i+14]) { s.add(i); s.add(i+7); s.add(i+14); }
+        }
+        return Array.from(s);
+    }
+
+    function useBooster(type) {
+        if (boosters[type] > 0) { boosters[type]--; updateUI(); alert("USADO!"); }
+        else { showAdFlow('boosters', 2, "RECOMPENSA: +3 BOOSTERS"); }
+    }
+
+    function showAdOptions() {
+        let opt = prompt("Escolha bónus para continuar:\n1 - +5 Ações (2 Ads)\n2 - +10 Ações (3 Ads)\n3 - +15 Ações (4 Ads)\n4 - Perder Vida");
+        if (opt == "1") showAdFlow('act5', 2, "RECOMPENSA: +5 AÇÕES");
+        else if (opt == "2") showAdFlow('act10', 3, "RECOMPENSA: +10 AÇÕES");
+        else if (opt == "3") showAdFlow('act15', 4, "RECOMPENSA: +15 AÇÕES");
+        else { lives--; actions=1; updateUI(); if(lives<=0) showAdFlow('life', 1, "RECOMPENSA: +1 VIDA"); }
+    }
+
+    function showAdFlow(type, count, text) {
+        pendingReward = type;
+        const modal = document.getElementById('ad-modal');
+        const container = document.getElementById('ad-container');
+        const closeBtn = document.getElementById('ad-close-btn');
+        document.getElementById('ad-info').innerText = text;
+        container.innerHTML = "";
+        modal.style.display = 'flex';
+        closeBtn.style.display = 'none';
+
+        for (let i = 0; i < count; i++) {
+            const ad = document.createElement('div');
+            ad.className = 'ad-box';
+            ad.innerHTML = `AD GOOGLE $300x250<br>Slot #${i+1}`;
+            container.appendChild(ad);
+            rev += 0.0005;
+        }
+        setTimeout(() => { closeBtn.style.display = 'block'; }, 2000 * count);
+    }
+
+    function rewardUser() {
+        if (pendingReward === 'life') { lives = 1; actions = 1; }
+        if (pendingReward === 'act5') actions = 5;
+        if (pendingReward === 'act10') actions = 10;
+        if (pendingReward === 'act15') actions = 15;
+        if (pendingReward === 'boosters') { boosters.bomb+=1; boosters.tractor+=1; boosters.shovel+=1; }
+        document.getElementById('ad-modal').style.display = 'none';
+        updateUI();
+        pendingReward = null;
+    }
+
+    function updateUI() {
+        document.getElementById('act-ui').innerText = actions;
+        document.getElementById('life-ui').innerText = lives > 0 ? "❤️" : "💔";
+        document.getElementById('m1').innerText = mission['🥛'];
+        document.getElementById('m2').innerText = mission['🥚'];
+        document.getElementById('m3').innerText = mission['🍯'];
+        document.getElementById('b-bomb').innerText = boosters.bomb;
+        document.getElementById('b-tractor').innerText = boosters.tractor;
+        document.getElementById('b-shovel').innerText = boosters.shovel;
+        document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
+        document.getElementById('adm-cost').innerText = `€ ${(matchesCount * 0.0005).toFixed(4)}`;
+    }
+
+    function render() {
         const cells = document.querySelectorAll('.cell');
         gridArray.forEach((icon, i) => cells[i].innerText = icon || "");
     }
 
-    function updateUI() {
-        // Game UI
-        document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('act-ui').innerText = actions;
-        document.getElementById('lvl-ui').innerText = level;
-        document.getElementById('m1').innerText = mission['🥛'];
-        document.getElementById('m2').innerText = mission['🥚'];
-        document.getElementById('m3').innerText = mission['🍯'];
-        
-        // Detailed Admin Ledger Sync [cite: 2026-03-30]
-        const costDB = totalMatches * 0.0005; // Custo operacional por match [cite: 2026-03-30]
-        const netProfit = grossIncomeAds - costDB;
-        
-        document.getElementById('adm-cost').innerText = `- € ${costDB.toFixed(4)}`;
-        document.getElementById('adm-profit').innerText = `€ ${netProfit.toFixed(4)}`;
-        document.getElementById('adm-profit').className = netProfit >= 0 ? 'profit-positive' : 'profit-negative';
-        
-        document.getElementById('adm-act').innerText = actions;
-        document.getElementById('adm-matches').innerText = totalMatches;
-        document.getElementById('adm-lvl').innerText = level;
-    }
+    function toggleAdmin() { const p = document.getElementById('admin-panel'); p.style.display = p.style.display === 'block' ? 'none' : 'block'; updateUI(); }
 
-    // NOVA LÓGICA DE NÍVEL v33.90 [cite: 2026-03-30]
-    function checkLevelProgress() {
-        // Verifica se TODOS os objetivos da missão chegaram a zero [cite: 2026-03-30]
-        if (mission['🥛'] <= 0 && mission['🥚'] <= 0 && mission['🍯'] <= 0) {
-            level++;
-            // Repõe ações e escala a dificuldade da missão para o próximo nível [cite: 2026-03-30]
-            actions = 20; 
-            mission = { '🥛': 5 + (level * 2), '🥚': 5 + (level * 2), '🍯': 5 + level };
-            
-            // Alerta visual de subida de nível
-            const alert = document.getElementById('level-alert');
-            alert.style.display = 'block';
-            setTimeout(() => {
-                alert.style.display = 'none';
-                initGrid(); // Reinicia grelha para o novo nível [cite: 2026-03-30]
-            }, 2000);
-        }
-    }
-
-    // ADMIN FUNCTIONS
-    function toggleAdmin() {
-        const p = document.getElementById('admin-panel');
-        const isOpen = p.style.display === 'block';
-        p.style.display = isOpen ? 'none' : 'block';
-        if (!isOpen) updateUI();
-    }
-    function forceAddActions(n) { actions += n; toggleAdmin(); updateUI(); }
-    function forceResetGame() { level = 1; balance = 0; actions = 20; totalMatches = 0; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); toggleAdmin(); updateUI(); }
-    async function checkAndResolveMatches(init) { await resolveMatches(init); updateUI(); }
-
-    tg.ready();
     initGrid();
     updateUI();
 </script>
