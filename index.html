@@ -3,107 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v34.06 - AUDIT ADMIN</title>
+    <title>Ouro da Quinta v34.07 - MASTER AUDIT</title>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --gray: #f4f4f4; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
+        /* HEADER E TRIGGER */
         #admin-trigger { position: fixed; top: 15px; right: 15px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 12px 20px; border-radius: 50px; font-weight: bold; cursor: pointer; }
 
-        /* COMANDO CENTRAL AUDIT [cite: 2026-03-22] */
-        #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; overflow-y: auto; padding: 20px; }
-        .card-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .card { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-        .card h4 { margin: 0; font-size: 10px; color: #888; text-transform: uppercase; }
-        .card b { font-size: 16px; display: block; margin-top: 5px; }
+        /* PAINEL DE AUDITORIA ULTRA DETALHADO */
+        #admin-panel { display: none; position: fixed; inset: 0; background: var(--gray); z-index: 9999; overflow-y: auto; padding: 15px; color: #333; }
+        .section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .section-h { font-weight: 800; font-size: 13px; border-bottom: 1px solid #eee; padding-bottom: 8px; margin-bottom: 10px; color: var(--brown); display: flex; justify-content: space-between; }
+        
+        .grid-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
+        .mini-card { background: #fafafa; padding: 10px; border-radius: 8px; border-left: 4px solid var(--accent); }
+        .mini-card small { font-size: 9px; color: #999; display: block; text-transform: uppercase; }
+        .mini-card b { font-size: 14px; }
 
-        .section { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; }
-        .section-title { font-weight: 800; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; display: flex; justify-content: space-between; }
+        table { width: 100%; border-collapse: collapse; font-size: 10px; }
+        th { text-align: left; padding: 6px; background: #eee; color: #666; }
+        td { padding: 6px; border-bottom: 1px solid #f0f0f0; }
 
-        table { width: 100%; border-collapse: collapse; font-size: 11px; }
-        th { text-align: left; padding: 8px; color: #666; background: #fafafa; }
-        td { padding: 8px; border-bottom: 1px solid #f0f0f0; }
+        .tag { padding: 2px 5px; border-radius: 4px; font-size: 9px; font-weight: bold; }
+        .tag-ad { background: #e3f2fd; color: #1565c0; }
+        .tag-game { background: #e8f5e9; color: #2e7d32; }
+        
+        .val-plus { color: var(--accent); font-weight: bold; }
+        .val-rev { color: var(--blue); font-weight: bold; }
 
-        .log-entry { font-size: 10px; padding: 5px 0; border-bottom: 1px dashed #eee; display: flex; justify-content: space-between; }
-        .log-earn { color: var(--accent); font-weight: bold; }
-        .log-spend { color: var(--red); font-weight: bold; }
-
-        .btn-close { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; }
+        .btn-back { width: 100%; padding: 15px; background: #333; color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<button id="admin-trigger" onclick="toggleAdmin()">COMANDO CENTRAL ⚙️</button>
+<button id="admin-trigger" onclick="toggleAdmin()">AUDITORIA MASTER ⚙️</button>
 
-<div id="game-preview" style="padding: 60px 20px; text-align: center;">
-    <div class="card" style="display:inline-block; padding: 20px;">
-        <small>AÇÕES RESTANTES</small><br><b id="g-act" style="font-size: 30px;">20</b>
+<div id="game-view" style="padding: 80px 20px; text-align: center;">
+    <div style="background:white; padding:20px; border-radius:20px; display:inline-block; border:2px solid var(--brown);">
+        <p>Ações: <b id="ui-act">20</b> | Saldo: <b id="ui-bal">€ 0.0000</b></p>
+        <button onclick="doAction('Grelha Match-3', 0.0005, 0)" style="padding:10px; background:var(--accent); color:white; border:none; border-radius:8px;">JOGAR (+€0.0005)</button>
+        <button onclick="doAction('Ad Sequencial 1/3', 0, 0.0010)" style="padding:10px; background:var(--blue); color:white; border:none; border-radius:8px;">VER AD (+€0.0010 Rev)</button>
     </div>
-    <p onclick="simulateAction()" style="cursor:pointer; background:var(--brown); color:white; padding:15px; border-radius:10px; margin-top:20px;">SIMULAR MATCH-3 (GANHO €0.0005)</p>
 </div>
 
 <div id="admin-panel">
-    <div class="section-title" style="font-size: 18px;">
-        <span>AUDITORIA DE SISTEMA</span>
-        <span style="color:var(--accent); font-size: 10px;">SERVIDOR: ONLINE</span>
+    <div class="section-h" style="font-size: 16px;">
+        <span>AUDITORIA DE SISTEMA v34.07</span>
+        <span style="color:var(--accent)">ONLINE</span>
     </div>
 
-    <div class="card-row">
-        <div class="card"><h4>Receita Total (Ads)</h4><b id="total-rev">€ 0.0020</b></div>
-        <div class="card"><h4>Passivo (Saldos Users)</h4><b id="total-wallets">€ 0.0000</b></div>
+    <div class="grid-stats">
+        <div class="mini-card"><small>RECEITA TOTAL ADS</small><b id="adm-total-rev">€ 0.0020</b></div>
+        <div class="mini-card"><small>PASSIVO TOTAL (USERS)</small><b id="adm-total-pass">€ 0.0000</b></div>
     </div>
 
     <div class="section">
-        <div class="section-title">DETALHE POR UTILIZADOR [ID: 5401881400]</div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <div style="flex:1;">Ganhos: <span class="log-earn" id="u-earn">€ 0.0000</span></div>
-            <div style="flex:1;">Gastos: <span class="log-spend" id="u-spend">€ 0.0000</span></div>
-            <div style="flex:1;">Saldo: <b id="u-bal">€ 0.0000</b></div>
-        </div>
-        
-        <div id="user-logs" style="max-height: 150px; overflow-y: auto; background: #f9f9f9; padding: 10px; border-radius: 8px;">
-            <div class="log-entry"><span>Sessão iniciada</span> <span>${new Date().toLocaleTimeString()}</span></div>
+        <div class="section-h">RESUMO UTILIZADOR: 5401881400</div>
+        <div class="grid-stats">
+            <div class="mini-card"><small>GANHOS TOTAIS</small><b id="u-total-earn" class="val-plus">€ 0.0000</b></div>
+            <div class="mini-card"><small>ADS VISTOS</small><b id="u-total-ads">0</b></div>
+            <div class="mini-card"><small>REV. GERADA (EST.)</small><b id="u-total-rev" class="val-rev">€ 0.0000</b></div>
+            <div class="mini-card"><small>SALDO ATUAL</small><b id="u-current-bal">€ 0.0000</b></div>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">FILA PAYPAL & AÇÕES RÁPIDAS</div>
-        <table>
-            <thead><tr><th>Utilizador</th><th>Montante</th><th>Ação</th></tr></thead>
-            <tbody>
-                <tr>
-                    <td>#5401881400</td>
-                    <td><b id="tab-bal">€ 0.0000</b></td>
-                    <td><button onclick="alert('Pagamento Processado')" style="background:var(--blue); color:white; border:none; padding:4px 8px; border-radius:4px;">PAGAR</button></td>
-                </tr>
-            </tbody>
-        </table>
+        <div class="section-h">HISTÓRICO DE RECOMPENSAS & ANÚNCIOS</div>
+        <div style="max-height: 250px; overflow-y: auto;">
+            <table>
+                <thead>
+                    <tr><th>Hora</th><th>Ação/Fonte</th><th>Tipo</th><th>Ganho User</th><th>Rev. Admin</th></tr>
+                </thead>
+                <tbody id="audit-logs">
+                    </tbody>
+            </table>
+        </div>
     </div>
 
-    <button class="btn-close" onclick="toggleAdmin()">VOLTAR AO JOGO</button>
+    <button class="btn-back" onclick="toggleAdmin()">VOLTAR AO JOGO</button>
 </div>
 
 <script>
-    let balance = 0, totalEarned = 0, totalSpent = 0, adsRev = 0.0020, actions = 20;
+    let balance = 0, totalRev = 0.0020, userRev = 0, userEarned = 0, adsSeen = 0, actions = 20;
 
-    function simulateAction() {
-        if(actions <= 0) return;
-        actions--;
-        let gain = 0.0005;
-        balance += gain;
-        totalEarned += gain;
-        addLog(`Match-3 realizado (+€${gain.toFixed(4)})`, 'earn');
+    function doAction(source, userGain, adminGain) {
+        if(userGain > 0) {
+            balance += userGain;
+            userEarned += userGain;
+        }
+        if(adminGain > 0) {
+            totalRev += adminGain;
+            userRev += adminGain;
+            adsSeen++;
+        }
+        
+        addAuditEntry(source, userGain, adminGain);
         updateUI();
     }
 
-    function addLog(msg, type) {
-        const logBox = document.getElementById('user-logs');
-        const entry = document.createElement('div');
-        entry.className = 'log-entry';
-        const colorClass = type === 'earn' ? 'log-earn' : (type === 'spend' ? 'log-spend' : '');
-        entry.innerHTML = `<span class="${colorClass}">${msg}</span> <span>${new Date().toLocaleTimeString()}</span>`;
-        logBox.prepend(entry);
+    function addAuditEntry(source, uGain, aGain) {
+        const tbody = document.getElementById('audit-logs');
+        const row = document.createElement('tr');
+        const type = aGain > 0 ? '<span class="tag tag-ad">AD</span>' : '<span class="tag tag-game">JOGO</span>';
+        
+        row.innerHTML = `
+            <td>${new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</td>
+            <td>${source}</td>
+            <td>${type}</td>
+            <td class="val-plus">+€${uGain.toFixed(4)}</td>
+            <td class="val-rev">€${aGain.toFixed(4)}</td>
+        `;
+        tbody.prepend(row);
     }
 
     function toggleAdmin() {
@@ -112,13 +124,17 @@
     }
 
     function updateUI() {
-        document.getElementById('g-act').innerText = actions;
-        document.getElementById('u-bal').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('u-earn').innerText = `€ ${totalEarned.toFixed(4)}`;
-        document.getElementById('u-spend').innerText = `€ ${totalSpent.toFixed(4)}`;
-        document.getElementById('total-wallets').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('tab-bal').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('total-rev').innerText = `€ ${adsRev.toFixed(4)}`;
+        // UI Jogo
+        document.getElementById('ui-act').innerText = actions;
+        document.getElementById('ui-bal').innerText = `€ ${balance.toFixed(4)}`;
+        
+        // UI Admin
+        document.getElementById('adm-total-rev').innerText = `€ ${totalRev.toFixed(4)}`;
+        document.getElementById('adm-total-pass').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('u-total-earn').innerText = `€ ${userEarned.toFixed(4)}`;
+        document.getElementById('u-total-ads').innerText = adsSeen;
+        document.getElementById('u-total-rev').innerText = `€ ${userRev.toFixed(4)}`;
+        document.getElementById('u-current-bal').innerText = `€ ${balance.toFixed(4)}`;
     }
 
     window.onload = updateUI;
