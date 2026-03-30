@@ -2,143 +2,151 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Ouro da Quinta v35.05 - FINAL FIX</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ouro da Quinta v36.01 - MULTI-USER SANDBOX</title>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --brown: #8d6e63; }
-        * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --blue: #4285f4; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
 
-        /* UI SUPERIOR */
-        #header { background: white; padding: 15px; display: flex; justify-content: space-around; border-bottom: 1px solid #ddd; z-index: 10; }
+        /* HEADER */
+        #header { background: #fff; padding: 12px; display: flex; justify-content: space-around; border-bottom: 2px solid #eee; z-index: 50; }
         .stat { text-align: center; }
-        .stat b { display: block; color: var(--accent); font-size: 18px; }
+        .stat small { font-size: 9px; color: #888; display: block; }
+        .stat b { font-size: 15px; color: var(--accent); }
 
-        /* AREA DE JOGO SEM BLOQUEIOS */
-        #game { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(7, 45px); 
-            gap: 5px; 
-            background: var(--brown); 
-            padding: 10px; 
-            border-radius: 12px;
-            pointer-events: all !important; /* Força interação */
-        }
-        .cell { 
-            width: 45px; 
-            height: 45px; 
-            background: #fff9c4; 
-            border-radius: 6px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 25px; 
-            cursor: pointer;
-            user-select: none;
-            touch-action: manipulation;
-        }
-        /* CRITICAL FIX: O emoji não pode intercetar o clique */
-        .cell span { pointer-events: none; } 
+        /* JOGO */
+        #game-view { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; background: #8d6e63; padding: 12px; border-radius: 12px; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; }
+        .cell span { pointer-events: none; }
 
-        #btn-ad { background: #4285f4; color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
+        /* PAINEL ADMIN DETALHADO */
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f0f2f5; z-index: 1000; overflow-y: auto; padding: 20px; }
+        .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 15px; border-left: 4px solid var(--accent); }
+        .card h4 { font-size: 11px; color: #666; margin: 0 0 5px 0; }
+        .card p { font-size: 18px; font-weight: bold; margin: 0; }
 
-        /* ADMIN PANEL */
-        #admin { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        /* TABELA DE UTILIZADORES */
+        .user-list { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 10px; }
+        .user-list td { padding: 8px; border-bottom: 1px solid #eee; }
+        
+        .btn-action { background: var(--blue); color: white; border: none; padding: 12px 25px; border-radius: 10px; font-weight: bold; margin-top: 15px; }
+        .btn-close { background: #333; color: white; width: 100%; padding: 15px; border: none; border-radius: 10px; margin-top: 15px; }
     </style>
 </head>
 <body>
 
-<button onclick="toggleAdmin()" style="position:fixed; top:10px; right:10px; z-index:100; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:50px; font-size:10px;">AUDITORIA ⚙️</button>
+<button onclick="toggleAdmin()" style="position:fixed; top:12px; right:12px; z-index:100; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:50px; font-size:10px;">COMANDO CENTRAL ⚙️</button>
 
 <div id="header">
-    <div class="stat"><small>ID</small><b id="ui-id">5401881400</b></div>
+    <div class="stat"><small>UTILIZADOR</small><b id="ui-id">5401881400</b></div>
     <div class="stat"><small>SALDO</small><b id="ui-bal">€ 0.0000</b></div>
     <div class="stat"><small>AÇÕES</small><b id="ui-act">20</b></div>
 </div>
 
-<div id="game">
+<div id="game-view">
     <div class="grid" id="grid"></div>
-    <button id="btn-ad" onclick="viewAd()">VER ANÚNCIO (+€0.0010 Rev)</button>
+    <button class="btn-action" onclick="getAd()">VER ANÚNCIO (+10 AÇÕES)</button>
 </div>
 
-<div id="admin">
-    <h2>PAINEL DE AUDITORIA MASTER</h2>
-    <div class="card">
-        <h4>Trocar Utilizador de Teste</h4>
-        <button onclick="switchUser('5401881400')">Admin</button>
-        <button onclick="switchUser('808476')">User 808476</button>
-        <button onclick="switchUser(Math.floor(Math.random()*999999))">Novo Aleatório</button>
+<div id="admin-panel">
+    <h2>AUDITORIA DE REDE</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <div class="card"><h4>Receita Ads</h4><p id="adm-rev" style="color:var(--blue)">€ 0.0000</p></div>
+        <div class="card"><h4>Passivo Total</h4><p id="adm-pass" style="color:var(--accent)">€ 0.0000</p></div>
     </div>
+
     <div class="card">
-        <p>Receita Global Ads: <b id="adm-rev">€ 0.0000</b></p>
-        <p>Total User Balances: <b id="adm-pass">€ 0.0000</b></p>
+        <h4>Simulador de Acesso</h4>
+        <div style="display:flex; gap:5px; margin-top:5px;">
+            <input type="number" id="new-id" placeholder="ID (ex: 808476)" style="flex:1; padding:8px; border:1px solid #ddd; border-radius:5px;">
+            <button onclick="switchUser()" style="padding:8px; background:var(--accent); color:white; border:none; border-radius:5px;">TROCAR</button>
+        </div>
+        <button onclick="switchUser(Math.floor(Math.random()*999999))" style="width:100%; margin-top:5px; padding:8px; background:#eee; border:none; border-radius:5px;">GERAR ALEATÓRIO</button>
     </div>
-    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:black; color:white; border-radius:10px;">FECHAR</button>
+
+    <div class="card">
+        <h4>Base de Dados em Tempo Real</h4>
+        <table class="user-list">
+            <thead><tr style="text-align:left; color:#999;"><th>ID</th><th>SALDO</th><th>AÇÕES</th></tr></thead>
+            <tbody id="user-rows"></tbody>
+        </table>
+    </div>
+
+    <button class="btn-close" onclick="toggleAdmin()">VOLTAR AO JOGO</button>
 </div>
 
 <script>
     const items = ['🥛', '🥚', '🍯', '🚜'];
     let currentId = "5401881400";
-    let rev = 0, totalSaldos = 0;
-    let users = { "5401881400": { bal: 0, act: 20 } };
+    let globalRev = 0;
+    // Base de dados local para teste multi-user [cite: 2026-03-22]
+    let db = { "5401881400": { bal: 0, act: 20 } };
 
-    function createGrid() {
+    function init() {
         const g = document.getElementById('grid');
         g.innerHTML = '';
         for(let i=0; i<49; i++) {
             const c = document.createElement('div');
             c.className = 'cell';
             c.innerHTML = `<span>${items[Math.floor(Math.random()*4)]}</span>`;
-            // Uso de mousedown e touchstart para garantir resposta imediata
-            c.addEventListener('mousedown', play);
-            c.addEventListener('touchstart', (e) => { e.preventDefault(); play(); });
+            c.onclick = play;
             g.appendChild(c);
         }
-        refresh();
+        update();
     }
 
     function play() {
-        let u = users[currentId];
-        if(u.act > 0) {
-            u.act--;
-            u.bal += 0.0005;
-            totalSaldos += 0.0005;
-            refresh();
-        } else {
-            alert("Ações esgotadas! Vê um anúncio.");
-        }
+        if(db[currentId].act > 0) {
+            db[currentId].act--;
+            db[currentId].bal += 0.0005;
+            update();
+        } else { alert("Ações esgotadas!"); }
     }
 
-    function viewAd() {
-        rev += 0.0010;
-        users[currentId].act += 10;
-        alert("Anúncio visto com sucesso!");
-        refresh();
+    function getAd() {
+        globalRev += 0.0010;
+        db[currentId].act += 10;
+        update();
+        alert("Anúncio visto!");
     }
 
-    function switchUser(id) {
-        if(!users[id]) users[id] = { bal: 0, act: 20 };
+    function switchUser(forcedId) {
+        const id = forcedId || document.getElementById('new-id').value;
+        if(!id) return;
+        if(!db[id]) db[id] = { bal: 0, act: 20 };
         currentId = id.toString();
-        refresh();
-        toggleAdmin();
+        update();
+        if(!forcedId) toggleAdmin();
     }
 
     function toggleAdmin() {
-        const a = document.getElementById('admin');
-        a.style.display = a.style.display === 'block' ? 'none' : 'block';
+        const p = document.getElementById('admin-panel');
+        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
     }
 
-    function refresh() {
+    function update() {
+        const u = db[currentId];
         document.getElementById('ui-id').innerText = currentId;
-        document.getElementById('ui-bal').innerText = `€ ${users[currentId].bal.toFixed(4)}`;
-        document.getElementById('ui-act').innerText = users[currentId].act;
-        document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
-        document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
+        document.getElementById('ui-bal').innerText = `€ ${u.bal.toFixed(4)}`;
+        document.getElementById('ui-act').innerText = u.act;
+        
+        // Atualizar Painel Admin
+        document.getElementById('adm-rev').innerText = `€ ${globalRev.toFixed(4)}`;
+        
+        let totalPass = 0;
+        let rows = "";
+        for(let id in db) {
+            totalPass += db[id].bal;
+            rows += `<tr><td>#${id}</td><td>€ ${db[id].bal.toFixed(4)}</td><td>${db[id].act}</td></tr>`;
+        }
+        document.getElementById('adm-pass').innerText = `€ ${totalPass.toFixed(4)}`;
+        document.getElementById('user-rows').innerHTML = rows;
     }
 
-    window.onload = createGrid;
+    window.onload = init;
 </script>
 </body>
 </html>
