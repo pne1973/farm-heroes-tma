@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.97 - SEQUENTIAL ADS</title>
+    <title>Ouro da Quinta v33.98 - ICON FIX</title>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
@@ -20,17 +20,17 @@
 
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 18px; }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.1s; }
+        .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
         
         .powers { display: flex; justify-content: center; gap: 10px; padding: 15px; }
         .p-btn { background: white; padding: 8px 12px; border-radius: 15px; border: none; font-weight: bold; font-size: 11px; display: flex; align-items: center; gap: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .p-count { background: var(--red); color: white; border-radius: 50%; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; }
 
-        /* Modal de Anúncio Único Sequencial */
         #ad-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; flex-direction: column; }
-        .ad-window { width: 300px; height: 250px; background: white; border: 6px solid #fbbc05; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
-        #ad-counter-label { position: absolute; top: -35px; color: white; font-weight: bold; font-size: 14px; }
-        .ad-close-btn { margin-top: 25px; padding: 12px 25px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; visibility: hidden; }
+        .ad-window { width: 300px; height: 250px; background: white; border: 6px solid #fbbc05; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        #ad-counter-label { margin-bottom: 15px; color: white; font-weight: bold; font-size: 16px; }
+        .ad-close-btn { margin-top: 25px; padding: 12px 30px; background: var(--accent); color: white; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; visibility: hidden; }
 
         #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; }
         #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
@@ -38,16 +38,16 @@
 </head>
 <body>
 
-<div id="top-ad">BANNER v33.97</div>
+<div id="top-ad">BANNER v33.98 | FIXING ICONS</div>
 <button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
 
 <div id="header">
     <div class="stats-row">
-        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">TESTE SEQUENCIAL</span></div>
+        <div class="stat-card"><span class="stat-l">Fase</span><span class="stat-v">TESTE</span></div>
         <div class="stat-card"><span class="stat-l">Vidas</span><span class="stat-v" id="life-ui">❤️</span></div>
         <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">1</span></div>
     </div>
-    <div style="background:white; padding:5px 25px; border-radius:20px; margin-top:5px; font-weight:bold;">
+    <div style="background:white; padding:5px 25px; border-radius:20px; margin-top:5px; font-weight:bold; border:1px solid #ddd;">
         🥛<span id="m1">5</span> 🥚<span id="m2">5</span> 🍯<span id="m3">5</span>
     </div>
 </div>
@@ -61,37 +61,38 @@
 </div>
 
 <div id="ad-overlay">
-    <div id="ad-counter-label">Anúncio 1 de 1</div>
+    <div id="ad-counter-label">A carregar anúncio...</div>
     <div class="ad-window">
-        <b style="font-size: 18px; color: #444;">ANÚNCIO GOOGLE</b>
-        <span style="font-size: 12px; color: #999; margin-top: 10px;">300 x 250</span>
+        <b style="font-size: 20px; color: #333;">PUBLICIDADE</b>
+        <span style="font-size: 14px; color: #666; margin-top: 10px;">Format: 300x250</span>
     </div>
-    <button id="btn-next-ad" class="ad-close-btn" onclick="processAdQueue()">FECHAR ANÚNCIO</button>
+    <button id="btn-next-ad" class="ad-close-btn" onclick="processAdQueue()">CONTINUAR</button>
 </div>
 
 <div id="admin-panel">
-    <h2>PAINEL DE AUDITORIA</h2>
-    <p>Receita Acumulada: <span style="color:green" id="adm-rev">€ 0.0020</span></p>
-    <button onclick="toggleAdmin()">FECHAR</button>
+    <h2>MODO ADMIN: 5401881400</h2>
+    <p>Receita: <span style="color:green" id="adm-rev">€ 0.0020</span></p>
+    <button onclick="toggleAdmin()" style="padding:10px; width:100%;">FECHAR</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.97 | SEQUENTIAL AD FLOW</div>
+<div id="footer">OURO DA QUINTA v33.98 | ICON RENDER RECOVERY</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
     let actions=1, lives=1, boosters={bomb:1, tractor:1, shovel:1}, mission={'🥛':5,'🥚':5,'🍯':5};
     let gridArray=[], rev=0.0020, selectedIdx=null;
-    
-    // Controlo de Fila de Ads
-    let adsRemaining = 0, totalAdsInSequence = 0, currentRewardType = null;
+    let adsRemaining=0, totalAdsInSequence=0, currentRewardType=null;
 
     function initGrid() {
         const gridEl = document.getElementById('grid');
-        gridEl.innerHTML = ''; gridArray = [];
+        gridEl.innerHTML = ''; 
+        gridArray = [];
         for (let i = 0; i < 49; i++) {
-            gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
+            const icon = icons[Math.floor(Math.random() * icons.length)];
+            gridArray.push(icon);
             const cell = document.createElement('div');
             cell.className = 'cell';
+            cell.innerText = icon; // Injeção direta do ícone
             cell.onclick = () => handleCell(i);
             gridEl.appendChild(cell);
         }
@@ -102,31 +103,28 @@
         if (lives <= 0) { startAdSequence('life', 1); return; }
         if (actions <= 0) { triggerAdOptions(); return; }
         
+        const cells = document.querySelectorAll('.cell');
         if (selectedIdx === null) {
-            selectedIdx = i; document.querySelectorAll('.cell')[i].style.outline = "3px solid blue";
+            selectedIdx = i;
+            cells[i].classList.add('selected');
         } else {
+            cells[selectedIdx].classList.remove('selected');
+            // Simula movimento para teste
             actions--; 
             updateUI();
             selectedIdx = null;
-            document.querySelectorAll('.cell').forEach(c => c.style.outline = "none");
-            if (actions <= 0) setTimeout(triggerAdOptions, 500);
+            if (actions <= 0) setTimeout(triggerAdOptions, 400);
         }
     }
 
     function triggerAdOptions() {
-        let opt = prompt("Escolha bónus:\n1 - +5 Ações (2 Ads)\n2 - +10 Ações (3 Ads)\n3 - +15 Ações (4 Ads)");
-        if (opt == "1") startAdSequence('act5', 2);
-        else if (opt == "2") startAdSequence('act10', 3);
-        else if (opt == "3") startAdSequence('act15', 4);
+        let opt = prompt("Escolha o bónus:\n1: +5 Ações (2 Ads)\n2: +10 Ações (3 Ads)\n3: +15 Ações (4 Ads)");
+        if (opt=="1") startAdSequence('act5', 2);
+        else if (opt=="2") startAdSequence('act10', 3);
+        else if (opt=="3") startAdSequence('act15', 4);
         else { lives--; actions=1; updateUI(); if(lives<=0) startAdSequence('life', 1); }
     }
 
-    function useBooster(type) {
-        if (boosters[type] > 0) { boosters[type]--; updateUI(); }
-        else { startAdSequence('boosters', 2); }
-    }
-
-    // LÓGICA DE SEQUÊNCIA DE ANÚNCIOS [cite: 2026-03-30]
     function startAdSequence(type, count) {
         currentRewardType = type;
         adsRemaining = count;
@@ -137,26 +135,19 @@
 
     function showNextAd() {
         const btn = document.getElementById('btn-next-ad');
-        const label = document.getElementById('ad-counter-label');
         btn.style.visibility = 'hidden';
-        
-        let currentNum = (totalAdsInSequence - adsRemaining) + 1;
-        label.innerText = `Anúncio ${currentNum} de ${totalAdsInSequence}`;
-        
-        // Simula tempo de visualização obrigatória
+        document.getElementById('ad-counter-label').innerText = `Anúncio ${(totalAdsInSequence - adsRemaining) + 1} de ${totalAdsInSequence}`;
         setTimeout(() => {
             btn.style.visibility = 'visible';
-            btn.innerText = adsRemaining > 1 ? "PRÓXIMO ANÚNCIO" : "RECOLHER RECOMPENSA";
+            btn.innerText = adsRemaining > 1 ? "PRÓXIMO" : "RECEBER RECOMPENSA";
         }, 2000);
     }
 
     function processAdQueue() {
         adsRemaining--;
-        rev += 0.0005; // Cada anúncio visualizado soma à receita
-        
-        if (adsRemaining > 0) {
-            showNextAd();
-        } else {
+        rev += 0.0005;
+        if (adsRemaining > 0) showNextAd();
+        else {
             applyReward();
             document.getElementById('ad-overlay').style.display = 'none';
         }
@@ -165,11 +156,14 @@
 
     function applyReward() {
         if (currentRewardType === 'life') { lives = 1; actions = 1; }
-        if (currentRewardType === 'act5') actions = 5;
-        if (currentRewardType === 'act10') actions = 10;
-        if (currentRewardType === 'act15') actions = 15;
-        if (currentRewardType === 'boosters') { boosters.bomb+=1; boosters.tractor+=1; boosters.shovel+=1; }
+        if (currentRewardType.startsWith('act')) actions = parseInt(currentRewardType.replace('act',''));
+        if (currentRewardType === 'boosters') { boosters.bomb++; boosters.tractor++; boosters.shovel++; }
         currentRewardType = null;
+    }
+
+    function useBooster(type) {
+        if (boosters[type] > 0) { boosters[type]--; updateUI(); alert("Booster Usado!"); }
+        else startAdSequence('boosters', 2);
     }
 
     function updateUI() {
@@ -183,10 +177,11 @@
 
     function toggleAdmin() {
         const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
     }
 
-    initGrid();
+    // Inicialização forçada
+    window.onload = initGrid;
 </script>
 </body>
 </html>
