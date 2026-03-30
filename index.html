@@ -3,39 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.64 - VISUAL SYNC FIX</title>
+    <title>Ouro da Quinta v33.66 - STRESS TEST MODE</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
+        body { margin: 0; padding: 0; width: 100%; height: 100vh; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; padding-bottom: 20px; }
+        #app-shell { display: flex; flex-direction: column; height: 100%; align-items: center; justify-content: space-between; padding: 10px 0 30px 0; }
 
-        .mock-ad { width: 320px; height: 50px; background: #f0f0f0; border: 1px dashed #ccc; color: #aaa; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin: 5px 0; }
+        .mock-ad { width: 320px; height: 50px; background: #eee; border: 1px dashed #bbb; color: #999; font-size: 10px; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
 
-        #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
-        .v { font-size: 16px; font-weight: 800; color: var(--accent); display: block; }
-        .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
+        #stats-row { width: 92%; display: flex; justify-content: space-between; gap: 8px; }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; flex: 1; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .v { font-size: 14px; font-weight: 800; color: var(--accent); display: block; }
+        .l { font-size: 8px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        /* MISSÃO COM ÍCONES REAIS (v33.64) [cite: 2026-03-30] */
-        #goals-bar { background: var(--white); padding: 8px 15px; border-radius: 25px; display: flex; gap: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); margin: 8px 0; }
-        .goal-item { display: flex; align-items: center; gap: 6px; font-weight: 800; font-size: 14px; }
-        .goal-item img { width: 20px; height: 20px; }
+        #goals-bar { background: var(--white); padding: 8px 20px; border-radius: 25px; display: flex; gap: 15px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); }
+        .goal-item { display: flex; align-items: center; gap: 5px; font-weight: 800; font-size: 14px; }
+        .goal-item img { width: 22px; height: 22px; }
 
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
-            gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
+            gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .cell img { width: 34px; height: 34px; pointer-events: none; transition: 0.2s; }
-        .selected { background: #b9f6ca; border: 3px solid var(--accent); transform: scale(1.05); }
-        .pop { animation: popAnim 0.3s forwards; }
-        @keyframes popAnim { 100% { transform: scale(0); opacity: 0; } }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .cell img { width: 32px; height: 32px; pointer-events: none; }
+        .selected { border: 3px solid var(--accent); background: #b9f6ca; z-index: 2; }
 
-        #boosters { display: flex; gap: 10px; margin-top: 10px; }
-        .b-btn { background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; }
+        #boosters { display: flex; gap: 8px; }
+        .b-btn { background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 6px; position: relative; }
+        .b-count { position: absolute; top: -5px; right: -5px; background: var(--red); color: white; font-size: 8px; padding: 2px 5px; border-radius: 10px; }
+
+        #ad-modal { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); display: none; flex-direction: column; align-items: center; justify-content: center; z-index: 1000; }
+        .ad-box { background: var(--white); padding: 25px; border-radius: 24px; color: #333; width: 85%; text-align: center; }
+        .btn-ad { background: var(--accent); color: white; padding: 14px 24px; border-radius: 12px; border: none; font-weight: 800; margin-top: 20px; width: 100%; font-size: 14px; }
 
         #admin-footer { width: 100%; background: #202124; color: #fff; padding: 6px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; }
     </style>
@@ -43,47 +45,54 @@
 <body>
 
 <div id="app-shell">
-    <div class="mock-ad">BANNER EXEMPLO (TOP)</div>
+    <div class="mock-ad">BANNER EXEMPLO (TOPO)</div>
 
-    <div id="stats">
-        <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
-        <div style="text-align:center"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
-        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)" id="act-ui">21</span></div>
+    <div id="stats-row">
+        <div class="stat-card"><span class="l">Vidas</span><span class="v" id="life-ui" style="color:var(--red)">❤️ 1</span></div>
+        <div class="stat-card"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span class="l">Ações</span><span class="v" style="color:var(--red)" id="act-ui">1</span></div>
     </div>
 
     <div id="goals-bar">
-        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/1998/1998592.png"> <span id="g0">10</span></div>
-        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/1998/1998610.png"> <span id="g1">12</span></div>
-        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/4028/4028682.png"> <span id="g2">5</span></div>
+        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/1998/1998606.png"> <span id="g0">10</span></div>
+        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/1998/1998592.png"> <span id="g1">12</span></div>
+        <div class="goal-item"><img src="https://cdn-icons-png.flaticon.com/128/10432/10432551.png"> <span id="g2">5</span></div>
     </div>
 
     <div id="grid"></div>
 
     <div id="boosters">
-        <div class="b-btn">💣 BOMBA</div>
-        <div class="b-btn">🚜 TRATOR</div>
-        <div class="b-btn">⛏️ PÁ</div>
+        <div class="b-btn">💣 BOMBA <span class="b-count">2</span></div>
+        <div class="b-btn">🚜 TRATOR <span class="b-count">2</span></div>
+        <div class="b-btn">⛏️ PÁ <span class="b-count">3</span></div>
     </div>
 
-    <div class="mock-ad">BANNER EXEMPLO (BOTTOM)</div>
-    <div id="admin-footer">ADMIN: 5401881400 | v33.64 | FULL ASSET SYNC</div>
+    <div class="mock-ad">BANNER EXEMPLO (FUNDO)</div>
+    <div id="admin-footer">ADMIN: 5401881400 | v33.66 | 1 LIFE & 1 ACTION TEST</div>
+</div>
+
+<div id="ad-modal">
+    <div class="ad-box">
+        <h2 style="margin-top:0">Fim de Jogo!</h2>
+        <p>Estás sem vidas e sem ações. Queres continuar a ganhar saldo?</p>
+        <button class="btn-ad" onclick="watchAd()">📺 VER ANÚNCIO (+1 VIDA & +5 AÇÕES)</button>
+    </div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // ÍCONES OFICIAIS [cite: 2026-03-30]
+    // ÍCONES RESTRITOS PARA SINCRONIA TOTAL [cite: 2026-03-30]
     const farmIcons = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png',  // 2: Abelha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // 3: Ovelha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png'  // 4: Porco
+        'https://cdn-icons-png.flaticon.com/128/1998/1998606.png', // Gato
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca
+        'https://cdn-icons-png.flaticon.com/128/10432/10432551.png' // Nota Musical
     ];
 
-    let cells = [];
-    let selected = null;
-    let actions = 21;
+    let actions = 1; // 1 Ação [cite: 2026-03-30]
+    let lives = 1;   // 1 Vida [cite: 2026-03-30]
     let balance = 0.0000;
+    let selected = null;
+    let cells = [];
     let goals = [10, 12, 5];
 
     function init() {
@@ -91,12 +100,8 @@
         const grid = document.getElementById('grid');
         grid.innerHTML = '';
         cells = [];
-        
         for (let i = 0; i < 49; i++) {
-            let type;
-            do { type = Math.floor(Math.random() * farmIcons.length); } 
-            while (isInitialMatch(i, type));
-
+            let type = Math.floor(Math.random() * farmIcons.length);
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.idx = i;
@@ -108,15 +113,8 @@
         }
     }
 
-    function isInitialMatch(i, type) {
-        let row = Math.floor(i/7), col = i%7;
-        if (col >= 2 && cells[i-1]?.dataset.type == type && cells[i-2]?.dataset.type == type) return true;
-        if (row >= 2 && cells[i-7]?.dataset.type == type && cells[i-14]?.dataset.type == type) return true;
-        return false;
-    }
-
     function handleMove(cell) {
-        if (actions <= 0) return;
+        if (actions <= 0 || lives <= 0) return;
         if (!selected) {
             selected = cell;
             cell.classList.add('selected');
@@ -125,11 +123,16 @@
             const idx2 = parseInt(cell.dataset.idx);
             if ([1, -1, 7, -7].includes(idx1 - idx2)) {
                 swap(selected, cell);
-                if (!processMatches()) {
+                if (!checkMatches()) {
                     setTimeout(() => swap(selected, cell), 250);
                 } else {
                     actions--;
                     updateUI();
+                    if (actions <= 0) {
+                        lives = 0; // Perde a última vida ao acabar as ações [cite: 2026-03-30]
+                        updateUI();
+                        setTimeout(showAdModal, 600);
+                    }
                 }
             }
             selected.classList.remove('selected');
@@ -138,15 +141,12 @@
     }
 
     function swap(c1, c2) {
-        const t = c1.dataset.type;
-        const h = c1.innerHTML;
-        c1.dataset.type = c2.dataset.type;
-        c1.innerHTML = c2.innerHTML;
-        c2.dataset.type = t;
-        c2.innerHTML = h;
+        const t = c1.dataset.type; const h = c1.innerHTML;
+        c1.dataset.type = c2.dataset.type; c1.innerHTML = c2.innerHTML;
+        c2.dataset.type = t; c2.innerHTML = h;
     }
 
-    function processMatches() {
+    function checkMatches() {
         let matched = new Set();
         for (let i = 0; i < 49; i++) {
             let row = Math.floor(i/7), col = i%7;
@@ -157,24 +157,15 @@
                 matched.add(i); matched.add(i+7); matched.add(i+14);
             }
         }
-
         if (matched.size > 0) {
             matched.forEach(idx => {
                 const type = cells[idx].dataset.type;
-                if (type < 3 && goals[type] > 0) goals[type]--; // Apenas vaca, galinha, abelha
+                if (goals[type] > 0) goals[type]--;
                 balance += 0.0005;
-                cells[idx].firstChild.classList.add('pop');
+                const newType = Math.floor(Math.random() * farmIcons.length);
+                cells[idx].dataset.type = newType;
+                cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
             });
-            tg.HapticFeedback.impactOccurred('medium');
-            setTimeout(() => {
-                matched.forEach(idx => {
-                    const newType = Math.floor(Math.random() * farmIcons.length);
-                    cells[idx].dataset.type = newType;
-                    cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
-                });
-                updateUI();
-                processMatches();
-            }, 350);
             return true;
         }
         return false;
@@ -183,9 +174,22 @@
     function updateUI() {
         document.getElementById('act-ui').innerText = actions;
         document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
+        document.getElementById('life-ui').innerText = `❤️ ${lives}`;
         document.getElementById('g0').innerText = goals[0];
         document.getElementById('g1').innerText = goals[1];
         document.getElementById('g2').innerText = goals[2];
+    }
+
+    function showAdModal() {
+        document.getElementById('ad-modal').style.display = 'flex';
+    }
+
+    function watchAd() {
+        document.getElementById('ad-modal').style.display = 'none';
+        lives = 1;
+        actions = 5;
+        updateUI();
+        tg.showPopup({ title: 'Recompensa!', message: 'Viste o anúncio. Recebeste +1 vida e +5 ações!' });
     }
 
     init();
