@@ -3,47 +3,68 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.89 - ADMIN FIX</title>
+    <title>Ouro da Quinta v33.90 - AUDIT & LEVELS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
-        body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; --black: #1a1a1a; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Botão Admin Flutuante */
-        #admin-trigger { position: fixed; top: 10px; right: 10px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; }
+        /* Botão Admin Flutuante v33.89 [cite: 2026-03-30] */
+        #admin-trigger { position: fixed; top: 12px; right: 12px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 18px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; font-size: 12px; }
 
-        #header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,0.9); border-bottom: 1px solid #ddd; }
+        #game-header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; background: rgba(255,255,255,0.95); border-bottom: 1px solid #eee; z-index: 10; }
         .stats-row { width: 90%; display: flex; justify-content: space-around; gap: 8px; margin-right: 60px; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.08); border: 1px solid #eee; }
+        .stat-v { font-size: 15px; font-weight: 800; color: var(--accent); }
+        .stat-l { font-size: 9px; color: #777; text-transform: uppercase; display: block; }
         
-        #mission-bar { background: var(--white); padding: 10px 25px; border-radius: 30px; display: flex; gap: 20px; font-weight: 800; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin-top: 5px; }
+        #mission-bar { background: var(--white); padding: 8px 25px; border-radius: 30px; display: flex; gap: 20px; font-weight: 800; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); border: 1px solid #eee; font-size: 14px; }
+        .m-item { display: flex; align-items: center; gap: 4px; }
 
+        /* GRID SYSTEM v33.89 [cite: 2026-03-30] */
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 14px; }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
-        .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; transition: transform 0.1s; border-bottom: 3px solid rgba(0,0,0,0.1); }
+        .cell:active { transform: scale(0.9); }
+        .selected { outline: 4px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
         
-        /* Painel Admin */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; overflow-y: auto; }
-        .admin-btn { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--blue); color: white; }
+        /* DETAILED ADMIN PANEL [cite: 2026-03-30] */
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f8f9fa; z-index: 9999; padding: 25px; overflow-y: auto; }
+        .admin-section { background: white; padding: 18px; border-radius: 15px; margin-bottom: 15px; box-shadow: 0 3px 6px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .admin-section h3 { margin-top: 0; color: #555; border-bottom: 2px solid #eee; padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; }
+        .ledger-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: #333; }
+        .ledger-val { font-weight: 700; }
+        .profit-positive { color: var(--accent); }
+        .profit-negative { color: var(--red); }
+        
+        .admin-btn { width: 100%; padding: 15px; margin: 8px 0; border: none; border-radius: 10px; font-weight: 800; cursor: pointer; font-size: 14px; transition: opacity 0.1s; }
+        .admin-btn:active { opacity: 0.8; }
+        .btn-blue { background: var(--blue); color: white; }
+        .btn-red { background: var(--red); color: white; }
 
-        #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
+        /* LEVEL UP ALERT */
+        #level-alert { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: var(--accent); color: white; padding: 30px; border-radius: 20px; text-align: center; font-weight: 800; font-size: 20px; z-index: 8000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+
+        #footer { background: var(--black); color: #fff; padding: 12px; text-align: center; font-size: 10px; font-weight: bold; letter-spacing: 0.5px; }
     </style>
 </head>
 <body>
 
 <button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
 
-<div id="header">
+<div id="level-alert">🎉 NÍVEL CONCLUÍDO! 🎉<br><span style="font-size:14px; font-weight:400;">Novas metas definidas.</span></div>
+
+<div id="game-header">
     <div class="stats-row">
-        <div class="stat-card"><span>Nível</span><br><span class="stat-v" id="lvl-ui">1</span></div>
-        <div class="stat-card"><span>Saldo</span><br><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
-        <div class="stat-card"><span>Ações</span><br><span class="stat-v" id="act-ui">20</span></div>
+        <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
+        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
     </div>
     <div id="mission-bar">
-        <span>🥛 <span id="m1">5</span></span> <span>🥚 <span id="m2">5</span></span> <span>🍯 <span id="m3">5</span></span>
+        <div class="m-item">🥛 <span id="m1">5</span></div>
+        <div class="m-item">🥚 <span id="m2">5</span></div>
+        <div class="m-item">🍯 <span id="m3">5</span></div>
     </div>
 </div>
 
@@ -52,25 +73,50 @@
 </div>
 
 <div id="admin-panel">
-    <h2 style="color:var(--accent)">PAINEL DE CONTROLO</h2>
-    <hr>
-    <p>ID ADMINISTRADOR: 5401881400</p>
-    <div style="background:white; padding:15px; border-radius:10px; margin:15px 0;">
-        <p>Ações: <strong id="adm-act">20</strong></p>
-        <p>Saldo: <strong id="adm-bal">€ 0.0000</strong></p>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <h2 style="margin:0; color:var(--accent);">Contabilidade Social Detalhada [cite: 2026-03-30]</h2>
+        <button onclick="toggleAdmin()" style="background:#555; color:white; border:none; padding:8px 15px; border-radius:8px; font-weight:bold;">X</button>
     </div>
-    <button class="admin-btn" onclick="addActions()">+50 AÇÕES</button>
-    <button class="admin-btn" onclick="resetGame()" style="background:var(--red)">RESET TOTAL</button>
-    <button class="admin-btn" style="background:#555" onclick="toggleAdmin()">FECHAR PAINEL</button>
+    <p style="font-size:12px; color:#666;">ID ADMINISTRADOR: 5401881400 | v33.90</p>
+
+    <div class="admin-section">
+        <h3>1. Livro-Razão de Auditoria</h3>
+        <div class="ledger-row"><span>Receita Bruta (Banners):</span><span class="ledger-val profit-positive">+ € 0.0020</span></div>
+        <div class="ledger-row"><span>Custo Operacional (Matches DB):</span><span class="ledger-val profit-negative" id="adm-cost">- € 0.0000</span></div>
+        <div style="border-top:1px dashed #ccc; margin-top:10px; padding-top:10px; font-weight:800; display:flex; justify-content:space-between;">
+            <span>LUCRO LÍQUIDO REAL:</span>
+            <span id="adm-profit" class="profit-positive">€ 0.0020</span>
+        </div>
+    </div>
+
+    <div class="admin-section">
+        <h3>2. Estatísticas do Utilizador</h3>
+        <p>Ações Disponíveis: <strong id="adm-act">20</strong></p>
+        <p>Total Matches Realizados: <strong id="adm-matches">0</strong></p>
+        <p>Nível Atual: <strong id="adm-lvl">1</strong></p>
+    </div>
+
+    <div class="admin-section">
+        <h3>3. Ferramentas de Teste</h3>
+        <button class="admin-btn btn-blue" onclick="forceAddActions(50)">FORÇAR +50 AÇÕES</button>
+        <button class="admin-btn btn-red" onclick="forceResetGame()">RESET TOTAL PARA NÍVEL 1</button>
+    </div>
+
+    <p style="font-size:10px; color:#aaa; text-align:center;">Nota de Auditoria: Os ganhos de match são simbólicos (€ 0.0001) para incentivar o jogo, mas geram custos operacionais na base de dados (€ 0.0005 por match) [cite: 2026-03-30].</p>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.89 | TOTAL ADMIN OVERRIDE</div>
+<div id="footer">OURO DA QUINTA v33.90 | AUDIT & LEVELS ENABLED | ID: 5401881400</div>
 
 <script>
+    const tg = window.Telegram.WebApp;
     const icons = ['🥛', '🥚', '🍯', '🚜'];
     let level = 1, balance = 0.0000, actions = 20, selectedIdx = null;
     let mission = { '🥛': 5, '🥚': 5, '🍯': 5 };
     let gridArray = [];
+    
+    // Detailed Ledger Variables [cite: 2026-03-30]
+    let totalMatches = 0;
+    const grossIncomeAds = 0.0020; // Receita fixa simulada de banners
 
     function initGrid() {
         const gridEl = document.getElementById('grid');
@@ -79,10 +125,12 @@
             gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
             const cell = document.createElement('div');
             cell.className = 'cell';
+            cell.dataset.idx = i;
             cell.onclick = () => handleCellClick(i);
             gridEl.appendChild(cell);
         }
-        checkAndResolve(true);
+        // Limpar matches iniciais sem cobrar ações ou gerar custos operacionais [cite: 2026-03-30]
+        checkAndResolveMatches(true);
     }
 
     function handleCellClick(idx) {
@@ -93,7 +141,7 @@
             cells[idx].classList.add('selected');
         } else {
             if (isAdjacent(selectedIdx, idx)) {
-                executeMove(selectedIdx, idx);
+                executeSwap(selectedIdx, idx);
             }
             cells[selectedIdx].classList.remove('selected');
             selectedIdx = null;
@@ -104,22 +152,36 @@
         return (Math.abs(Math.floor(i1/7)-Math.floor(i2/7)) + Math.abs((i1%7)-(i2%7))) === 1;
     }
 
-    async function executeMove(i1, i2) {
-        let t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
+    async function executeSwap(i1, i2) {
+        swapData(i1, i2);
         let matches = findMatches();
-        if (matches.length > 0) { actions--; await resolveMatches(); }
-        else { t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t; }
+        if (matches.length > 0) {
+            actions--;
+            totalMatches++; // Incrementa custo operacional [cite: 2026-03-30]
+            await resolveMatches(false);
+            checkLevelProgress(); // Nova verificação de nível [cite: 2026-03-30]
+        } else {
+            // Reverte se não houver match [cite: 2026-03-30]
+            swapData(i1, i2);
+        }
         updateUI();
+    }
+
+    function swapData(i1, i2) {
+        let t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
+        renderGrid();
     }
 
     function findMatches() {
         let matchSet = new Set();
+        // Horizontal
         for (let r = 0; r < 7; r++) {
             for (let c = 0; c < 5; c++) {
                 let i = r * 7 + c;
                 if (gridArray[i] === gridArray[i+1] && gridArray[i] === gridArray[i+2]) { matchSet.add(i); matchSet.add(i+1); matchSet.add(i+2); }
             }
         }
+        // Vertical
         for (let c = 0; c < 7; c++) {
             for (let r = 0; r < 5; r++) {
                 let i = r * 7 + c;
@@ -129,15 +191,24 @@
         return Array.from(matchSet);
     }
 
-    async function resolveMatches(init = false) {
+    async function resolveMatches(isInitialCheck = false) {
         let matches = findMatches();
         if (matches.length === 0) return;
+        
         matches.forEach(idx => {
-            if (!init && mission[gridArray[idx]] > 0) { mission[gridArray[idx]]--; balance += 0.0001; }
+            // Lógica de colheita/saldo [cite: 2026-03-30]
+            if (!isInitialCheck && mission[gridArray[idx]] > 0) {
+                mission[gridArray[idx]]--;
+                balance += 0.0001; 
+            }
             gridArray[idx] = null;
         });
-        render(); await new Promise(r => setTimeout(r, 200));
-        applyGravity(); await resolveMatches(init);
+        
+        renderGrid();
+        await new Promise(r => setTimeout(r, 200));
+        applyGravity();
+        // Verificação recursiva para matches em cadeia [cite: 2026-03-30]
+        await resolveMatches(isInitialCheck);
     }
 
     function applyGravity() {
@@ -150,35 +221,69 @@
             }
             for (let i = 0; i < empty; i++) gridArray[i*7+c] = icons[Math.floor(Math.random() * icons.length)];
         }
-        render();
+        renderGrid();
     }
 
-    function render() {
+    function renderGrid() {
         const cells = document.querySelectorAll('.cell');
         gridArray.forEach((icon, i) => cells[i].innerText = icon || "");
     }
 
     function updateUI() {
+        // Game UI
         document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
         document.getElementById('act-ui').innerText = actions;
         document.getElementById('lvl-ui').innerText = level;
         document.getElementById('m1').innerText = mission['🥛'];
         document.getElementById('m2').innerText = mission['🥚'];
         document.getElementById('m3').innerText = mission['🍯'];
+        
+        // Detailed Admin Ledger Sync [cite: 2026-03-30]
+        const costDB = totalMatches * 0.0005; // Custo operacional por match [cite: 2026-03-30]
+        const netProfit = grossIncomeAds - costDB;
+        
+        document.getElementById('adm-cost').innerText = `- € ${costDB.toFixed(4)}`;
+        document.getElementById('adm-profit').innerText = `€ ${netProfit.toFixed(4)}`;
+        document.getElementById('adm-profit').className = netProfit >= 0 ? 'profit-positive' : 'profit-negative';
+        
+        document.getElementById('adm-act').innerText = actions;
+        document.getElementById('adm-matches').innerText = totalMatches;
+        document.getElementById('adm-lvl').innerText = level;
     }
 
+    // NOVA LÓGICA DE NÍVEL v33.90 [cite: 2026-03-30]
+    function checkLevelProgress() {
+        // Verifica se TODOS os objetivos da missão chegaram a zero [cite: 2026-03-30]
+        if (mission['🥛'] <= 0 && mission['🥚'] <= 0 && mission['🍯'] <= 0) {
+            level++;
+            // Repõe ações e escala a dificuldade da missão para o próximo nível [cite: 2026-03-30]
+            actions = 20; 
+            mission = { '🥛': 5 + (level * 2), '🥚': 5 + (level * 2), '🍯': 5 + level };
+            
+            // Alerta visual de subida de nível
+            const alert = document.getElementById('level-alert');
+            alert.style.display = 'block';
+            setTimeout(() => {
+                alert.style.display = 'none';
+                initGrid(); // Reinicia grelha para o novo nível [cite: 2026-03-30]
+            }, 2000);
+        }
+    }
+
+    // ADMIN FUNCTIONS
     function toggleAdmin() {
         const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-        document.getElementById('adm-act').innerText = actions;
-        document.getElementById('adm-bal').innerText = `€ ${balance.toFixed(4)}`;
+        const isOpen = p.style.display === 'block';
+        p.style.display = isOpen ? 'none' : 'block';
+        if (!isOpen) updateUI();
     }
+    function forceAddActions(n) { actions += n; toggleAdmin(); updateUI(); }
+    function forceResetGame() { level = 1; balance = 0; actions = 20; totalMatches = 0; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); toggleAdmin(); updateUI(); }
+    async function checkAndResolveMatches(init) { await resolveMatches(init); updateUI(); }
 
-    function addActions() { actions += 50; updateUI(); toggleAdmin(); }
-    function resetGame() { level = 1; balance = 0; actions = 20; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); toggleAdmin(); updateUI(); }
-    async function checkAndResolve(init) { await resolveMatches(init); updateUI(); }
-
+    tg.ready();
     initGrid();
+    updateUI();
 </script>
 </body>
 </html>
