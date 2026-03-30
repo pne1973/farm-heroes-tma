@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.61 - THEME & BANNERS</title>
+    <title>Ouro da Quinta v33.62 - FINAL FIX</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
@@ -12,29 +12,28 @@
 
         #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; padding-bottom: 25px; }
 
-        .mock-ad { width: 320px; height: 50px; background: #eee; border: 1px dashed #bbb; color: #999; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 5px 0; }
+        .mock-ad { width: 320px; height: 50px; background: #f0f0f0; border: 1px dashed #ccc; color: #888; font-size: 10px; display: flex; align-items: center; justify-content: center; margin: 5px 0; border-radius: 8px; }
 
-        #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+        #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .v { font-size: 16px; font-weight: 800; color: var(--accent); display: block; }
         .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        #goals-bar { background: var(--white); padding: 6px 20px; border-radius: 20px; font-size: 14px; font-weight: 800; display: flex; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 5px 0; }
-        
-        #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        #goals-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 800; display: flex; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 10px 0; }
         
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
+            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
             gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
         }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-        .cell img { width: 32px; height: 32px; transition: 0.2s; pointer-events: none; }
-        .selected { background: #b9f6ca; border: 3px solid var(--accent); z-index: 5; transform: scale(1.1); }
-        .exploding { transform: scale(0); opacity: 0; transition: 0.3s; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; position: relative; }
+        .cell img { width: 34px; height: 34px; pointer-events: none; transition: transform 0.2s; }
+        .selected { background: #b9f6ca; border: 3px solid var(--accent); transform: scale(1.05); z-index: 10; }
+        
+        .match-anim { animation: pop 0.4s forwards; }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.2); } 100% { transform: scale(0); opacity: 0; } }
 
-        #boosters { display: flex; gap: 8px; margin-top: 15px; }
-        .b-btn { background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
-        .b-btn span { font-size: 14px; }
+        #boosters { display: flex; gap: 10px; margin-top: 15px; }
+        .b-btn { background: var(--white); padding: 10px 15px; border-radius: 10px; border: 1px solid #ddd; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
 
         #admin-footer { width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; }
     </style>
@@ -42,7 +41,7 @@
 <body>
 
 <div id="app-shell">
-    <div class="mock-ad">BANNER EXEMPLO (TOPO)</div>
+    <div class="mock-ad">BANNER EXEMPLO (TOP)</div>
 
     <div id="stats">
         <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
@@ -51,31 +50,28 @@
     </div>
 
     <div id="goals-bar">
-        <span id="g0">🥛 10</span> <span id="g1">🥚 12</span> <span id="g2">🍯 5</span>
+        <span id="g0">🥛 10</span> | <span id="g1">🐣 12</span> | <span id="g2">🐝 5</span>
     </div>
 
-    <div id="game-zone">
-        <div id="grid"></div>
-        <div id="boosters">
-            <div class="b-btn"><span>💣</span> BOMBA</div>
-            <div class="b-btn"><span>🚜</span> TRATOR</div>
-            <div class="b-btn"><span>⛏️</span> PÁ</div>
-        </div>
+    <div id="grid"></div>
+
+    <div id="boosters">
+        <div class="b-btn">💣 BOMBA</div>
+        <div class="b-btn">🚜 TRATOR</div>
+        <div class="b-btn">⛏️ PÁ</div>
     </div>
 
-    <div class="mock-ad">BANNER EXEMPLO (FUNDO)</div>
-    <div id="admin-footer">ADMIN: 5401881400 | v33.61 | SYNCED ICONS & BANNERS</div>
+    <div class="mock-ad">BANNER EXEMPLO (BOTTOM)</div>
+    <div id="admin-footer">ADMIN: 5401881400 | v33.62 | ICONS HARD-LOCKED</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // APENAS ÍCONES DA MISSÃO (Corrigindo o erro das imagens genéricas) [cite: 2026-03-30]
+    // LISTA RESTRITA: APENAS ANIMAIS DA QUINTA
     const farmIcons = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca (Leite)
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha (Ovo)
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png',  // 2: Abelha (Mel)
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // 3: Ovelha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png'  // 4: Porco
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca
+        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha
+        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // 2: Abelha
     ];
 
     let cells = [];
@@ -91,7 +87,11 @@
         cells = [];
         
         for (let i = 0; i < 49; i++) {
-            const type = Math.floor(Math.random() * farmIcons.length);
+            let type;
+            // Garante que não começa com matches
+            do { type = Math.floor(Math.random() * farmIcons.length); } 
+            while (isMatch(i, type));
+
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.idx = i;
@@ -103,6 +103,13 @@
         }
     }
 
+    function isMatch(i, type) {
+        let row = Math.floor(i / 7), col = i % 7;
+        if (col >= 2 && cells[i-1]?.dataset.type == type && cells[i-2]?.dataset.type == type) return true;
+        if (row >= 2 && cells[i-7]?.dataset.type == type && cells[i-14]?.dataset.type == type) return true;
+        return false;
+    }
+
     function handleMove(cell) {
         if (actions <= 0) return;
         if (!selected) {
@@ -111,10 +118,12 @@
         } else {
             const idx1 = parseInt(selected.dataset.idx);
             const idx2 = parseInt(cell.dataset.idx);
-            if ([1, -1, 7, -7].includes(idx1 - idx2)) {
+            const isNeighbor = [1, -1, 7, -7].includes(idx1 - idx2);
+
+            if (isNeighbor) {
                 swap(selected, cell);
-                if (!checkMatches()) {
-                    setTimeout(() => swap(selected, cell), 300);
+                if (!processMatches()) {
+                    setTimeout(() => swap(selected, cell), 250);
                 } else {
                     actions--;
                     updateUI();
@@ -134,9 +143,8 @@
         c2.innerHTML = h;
     }
 
-    function checkMatches() {
+    function processMatches() {
         let matched = new Set();
-        // Horizontal
         for (let i = 0; i < 49; i++) {
             let row = Math.floor(i/7), col = i%7;
             if (col < 5 && cells[i].dataset.type == cells[i+1].dataset.type && cells[i].dataset.type == cells[i+2].dataset.type) {
@@ -146,13 +154,15 @@
                 matched.add(i); matched.add(i+7); matched.add(i+14);
             }
         }
+
         if (matched.size > 0) {
             matched.forEach(idx => {
                 const type = cells[idx].dataset.type;
                 if (goals[type] > 0) goals[type]--;
                 balance += 0.0005;
-                cells[idx].firstChild.classList.add('exploding');
+                cells[idx].firstChild.classList.add('match-anim');
             });
+            
             setTimeout(() => {
                 matched.forEach(idx => {
                     const newType = Math.floor(Math.random() * farmIcons.length);
@@ -160,8 +170,8 @@
                     cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
                 });
                 updateUI();
-                checkMatches();
-            }, 300);
+                processMatches(); // Re-checar cascatas
+            }, 400);
             return true;
         }
         return false;
@@ -171,8 +181,8 @@
         document.getElementById('act-ui').innerText = actions;
         document.getElementById('bal-ui').innerText = `€ ${balance.toFixed(4)}`;
         document.getElementById('g0').innerText = `🥛 ${goals[0]}`;
-        document.getElementById('g1').innerText = `🥚 ${goals[1]}`;
-        document.getElementById('g2').innerText = `🍯 ${goals[2]}`;
+        document.getElementById('g1').innerText = `🐣 ${goals[1]}`;
+        document.getElementById('g2').innerText = `🐝 ${goals[2]}`;
     }
 
     init();
