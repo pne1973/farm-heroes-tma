@@ -2,139 +2,143 @@
 <html lang="pt-pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v35.04 - SANDBOX TOTAL</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ouro da Quinta v35.05 - FINAL FIX</title>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --brown: #8d6e63; --blue: #4285f4; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; margin: 0; padding: 0; touch-action: manipulation; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --brown: #8d6e63; }
+        * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
         body { background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* HEADER SEM BLOQUEIO */
-        #header { background: #fff; padding: 12px; display: flex; justify-content: space-around; border-bottom: 2px solid #eee; z-index: 100; position: relative; }
+        /* UI SUPERIOR */
+        #header { background: white; padding: 15px; display: flex; justify-content: space-around; border-bottom: 1px solid #ddd; z-index: 10; }
         .stat { text-align: center; }
-        .stat small { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
-        .stat b { font-size: 15px; color: var(--accent); }
+        .stat b { display: block; color: var(--accent); font-size: 18px; }
 
-        /* GRELHA DE JOGO - CAMADA SUPERIOR */
-        #game-area { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 200; position: relative; }
-        .grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; background: var(--brown); padding: 10px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; transition: 0.1s; border: 1px solid rgba(0,0,0,0.05); }
-        .cell:active { transform: scale(0.9); background: #fff176; }
+        /* AREA DE JOGO SEM BLOQUEIOS */
+        #game { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; }
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 45px); 
+            gap: 5px; 
+            background: var(--brown); 
+            padding: 10px; 
+            border-radius: 12px;
+            pointer-events: all !important; /* Força interação */
+        }
+        .cell { 
+            width: 45px; 
+            height: 45px; 
+            background: #fff9c4; 
+            border-radius: 6px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 25px; 
+            cursor: pointer;
+            user-select: none;
+            touch-action: manipulation;
+        }
+        /* CRITICAL FIX: O emoji não pode intercetar o clique */
+        .cell span { pointer-events: none; } 
 
-        /* BOTÃO AUDITORIA */
-        #audit-trigger { position: fixed; top: 12px; right: 12px; background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 50px; font-size: 10px; font-weight: bold; z-index: 300; cursor: pointer; }
+        #btn-ad { background: #4285f4; color: white; border: none; padding: 15px 40px; border-radius: 10px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-        /* PAINEL DE CONTROLO */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; color: #333; }
-        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; border-left: 5px solid var(--accent); }
-        
-        .btn-main { background: var(--blue); color: white; border: none; padding: 15px; border-radius: 10px; font-weight: bold; width: 280px; margin-top: 15px; cursor: pointer; }
+        /* ADMIN PANEL */
+        #admin { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
-<button id="audit-trigger" onclick="toggleAdmin()">AUDITORIA MASTER ⚙️</button>
+<button onclick="toggleAdmin()" style="position:fixed; top:10px; right:10px; z-index:100; background:var(--accent); color:white; border:none; padding:8px 15px; border-radius:50px; font-size:10px;">AUDITORIA ⚙️</button>
 
 <div id="header">
-    <div class="stat"><small>USER ID</small><b id="ui-id">5401881400</b></div>
+    <div class="stat"><small>ID</small><b id="ui-id">5401881400</b></div>
     <div class="stat"><small>SALDO</small><b id="ui-bal">€ 0.0000</b></div>
     <div class="stat"><small>AÇÕES</small><b id="ui-act">20</b></div>
 </div>
 
-<div id="game-area">
+<div id="game">
     <div class="grid" id="grid"></div>
-    <button class="btn-main" onclick="viewAd()">VER ANÚNCIO (+€0.0010 Rev)</button>
+    <button id="btn-ad" onclick="viewAd()">VER ANÚNCIO (+€0.0010 Rev)</button>
 </div>
 
-<div id="admin-panel">
-    <h2 style="margin-bottom:15px; color:var(--accent);">COMANDO CENTRAL v35.04</h2>
-    
+<div id="admin">
+    <h2>PAINEL DE AUDITORIA MASTER</h2>
     <div class="card">
-        <h4>Teste de Multi-Utilizadores</h4>
-        <div style="display:flex; gap:10px; margin-top:10px;">
-            <button onclick="switchUser('5401881400')" style="padding:8px; flex:1;">Admin (Original)</button>
-            <button onclick="switchUser('808476')" style="padding:8px; flex:1;">User #808476</button>
-            <button onclick="switchUser(Math.floor(Math.random()*900000))" style="padding:8px; flex:1;">+ Novo Aleatório</button>
-        </div>
+        <h4>Trocar Utilizador de Teste</h4>
+        <button onclick="switchUser('5401881400')">Admin</button>
+        <button onclick="switchUser('808476')">User 808476</button>
+        <button onclick="switchUser(Math.floor(Math.random()*999999))">Novo Aleatório</button>
     </div>
-
     <div class="card">
-        <h4>Resumo de Auditoria [Global]</h4>
-        <p>Receita Estimada (Ads): <b id="adm-rev">€ 0.0000</b></p>
-        <p>Passivo (Saldos Users): <b id="adm-pass">€ 0.0000</b></p>
+        <p>Receita Global Ads: <b id="adm-rev">€ 0.0000</b></p>
+        <p>Total User Balances: <b id="adm-pass">€ 0.0000</b></p>
     </div>
-
-    <div class="card">
-        <h4>Logs de Origem de Valor</h4>
-        <div id="logs" style="font-size:11px; max-height:150px; overflow-y:auto;"></div>
-    </div>
-
-    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#333; color:white; border:none; border-radius:10px; font-weight:bold;">VOLTAR AO JOGO</button>
+    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:black; color:white; border-radius:10px;">FECHAR</button>
 </div>
 
 <script>
     const items = ['🥛', '🥚', '🍯', '🚜'];
     let currentId = "5401881400";
-    let globalRev = 0, globalPass = 0;
-    let db = { "5401881400": { bal: 0, act: 20 } };
+    let rev = 0, totalSaldos = 0;
+    let users = { "5401881400": { bal: 0, act: 20 } };
 
-    function initGrid() {
+    function createGrid() {
         const g = document.getElementById('grid');
         g.innerHTML = '';
         for(let i=0; i<49; i++) {
-            let c = document.createElement('div');
+            const c = document.createElement('div');
             c.className = 'cell';
-            c.innerText = items[Math.floor(Math.random()*4)];
-            c.onclick = (e) => { e.preventDefault(); handleAction(); };
+            c.innerHTML = `<span>${items[Math.floor(Math.random()*4)]}</span>`;
+            // Uso de mousedown e touchstart para garantir resposta imediata
+            c.addEventListener('mousedown', play);
+            c.addEventListener('touchstart', (e) => { e.preventDefault(); play(); });
             g.appendChild(c);
         }
-        update();
+        refresh();
     }
 
-    function handleAction() {
-        if(db[currentId].act > 0) {
-            db[currentId].act--;
-            db[currentId].bal += 0.0005;
-            globalPass += 0.0005;
-            addLog(currentId, "Clique Grelha", 0.0005, 0);
-            update();
-        } else { alert("Ações esgotadas! Veja um AD."); }
+    function play() {
+        let u = users[currentId];
+        if(u.act > 0) {
+            u.act--;
+            u.bal += 0.0005;
+            totalSaldos += 0.0005;
+            refresh();
+        } else {
+            alert("Ações esgotadas! Vê um anúncio.");
+        }
     }
 
     function viewAd() {
-        globalRev += 0.0010;
-        db[currentId].act += 10;
-        addLog(currentId, "Visualização AD", 0, 0.0010);
-        alert("Recompensa: +10 Ações!");
-        update();
+        rev += 0.0010;
+        users[currentId].act += 10;
+        alert("Anúncio visto com sucesso!");
+        refresh();
     }
 
     function switchUser(id) {
-        if(!db[id]) db[id] = { bal: 0, act: 20 };
+        if(!users[id]) users[id] = { bal: 0, act: 20 };
         currentId = id.toString();
-        update();
-        alert("Sessão trocada para ID: " + currentId);
-    }
-
-    function addLog(id, type, gain, rev) {
-        const l = document.getElementById('logs');
-        l.innerHTML = `<div>[${id}] ${type}: +€${gain.toFixed(4)} (Rev: €${rev.toFixed(4)})</div>` + l.innerHTML;
+        refresh();
+        toggleAdmin();
     }
 
     function toggleAdmin() {
-        const p = document.getElementById('admin-panel');
-        p.style.display = (p.style.display === 'block') ? 'none' : 'block';
+        const a = document.getElementById('admin');
+        a.style.display = a.style.display === 'block' ? 'none' : 'block';
     }
 
-    function update() {
+    function refresh() {
         document.getElementById('ui-id').innerText = currentId;
-        document.getElementById('ui-bal').innerText = `€ ${db[currentId].bal.toFixed(4)}`;
-        document.getElementById('ui-act').innerText = db[currentId].act;
-        document.getElementById('adm-rev').innerText = `€ ${globalRev.toFixed(4)}`;
-        document.getElementById('adm-pass').innerText = `€ ${globalPass.toFixed(4)}`;
+        document.getElementById('ui-bal').innerText = `€ ${users[currentId].bal.toFixed(4)}`;
+        document.getElementById('ui-act').innerText = users[currentId].act;
+        document.getElementById('adm-rev').innerText = `€ ${rev.toFixed(4)}`;
+        document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
     }
 
-    window.onload = initGrid;
+    window.onload = createGrid;
 </script>
 </body>
 </html>
