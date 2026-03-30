@@ -3,40 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Ouro da Quinta v33.49 - CLEAN & FUNCTIONAL</title>
+    <title>Ouro da Quinta v33.61 - THEME & BANNERS</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: 'Segoe UI', sans-serif; }
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; padding: 15px 0 25px 0; }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; padding-bottom: 25px; }
+
+        .mock-ad { width: 320px; height: 50px; background: #eee; border: 1px dashed #bbb; color: #999; font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin: 5px 0; }
 
         #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
         .v { font-size: 16px; font-weight: 800; color: var(--accent); display: block; }
         .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        #goals-bar { background: var(--white); padding: 8px 15px; border-radius: 20px; font-size: 14px; font-weight: 800; display: flex; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        #goals-bar { background: var(--white); padding: 6px 20px; border-radius: 20px; font-size: 14px; font-weight: 800; display: flex; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin: 5px 0; }
+        
+        #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
         
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
+            display: grid; grid-template-columns: repeat(7, 42px); grid-template-rows: repeat(7, 42px); 
             gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
-        .cell img { width: 34px; height: 34px; transition: transform 0.2s, opacity 0.2s; pointer-events: none; }
-        .selected { background: #b9f6ca; border: 3px solid var(--accent); z-index: 5; }
-        .match { transform: scale(0); opacity: 0; transition: 0.3s; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+        .cell img { width: 32px; height: 32px; transition: 0.2s; pointer-events: none; }
+        .selected { background: #b9f6ca; border: 3px solid var(--accent); z-index: 5; transform: scale(1.1); }
+        .exploding { transform: scale(0); opacity: 0; transition: 0.3s; }
 
-        #boosters { display: flex; gap: 10px; }
-        .b-btn { background: var(--white); padding: 10px 18px; border-radius: 12px; border: 1px solid #ddd; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        #boosters { display: flex; gap: 8px; margin-top: 15px; }
+        .b-btn { background: var(--white); padding: 8px 12px; border-radius: 10px; border: 1px solid #ddd; font-size: 10px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
+        .b-btn span { font-size: 14px; }
 
-        #admin-footer { width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 10px; text-align: center; position: fixed; bottom: 0; }
+        #admin-footer { width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 9px; text-align: center; position: fixed; bottom: 0; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
+    <div class="mock-ad">BANNER EXEMPLO (TOPO)</div>
+
     <div id="stats">
         <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
         <div style="text-align:center"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
@@ -44,28 +51,31 @@
     </div>
 
     <div id="goals-bar">
-        <span id="g0">🥛 10</span> | <span id="g1">🥚 12</span> | <span id="g2">🍯 5</span>
+        <span id="g0">🥛 10</span> <span id="g1">🥚 12</span> <span id="g2">🍯 5</span>
     </div>
 
-    <div id="grid"></div>
-
-    <div id="boosters">
-        <div class="b-btn">💣 BOMBA</div>
-        <div class="b-btn">🚜 TRATOR</div>
+    <div id="game-zone">
+        <div id="grid"></div>
+        <div id="boosters">
+            <div class="b-btn"><span>💣</span> BOMBA</div>
+            <div class="b-btn"><span>🚜</span> TRATOR</div>
+            <div class="b-btn"><span>⛏️</span> PÁ</div>
+        </div>
     </div>
 
-    <div id="admin-footer">ADMIN: 5401881400 | v33.49 | ADS REMOVED | MATCH FIXED</div>
+    <div class="mock-ad">BANNER EXEMPLO (FUNDO)</div>
+    <div id="admin-footer">ADMIN: 5401881400 | v33.61 | SYNCED ICONS & BANNERS</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // Ícones corrigidos para as missões: Vaca (0), Galinha (1), Abelha (2), Ovelha (3), Porco (4)
+    // APENAS ÍCONES DA MISSÃO (Corrigindo o erro das imagens genéricas) [cite: 2026-03-30]
     const farmIcons = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', 
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', 
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png',  
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', 
-        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png'  
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca (Leite)
+        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha (Ovo)
+        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png',  // 2: Abelha (Mel)
+        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // 3: Ovelha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png'  // 4: Porco
     ];
 
     let cells = [];
@@ -81,29 +91,19 @@
         cells = [];
         
         for (let i = 0; i < 49; i++) {
-            let type;
-            do { type = Math.floor(Math.random() * farmIcons.length); } 
-            while (avoidInitialMatch(i, type));
-
+            const type = Math.floor(Math.random() * farmIcons.length);
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.idx = i;
             cell.dataset.type = type;
             cell.innerHTML = `<img src="${farmIcons[type]}">`;
-            cell.onclick = () => handleCellClick(cell);
+            cell.onclick = () => handleMove(cell);
             grid.appendChild(cell);
             cells.push(cell);
         }
     }
 
-    function avoidInitialMatch(i, type) {
-        let row = Math.floor(i / 7), col = i % 7;
-        if (col >= 2 && cells[i-1]?.dataset.type == type && cells[i-2]?.dataset.type == type) return true;
-        if (row >= 2 && cells[i-7]?.dataset.type == type && cells[i-14]?.dataset.type == type) return true;
-        return false;
-    }
-
-    function handleCellClick(cell) {
+    function handleMove(cell) {
         if (actions <= 0) return;
         if (!selected) {
             selected = cell;
@@ -113,7 +113,7 @@
             const idx2 = parseInt(cell.dataset.idx);
             if ([1, -1, 7, -7].includes(idx1 - idx2)) {
                 swap(selected, cell);
-                if (!checkAndProcessMatches()) {
+                if (!checkMatches()) {
                     setTimeout(() => swap(selected, cell), 300);
                 } else {
                     actions--;
@@ -134,10 +134,11 @@
         c2.innerHTML = h;
     }
 
-    function checkAndProcessMatches() {
+    function checkMatches() {
         let matched = new Set();
+        // Horizontal
         for (let i = 0; i < 49; i++) {
-            let row = Math.floor(i / 7), col = i % 7;
+            let row = Math.floor(i/7), col = i%7;
             if (col < 5 && cells[i].dataset.type == cells[i+1].dataset.type && cells[i].dataset.type == cells[i+2].dataset.type) {
                 matched.add(i); matched.add(i+1); matched.add(i+2);
             }
@@ -145,23 +146,21 @@
                 matched.add(i); matched.add(i+7); matched.add(i+14);
             }
         }
-
         if (matched.size > 0) {
             matched.forEach(idx => {
                 const type = cells[idx].dataset.type;
                 if (goals[type] > 0) goals[type]--;
-                balance += 0.0001;
-                cells[idx].firstChild.classList.add('match');
+                balance += 0.0005;
+                cells[idx].firstChild.classList.add('exploding');
             });
-            tg.HapticFeedback.notificationOccurred('success');
             setTimeout(() => {
                 matched.forEach(idx => {
                     const newType = Math.floor(Math.random() * farmIcons.length);
                     cells[idx].dataset.type = newType;
                     cells[idx].innerHTML = `<img src="${farmIcons[newType]}">`;
                 });
-                checkAndProcessMatches();
                 updateUI();
+                checkMatches();
             }, 300);
             return true;
         }
