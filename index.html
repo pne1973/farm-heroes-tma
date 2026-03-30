@@ -3,150 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Apex Social v33.47 - Stability & Movement</title>
+    <title>Apex Social v33.48 - CLEAN VERSION</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script async src="https://pl29012868.profitablecpmratenetwork.com/7b/31/43/7b314394efd9e2e979501f8a43f83bcb.js"></script>
-
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; touch-action: none; user-select: none; }
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background: var(--bg); font-family: sans-serif; }
 
-        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: space-between; }
+        #app-shell { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: flex-start; padding-top: 20px; }
 
-        /* MONETIZAÇÃO: FIXED TOP */
-        #top-ad { width: 320px; height: 50px; margin-top: 5px; overflow: hidden; flex-shrink: 0; }
+        /* DASHBOARD LIMPO */
+        #stats { width: 92%; background: var(--white); border-radius: 12px; display: flex; justify-content: space-around; padding: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); margin-bottom: 15px; }
+        .v { font-size: 16px; font-weight: 800; color: var(--accent); display: block; }
+        .l { font-size: 9px; text-transform: uppercase; color: #666; font-weight: 700; }
 
-        /* DASHBOARD */
-        #stats { width: 95%; background: var(--white); border-radius: 10px; display: flex; justify-content: space-around; padding: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-        .v { font-size: 14px; font-weight: 800; color: var(--accent); }
-        .l { font-size: 8px; text-transform: uppercase; color: #666; font-weight: 700; }
-
-        /* ÁREA DE JOGO ESTÁVEL */
-        #game-zone { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; width: 100%; }
+        /* MISSÕES CORRIGIDAS */
+        #goals-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; font-size: 13px; font-weight: 800; margin-bottom: 20px; display: flex; gap: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         
+        /* TABULEIRO CENTRALIZADO */
         #grid { 
-            display: grid; grid-template-columns: repeat(7, 36px); grid-template-rows: repeat(7, 36px); 
-            gap: 4px; padding: 8px; background: #8d6e63; border-radius: 10px;
+            display: grid; grid-template-columns: repeat(7, 44px); grid-template-rows: repeat(7, 44px); 
+            gap: 4px; padding: 10px; background: var(--brown); border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
         }
-        .cell { 
-            width: 36px; height: 36px; background: #fff9c4; border-radius: 5px; 
-            display: flex; align-items: center; justify-content: center; transition: 0.2s;
-        }
-        .cell img { width: 26px; height: 26px; pointer-events: none; }
-        .selected { background: #b9f6ca; border: 2px solid var(--accent); transform: scale(1.1); z-index: 5; }
+        .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .cell img { width: 34px; height: 34px; pointer-events: none; }
+        .selected { background: #b9f6ca; border: 3px solid var(--accent); transform: scale(1.1); z-index: 5; }
 
-        /* BOOSTERS COMPACTOS */
-        #boosters { display: flex; gap: 8px; margin-top: 10px; }
-        .b-mini { background: var(--white); padding: 5px 12px; border-radius: 8px; border: 1px solid #ddd; font-size: 9px; font-weight: 800; display: flex; align-items: center; gap: 5px; }
-        .b-mini img { width: 16px; height: 16px; }
+        /* BOOSTERS */
+        #boosters { display: flex; gap: 10px; margin-top: 25px; }
+        .b-btn { background: var(--white); padding: 10px 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 11px; font-weight: 800; display: flex; align-items: center; gap: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
-        /* MONETIZAÇÃO: FIXED BOTTOM */
-        #bottom-ad { width: 320px; height: 50px; margin-bottom: 35px; overflow: hidden; flex-shrink: 0; }
-        
-        #admin { position: fixed; bottom: 0; width: 100%; background: #202124; color: #fff; padding: 8px 0; font-size: 9px; text-align: center; }
+        #admin-footer { width: 100%; background: #202124; color: #fff; padding: 10px 0; font-size: 10px; text-align: center; position: fixed; bottom: 0; }
     </style>
 </head>
 <body>
 
 <div id="app-shell">
-    <div id="top-ad">
-        <script type="text/javascript">
-            atOptions = { 'key' : '52802f8e0e936960203e1401659b0395', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
-    </div>
-
     <div id="stats">
         <div style="text-align:center"><span class="l">Nível</span><span class="v">1</span></div>
-        <div style="text-align:center"><span class="l">Saldo</span><span class="v">€ 0.0000</span></div>
-        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)">21</span></div>
+        <div style="text-align:center"><span class="l">Saldo</span><span class="v" id="bal-ui">€ 0.0000</span></div>
+        <div style="text-align:center"><span class="l">Ações</span><span class="v" style="color:var(--red)" id="act-ui">21</span></div>
     </div>
 
-    <div id="game-zone">
-        <div id="grid"></div>
-        <div id="boosters">
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/598/598219.png">BOMBA</div>
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/940/940561.png">TROCA</div>
-            <div class="b-mini"><img src="https://cdn-icons-png.flaticon.com/128/2210/2210041.png">PÁ</div>
-        </div>
+    <div id="goals-bar">
+        <span id="g-milk">🥛 10</span>
+        <span id="g-egg">🥚 12</span>
+        <span id="g-honey">🍯 5</span>
     </div>
 
-    <div id="bottom-ad">
-        <script type="text/javascript">
-            atOptions = { 'key' : '52802f8e0e936960203e1401659b0395', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {} };
-        </script>
-        <script type="text/javascript" src="https://www.highperformanceformat.com/52802f8e0e936960203e1401659b0395/invoke.js"></script>
+    <div id="grid"></div>
+
+    <div id="boosters">
+        <div class="b-btn">💣 BOMBA</div>
+        <div class="b-btn">🚜 TRATOR</div>
+        <div class="b-btn)⛏️ PÁ</div>
     </div>
 
-    <div id="admin">ADMIN: 5401881400 | v33.47 | STABILITY FIX</div>
+    <div id="admin-footer">ADMIN: 5401881400 | v33.48 | NO ADS | ICONS FIXED</div>
 </div>
 
 <script>
     const tg = window.Telegram.WebApp;
-    // ÍCONES TEMÁTICOS DA QUINTA CORRIGIDOS
-    const farmAnimals = [
-        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // Vaca
-        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // Galinha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // Ovelha
-        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png', // Porco
-        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png'  // Abelha
+    // ÍCONES QUE CORRESPONDEM ÀS MISSÕES
+    const farmIcons = [
+        'https://cdn-icons-png.flaticon.com/128/1998/1998592.png', // 0: Vaca (Leite)
+        'https://cdn-icons-png.flaticon.com/128/1998/1998610.png', // 1: Galinha (Ovo)
+        'https://cdn-icons-png.flaticon.com/128/4028/4028682.png',  // 2: Abelha (Mel)
+        'https://cdn-icons-png.flaticon.com/128/1998/1998620.png', // 3: Ovelha
+        'https://cdn-icons-png.flaticon.com/128/1998/1998601.png'  // 4: Porco
     ];
+
     let selected = null;
+    let actions = 21;
 
     function init() {
         tg.ready(); tg.expand();
         const grid = document.getElementById('grid');
+        grid.innerHTML = '';
+        
         for (let i = 0; i < 49; i++) {
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.dataset.idx = i;
-            cell.dataset.type = Math.floor(Math.random() * farmAnimals.length);
-            cell.innerHTML = `<img src="${farmAnimals[cell.dataset.type]}">`;
-            cell.onclick = () => handleMove(cell);
+            // Gera animais aleatórios da lista acima
+            const type = Math.floor(Math.random() * farmIcons.length);
+            cell.dataset.type = type;
+            cell.innerHTML = `<img src="${farmIcons[type]}">`;
+            cell.onclick = () => handleSelect(cell);
             grid.appendChild(cell);
         }
     }
 
-    // MECÂNICA DE MOVIMENTO: TROCA POR CLIQUE
-    function handleMove(cell) {
+    function handleSelect(cell) {
+        if (actions <= 0) return;
+
         if (!selected) {
-            // Seleciona a primeira peça
             selected = cell;
             cell.classList.add('selected');
             tg.HapticFeedback.impactOccurred('light');
         } else {
-            // Tenta trocar com a segunda peça
             const idx1 = parseInt(selected.dataset.idx);
             const idx2 = parseInt(cell.dataset.idx);
-            
-            // Verifica se são vizinhos (cima, baixo, esquerda, direita)
             const isNeighbor = [1, -1, 7, -7].includes(idx1 - idx2);
 
             if (isNeighbor) {
-                // Realiza a troca visual e de dados
-                const tempHTML = selected.innerHTML;
-                const tempType = selected.dataset.type;
+                // Troca de posição
+                const tType = selected.dataset.type;
+                const tHTML = selected.innerHTML;
                 
-                selected.innerHTML = cell.innerHTML;
                 selected.dataset.type = cell.dataset.type;
+                selected.innerHTML = cell.innerHTML;
                 
-                cell.innerHTML = tempHTML;
-                cell.dataset.type = tempType;
+                cell.dataset.type = tType;
+                cell.innerHTML = tHTML;
                 
+                actions--;
+                document.getElementById('act-ui').innerText = actions;
                 tg.HapticFeedback.notificationOccurred('success');
-                checkMatches();
             }
             
-            // Limpa a seleção
             selected.classList.remove('selected');
             selected = null;
         }
-    }
-
-    function checkMatches() {
-        // Lógica de Match-3 básica para explosão
-        tg.showAlert("Match Detected!");
     }
 
     init();
