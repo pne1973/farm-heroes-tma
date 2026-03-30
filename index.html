@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.78 - FIXED GRID</title>
+    <title>Ouro da Quinta v33.79 - INFINITE GRID</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --red: #d93025; --white: #ffffff; --brown: #8d6e63; }
+        :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
@@ -20,8 +20,8 @@
         
         #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
         #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; padding: 10px; background: var(--brown); border-radius: 12px; }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: 0.2s; cursor: pointer; }
-        .cell.matched { opacity: 0; transform: scale(0); pointer-events: none; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.1s; cursor: pointer; }
+        .cell:active { transform: scale(0.8); }
 
         .ad-placeholder { width: 320px; height: 50px; background: rgba(0,0,0,0.05); border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; border-radius: 8px; margin: 5px auto; }
         #footer { background: #000; color: #fff; padding: 12px; text-align: center; font-size: 9px; font-weight: bold; }
@@ -30,15 +30,15 @@
 <body>
 
 <div id="game-header">
-    <div class="ad-placeholder">BANNER TOPO (€ 0.0010)</div>
+    <div class="ad-placeholder">BANNER TOPO (€ 0.0010) [cite: 2026-03-30]</div>
     <div id="stats-row">
         <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">1</span></div>
-        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0005</span></div>
-        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">15</span></div>
+        <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0007</span></div>
+        <div class="stat-card"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">11</span></div>
     </div>
     <div id="mission-bar">
-        <div class="m-item">🥛 <span id="m1">9</span></div>
-        <div class="m-item">🥚 <span id="m2">9</span></div>
+        <div class="m-item">🥛 <span id="m1">8</span></div>
+        <div class="m-item">🥚 <span id="m2">8</span></div>
         <div class="m-item">🍯 <span id="m3">4</span></div>
     </div>
 </div>
@@ -47,16 +47,27 @@
     <div id="grid"></div>
 </div>
 
-<div class="ad-placeholder">BANNER FUNDO (€ 0.0010)</div>
+<div class="ad-placeholder">BANNER FUNDO (€ 0.0010) [cite: 2026-03-30]</div>
 
-<div id="footer">ADMIN: 5401881400 | v33.78 | OBRIGATORY FULL GRID</div>
+<div id="footer">ADMIN: 5401881400 | v33.79 | REGENERATIVE GRID SYSTEM</div>
 
 <script>
     const tg = window.Telegram.WebApp;
     const icons = ['🥛', '🥚', '🍯', '🚜'];
-    let mission = { '🥛': 9, '🥚': 9, '🍯': 4 };
-    let balance = 0.0005, actions = 15;
+    let mission = { '🥛': 8, '🥚': 8, '🍯': 4 };
+    let balance = 0.0007, actions = 11;
     let gridArray = [];
+
+    function getSafeIcon(index) {
+        let possible = [...icons];
+        let row = Math.floor(index / 7);
+        let col = index % 7;
+
+        if (col > 0) possible = possible.filter(icon => icon !== gridArray[index - 1]);
+        if (row > 0) possible = possible.filter(icon => icon !== gridArray[index - 7]);
+        
+        return possible[Math.floor(Math.random() * possible.length)];
+    }
 
     function createGrid() {
         const gridEl = document.getElementById('grid');
@@ -64,36 +75,36 @@
         gridArray = [];
 
         for (let i = 0; i < 49; i++) {
-            let possible = [...icons];
-            let row = Math.floor(i / 7);
-            let col = i % 7;
-
-            // Filtro rigoroso: remove ícone da esquerda e de cima
-            if (col > 0) possible = possible.filter(icon => icon !== gridArray[i - 1]);
-            if (row > 0) possible = possible.filter(icon => icon !== gridArray[i - 7]);
-
-            // Se por algum motivo as restrições esvaziarem as opções, volta aos ícones padrão
-            if (possible.length === 0) possible = [...icons];
-
-            const chosen = possible[Math.floor(Math.random() * possible.length)];
+            const chosen = getSafeIcon(i);
             gridArray.push(chosen);
 
             const cell = document.createElement('div');
             cell.className = 'cell';
             cell.innerText = chosen;
-            cell.onclick = () => {
-                if (actions > 0 && !cell.classList.contains('matched')) {
-                    actions--;
-                    if (mission[chosen] > 0) {
-                        mission[chosen]--;
-                        balance += 0.0001;
-                        cell.classList.add('matched');
-                    }
-                    updateUI();
-                }
-            };
+            cell.dataset.id = i;
+            cell.onclick = () => handleMove(cell, i);
             gridEl.appendChild(cell);
         }
+    }
+
+    function handleMove(cell, index) {
+        if (actions <= 0) return;
+
+        const currentIcon = cell.innerText;
+        actions--;
+
+        // Se o ícone clicado for da missão, ganha saldo e atualiza missão
+        if (mission[currentIcon] > 0) {
+            mission[currentIcon]--;
+            balance += 0.0001;
+        }
+
+        // REGENERAÇÃO: Troca o ícone clicado por um novo imediatamente [cite: 2026-03-30]
+        const newIcon = getSafeIcon(index);
+        gridArray[index] = newIcon;
+        cell.innerText = newIcon;
+        
+        updateUI();
     }
 
     function updateUI() {
