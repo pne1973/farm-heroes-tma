@@ -3,50 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.88 - ADMIN CLICK</title>
+    <title>Ouro da Quinta v33.89 - ADMIN FIX</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; --blue: #4285f4; --red: #d93025; }
         * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
         body { margin: 0; background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
+        /* Botão Admin Flutuante */
+        #admin-trigger { position: fixed; top: 10px; right: 10px; z-index: 5000; background: var(--accent); color: white; border: none; padding: 10px 15px; border-radius: 50px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; }
+
         #header { padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; background: rgba(255,255,255,0.9); border-bottom: 1px solid #ddd; }
-        .stats-row { width: 100%; display: flex; justify-content: space-around; gap: 8px; }
-        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; transition: transform 0.1s; }
-        .stat-card:active { transform: scale(0.95); }
+        .stats-row { width: 90%; display: flex; justify-content: space-around; gap: 8px; margin-right: 60px; }
+        .stat-card { background: var(--white); padding: 8px; border-radius: 12px; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .stat-v { font-size: 14px; font-weight: 800; color: var(--accent); }
-        .stat-l { font-size: 9px; color: #999; text-transform: uppercase; display: block; }
         
         #mission-bar { background: var(--white); padding: 10px 25px; border-radius: 30px; display: flex; gap: 20px; font-weight: 800; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin-top: 5px; }
 
         #grid-container { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 14px; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        #grid { display: grid; grid-template-columns: repeat(7, 44px); gap: 4px; padding: 10px; background: var(--brown); border-radius: 14px; }
         .cell { width: 44px; height: 44px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; }
         .selected { outline: 3px solid var(--blue); transform: scale(1.1); z-index: 5; background: #fffde7; }
         
-        /* Painel Admin Moderno */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 2000; padding: 25px; overflow-y: auto; }
-        .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid var(--accent); padding-bottom: 10px; }
-        .admin-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .admin-btn { width: 100%; padding: 12px; margin: 5px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-        .btn-blue { background: var(--blue); color: white; }
-        .btn-red { background: var(--red); color: white; }
+        /* Painel Admin */
+        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 9999; padding: 25px; overflow-y: auto; }
+        .admin-btn { width: 100%; padding: 12px; margin: 8px 0; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; background: var(--blue); color: white; }
 
         #footer { background: #000; color: #fff; padding: 10px; text-align: center; font-size: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
+<button id="admin-trigger" onclick="toggleAdmin()">ADMIN ⚙️</button>
+
 <div id="header">
     <div class="stats-row">
-        <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Nível</span><span class="stat-v" id="lvl-ui">1</span></div>
-        <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
-        <div class="stat-card" onclick="openAdmin()"><span class="stat-l">Ações</span><span class="stat-v" id="act-ui">20</span></div>
+        <div class="stat-card"><span>Nível</span><br><span class="stat-v" id="lvl-ui">1</span></div>
+        <div class="stat-card"><span>Saldo</span><br><span class="stat-v" id="bal-ui">€ 0.0000</span></div>
+        <div class="stat-card"><span>Ações</span><br><span class="stat-v" id="act-ui">20</span></div>
     </div>
     <div id="mission-bar">
-        <span>🥛 <span id="m1">5</span></span>
-        <span>🥚 <span id="m2">5</span></span>
-        <span>🍯 <span id="m3">5</span></span>
+        <span>🥛 <span id="m1">5</span></span> <span>🥚 <span id="m2">5</span></span> <span>🍯 <span id="m3">5</span></span>
     </div>
 </div>
 
@@ -55,29 +52,19 @@
 </div>
 
 <div id="admin-panel">
-    <div class="admin-header">
-        <h2 style="margin:0; color:var(--accent);">PAINEL ADMIN</h2>
-        <span style="font-size: 10px; background:#ddd; padding:4px 8px; border-radius:10px;">ID: 5401881400</span>
+    <h2 style="color:var(--accent)">PAINEL DE CONTROLO</h2>
+    <hr>
+    <p>ID ADMINISTRADOR: 5401881400</p>
+    <div style="background:white; padding:15px; border-radius:10px; margin:15px 0;">
+        <p>Ações: <strong id="adm-act">20</strong></p>
+        <p>Saldo: <strong id="adm-bal">€ 0.0000</strong></p>
     </div>
-    
-    <div class="admin-card">
-        <h3>Estatísticas Atuais</h3>
-        <p>Saldo Acumulado: <strong id="adm-bal">€ 0.0000</strong></p>
-        <p>Ações Disponíveis: <strong id="adm-act">20</strong></p>
-        <p>Nível Atual: <strong id="adm-lvl">1</strong></p>
-    </div>
-
-    <div class="admin-card">
-        <h3>Ações Rápidas</h3>
-        <button class="admin-btn btn-blue" onclick="addActions()">+10 AÇÕES (Bónus)</button>
-        <button class="admin-btn btn-blue" onclick="addBalance()">+€ 1.00 (Teste)</button>
-        <button class="admin-btn btn-red" onclick="resetGame()">RESET TOTAL PARA NÍVEL 1</button>
-    </div>
-
-    <button class="admin-btn" style="background:#555; color:white; margin-top:20px;" onclick="closeAdmin()">VOLTAR AO JOGO</button>
+    <button class="admin-btn" onclick="addActions()">+50 AÇÕES</button>
+    <button class="admin-btn" onclick="resetGame()" style="background:var(--red)">RESET TOTAL</button>
+    <button class="admin-btn" style="background:#555" onclick="toggleAdmin()">FECHAR PAINEL</button>
 </div>
 
-<div id="footer">OURO DA QUINTA v33.88 | ADMIN ID: 5401881400</div>
+<div id="footer">OURO DA QUINTA v33.89 | TOTAL ADMIN OVERRIDE</div>
 
 <script>
     const icons = ['🥛', '🥚', '🍯', '🚜'];
@@ -87,8 +74,7 @@
 
     function initGrid() {
         const gridEl = document.getElementById('grid');
-        gridEl.innerHTML = '';
-        gridArray = [];
+        gridEl.innerHTML = ''; gridArray = [];
         for (let i = 0; i < 49; i++) {
             gridArray.push(icons[Math.floor(Math.random() * icons.length)]);
             const cell = document.createElement('div');
@@ -115,27 +101,15 @@
     }
 
     function isAdjacent(i1, i2) {
-        const r1 = Math.floor(i1/7), c1 = i1%7;
-        const r2 = Math.floor(i2/7), c2 = i2%7;
-        return (Math.abs(r1-r2) + Math.abs(c1-c2)) === 1;
+        return (Math.abs(Math.floor(i1/7)-Math.floor(i2/7)) + Math.abs((i1%7)-(i2%7))) === 1;
     }
 
     async function executeMove(i1, i2) {
-        swapData(i1, i2);
+        let t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
         let matches = findMatches();
-        if (matches.length > 0) {
-            actions--;
-            await resolveMatches();
-            checkLevelUp();
-        } else {
-            swapData(i1, i2); // Reverte se não houver match
-        }
+        if (matches.length > 0) { actions--; await resolveMatches(); }
+        else { t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t; }
         updateUI();
-    }
-
-    function swapData(i1, i2) {
-        const t = gridArray[i1]; gridArray[i1] = gridArray[i2]; gridArray[i2] = t;
-        render();
     }
 
     function findMatches() {
@@ -143,37 +117,27 @@
         for (let r = 0; r < 7; r++) {
             for (let c = 0; c < 5; c++) {
                 let i = r * 7 + c;
-                if (gridArray[i] === gridArray[i+1] && gridArray[i] === gridArray[i+2]) {
-                    matchSet.add(i); matchSet.add(i+1); matchSet.add(i+2);
-                }
+                if (gridArray[i] === gridArray[i+1] && gridArray[i] === gridArray[i+2]) { matchSet.add(i); matchSet.add(i+1); matchSet.add(i+2); }
             }
         }
         for (let c = 0; c < 7; c++) {
             for (let r = 0; r < 5; r++) {
                 let i = r * 7 + c;
-                if (gridArray[i] === gridArray[i+7] && gridArray[i] === gridArray[i+14]) {
-                    matchSet.add(i); matchSet.add(i+7); matchSet.add(i+14);
-                }
+                if (gridArray[i] === gridArray[i+7] && gridArray[i] === gridArray[i+14]) { matchSet.add(i); matchSet.add(i+7); matchSet.add(i+14); }
             }
         }
         return Array.from(matchSet);
     }
 
-    async function resolveMatches(isInitial = false) {
+    async function resolveMatches(init = false) {
         let matches = findMatches();
         if (matches.length === 0) return;
         matches.forEach(idx => {
-            const icon = gridArray[idx];
-            if (!isInitial && mission[icon] > 0) {
-                mission[icon]--;
-                balance += 0.0001;
-            }
+            if (!init && mission[gridArray[idx]] > 0) { mission[gridArray[idx]]--; balance += 0.0001; }
             gridArray[idx] = null;
         });
-        render();
-        await new Promise(r => setTimeout(r, 200));
-        applyGravity();
-        await resolveMatches(isInitial);
+        render(); await new Promise(r => setTimeout(r, 200));
+        applyGravity(); await resolveMatches(init);
     }
 
     function applyGravity() {
@@ -182,12 +146,9 @@
             for (let r = 6; r >= 0; r--) {
                 let i = r * 7 + c;
                 if (gridArray[i] === null) empty++;
-                else if (empty > 0) {
-                    gridArray[i + (empty * 7)] = gridArray[i];
-                    gridArray[i] = null;
-                }
+                else if (empty > 0) { gridArray[i+(empty*7)] = gridArray[i]; gridArray[i] = null; }
             }
-            for (let i = 0; i < empty; i++) gridArray[i * 7 + c] = icons[Math.floor(Math.random() * icons.length)];
+            for (let i = 0; i < empty; i++) gridArray[i*7+c] = icons[Math.floor(Math.random() * icons.length)];
         }
         render();
     }
@@ -206,27 +167,15 @@
         document.getElementById('m3').innerText = mission['🍯'];
     }
 
-    function checkLevelUp() {
-        if (mission['🥛'] <= 0 && mission['🥚'] <= 0 && mission['🍯'] <= 0) {
-            level++;
-            actions = 20;
-            mission = { '🥛': 5 + level, '🥚': 5 + level, '🍯': 3 + level };
-            alert(`EXCELENTE! Nível ${level} iniciado.`);
-            initGrid();
-        }
+    function toggleAdmin() {
+        const p = document.getElementById('admin-panel');
+        p.style.display = p.style.display === 'block' ? 'none' : 'block';
+        document.getElementById('adm-act').innerText = actions;
+        document.getElementById('adm-bal').innerText = `€ ${balance.toFixed(4)}`;
     }
 
-    // FUNÇÕES ADMIN
-    function openAdmin() {
-        document.getElementById('admin-panel').style.display = 'block';
-        document.getElementById('adm-bal').innerText = `€ ${balance.toFixed(4)}`;
-        document.getElementById('adm-act').innerText = actions;
-        document.getElementById('adm-lvl').innerText = level;
-    }
-    function closeAdmin() { document.getElementById('admin-panel').style.display = 'none'; }
-    function addActions() { actions += 10; updateUI(); openAdmin(); }
-    function addBalance() { balance += 1.0; updateUI(); openAdmin(); }
-    function resetGame() { level = 1; actions = 20; balance = 0; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); closeAdmin(); updateUI(); }
+    function addActions() { actions += 50; updateUI(); toggleAdmin(); }
+    function resetGame() { level = 1; balance = 0; actions = 20; mission = { '🥛': 5, '🥚': 5, '🍯': 5 }; initGrid(); toggleAdmin(); updateUI(); }
     async function checkAndResolve(init) { await resolveMatches(init); updateUI(); }
 
     initGrid();
