@@ -1,389 +1,1987 @@
 <!DOCTYPE html>
-<html lang="pt-pt">
+<html lang="pt">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ouro da Quinta v36.04 - ULTRA FIX</title>
-    <style>
-        :root { --bg: #fdfae5; --accent: #2e7d32; --blue: #4285f4; }
-        * { box-sizing: border-box; font-family: sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-        
-        body { background: var(--bg); height: 100vh; display: flex; flex-direction: column; overflow: hidden; touch-action: none; }
+  <meta charset="UTF-8" />
+  <title>Farm Match Rewards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-soft: #111827;
+      --panel: #020617;
+      --accent: #22c55e;
+      --accent-soft: rgba(34, 197, 94, 0.15);
+      --danger: #ef4444;
+      --warning: #eab308;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #1f2937;
+      --card: #020617;
+      --card-soft: #020617;
+      --admin-bg: #020617;
+      --admin-card: #020617;
+      --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-sm: 8px;
+    }
 
-        /* HEADER OFICIAL */
-        #header { background: #fff; padding: 15px; display: flex; justify-content: space-around; border-bottom: 1px solid #ddd; }
-        .stat { text-align: center; }
-        .stat small { font-size: 10px; color: #888; display: block; }
-        .stat b { font-size: 16px; color: var(--accent); }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+    }
 
-        /* GRELHA REATIVA */
-        #game-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .grid { 
-            display: grid; grid-template-columns: repeat(7, 42px); gap: 4px; 
-            background: #8d6e63; padding: 10px; border-radius: 10px;
-            touch-action: none;
-        }
-        .cell { 
-            width: 42px; height: 42px; background: #fff9c4; border-radius: 4px; 
-            display: flex; align-items: center; justify-content: center; font-size: 20px; 
-            user-select: none;
-            transition: transform 0.15s linear, opacity 0.15s linear;
-        }
+    body {
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: stretch;
+      justify-content: center;
+      padding: 20px;
+    }
 
-        /* ANIMAÇÕES MATCH-3 (ESTILO A) */
-        .cell.swap { z-index: 10; }
-        .cell.fade-out { opacity: 0; }
-        .cell.fall { transition: transform 0.2s linear; }
+    .app-shell {
+      display: grid;
+      grid-template-columns: 2.2fr 1.4fr;
+      gap: 18px;
+      width: 100%;
+      max-width: 1320px;
+      background: linear-gradient(135deg, #020617 0, #020617 40%, #020617 100%);
+      border-radius: 26px;
+      padding: 18px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85);
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      position: relative;
+      overflow: hidden;
+    }
 
-        /* ADMIN STYLE */
-        #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; touch-action: auto; }
-        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        .btn-main { background: var(--blue); color: white; border: none; padding: 15px 30px; border-radius: 8px; font-weight: bold; margin-top: 20px; }
-        .btn-cfg { position: fixed; top: 10px; right: 10px; background: var(--accent); color: white; border: none; padding: 5px 12px; border-radius: 20px; font-size: 10px; z-index: 100; }
-    </style>
+    @media (max-width: 1024px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .left-panel,
+    .right-panel {
+      background: radial-gradient(circle at top left, #020617 0, #020617 55%);
+      border-radius: 22px;
+      padding: 16px 16px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.12);
+      box-shadow: 0 18px 45px rgba(0, 0, 0, 0.7);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(34, 197, 94, 0.08), transparent 55%);
+      pointer-events: none;
+    }
+
+    .right-panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, rgba(56, 189, 248, 0.08), transparent 55%);
+      pointer-events: none;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .panel-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .panel-title h1 {
+      font-size: 20px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      color: #e5e7eb;
+    }
+
+    .panel-title span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .badge-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95));
+    }
+
+    .badge-pill-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: radial-gradient(circle at center, #22c55e, #16a34a);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.8);
+    }
+
+    .game-top-bar {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .stat-card {
+      flex: 1;
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 14px;
+      padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+
+    .stat-card-value {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .stat-card-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      color: var(--muted);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+    }
+
+    .game-main {
+      display: grid;
+      grid-template-columns: 1.6fr 1.1fr;
+      gap: 12px;
+      position: relative;
+      z-index: 1;
+    }
+
+    @media (max-width: 900px) {
+      .game-main {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .board-wrapper {
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 18px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .board-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .board-header-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tier-pill {
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(52, 211, 153, 0.6);
+      color: #6ee7b7;
+      background: radial-gradient(circle at top, rgba(22, 163, 74, 0.35), transparent 60%);
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
+      padding: 10px;
+      border-radius: 14px;
+      border: 1px solid rgba(15, 23, 42, 0.9);
+      box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.9);
+    }
+
+    .cell {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      background: radial-gradient(circle at top, #020617 0, #020617 70%);
+      border: 1px solid rgba(30, 64, 175, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
+        background 0.12s ease;
+    }
+
+    .cell:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.9);
+      border-color: rgba(59, 130, 246, 0.9);
+    }
+
+    .cell.selected {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 1px rgba(34, 197, 94, 0.7), 0 10px 25px rgba(22, 163, 74, 0.7);
+      transform: translateY(-1px) scale(1.02);
+    }
+
+    .cell.match {
+      animation: popMatch 0.35s ease forwards;
+      border-color: rgba(250, 204, 21, 0.9);
+    }
+
+    @keyframes popMatch {
+      0% {
+        transform: scale(1);
+        opacity: 1;
+      }
+      40% {
+        transform: scale(1.18);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0.4);
+        opacity: 0;
+      }
+    }
+
+    .cell::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top, rgba(148, 163, 184, 0.12), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.12s ease;
+    }
+
+    .cell:hover::after {
+      opacity: 1;
+    }
+
+    .mission-panel {
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 18px;
+      padding: 12px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .mission-title {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .mission-items {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .mission-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(55, 65, 81, 0.9);
+    }
+
+    .mission-emoji {
+      font-size: 18px;
+    }
+
+    .mission-text {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      font-size: 11px;
+    }
+
+    .mission-label {
+      color: var(--muted);
+    }
+
+    .mission-progress {
+      font-size: 11px;
+      color: #e5e7eb;
+    }
+
+    .mission-bar {
+      width: 100%;
+      height: 4px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.9);
+      overflow: hidden;
+      margin-top: 2px;
+    }
+
+    .mission-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #a3e635);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .actions-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .resource-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .resource-card {
+      flex: 1;
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 14px;
+      padding: 8px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      font-size: 11px;
+    }
+
+    .resource-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--muted);
+    }
+
+    .resource-value {
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: baseline;
+      gap: 4px;
+    }
+
+    .resource-sub {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .boosters-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .booster-btn {
+      border-radius: 12px;
+      padding: 6px 4px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 1));
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      font-size: 11px;
+      color: var(--muted);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
+        filter 0.12s ease;
+    }
+
+    .booster-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.9);
+      border-color: rgba(59, 130, 246, 0.9);
+    }
+
+    .booster-emoji {
+      font-size: 18px;
+    }
+
+    .booster-count {
+      font-size: 11px;
+      color: #e5e7eb;
+    }
+
+    .booster-btn.disabled {
+      filter: blur(0.4px) grayscale(0.7);
+      opacity: 0.55;
+      border-style: dashed;
+      border-color: rgba(75, 85, 99, 0.9);
+    }
+
+    .booster-btn.disabled::after {
+      content: "Ver anúncio";
+      position: absolute;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 9px;
+      color: #facc15;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .actions-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      border-radius: 999px;
+      padding: 7px 12px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
+      color: #e5e7eb;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s ease,
+        background 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .btn span {
+      font-size: 13px;
+    }
+
+    .btn-primary {
+      border-color: rgba(34, 197, 94, 0.7);
+      background: radial-gradient(circle at top, rgba(22, 163, 74, 0.9), rgba(21, 128, 61, 1));
+      box-shadow: 0 12px 30px rgba(22, 163, 74, 0.7);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 40px rgba(22, 163, 74, 0.9);
+    }
+
+    .btn-ghost {
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
+    }
+
+    .btn-ghost:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.9);
+      border-color: rgba(148, 163, 184, 0.7);
+    }
+
+    .btn-small {
+      padding: 5px 10px;
+      font-size: 10px;
+    }
+
+    .btn-disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      box-shadow: none;
+      transform: none;
+    }
+
+    .login-daily {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .login-daily span {
+      font-size: 11px;
+    }
+
+    .login-streak {
+      font-size: 11px;
+      color: #facc15;
+    }
+
+    .right-panel-content {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      border-radius: 999px;
+      padding: 6px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
+      color: var(--muted);
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      border-color: rgba(34, 197, 94, 0.8);
+      color: #bbf7d0;
+      box-shadow: 0 12px 30px rgba(22, 163, 74, 0.7);
+      background: radial-gradient(circle at top, rgba(22, 163, 74, 0.9), rgba(21, 128, 61, 1));
+    }
+
+    .tab-content {
+      display: none;
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 18px;
+      padding: 10px;
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      max-height: 520px;
+      overflow: auto;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .admin-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .admin-cards {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .admin-card {
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 14px;
+      padding: 8px 9px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      font-size: 11px;
+    }
+
+    .admin-card-label {
+      color: var(--muted);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .admin-card-value {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .admin-card-sub {
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .admin-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10px;
+      margin-top: 4px;
+    }
+
+    .admin-table th,
+    .admin-table td {
+      padding: 4px 4px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      text-align: left;
+    }
+
+    .admin-table th {
+      color: var(--muted);
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-size: 9px;
+    }
+
+    .admin-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .status-pill {
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 9px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .status-pill.pending {
+      border-color: rgba(234, 179, 8, 0.8);
+      color: #facc15;
+    }
+
+    .status-pill.paid {
+      border-color: rgba(34, 197, 94, 0.8);
+      color: #bbf7d0;
+    }
+
+    .status-pill.rejected {
+      border-color: rgba(248, 113, 113, 0.8);
+      color: #fecaca;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(31, 41, 55, 0.9);
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #22c55e, #a3e635);
+      width: 0%;
+      transition: width 0.2s ease;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal {
+      width: 300px;
+      height: 250px;
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border-radius: 16px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.9);
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .modal-tag {
+      padding: 2px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .modal-body {
+      flex: 1;
+      border-radius: 12px;
+      background: radial-gradient(circle at top, #020617 0, #020617 60%);
+      border: 1px dashed rgba(75, 85, 99, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .modal-ad-placeholder {
+      width: 100%;
+      height: 100%;
+      border-radius: 10px;
+      background: repeating-linear-gradient(
+          45deg,
+          rgba(31, 41, 55, 0.9),
+          rgba(31, 41, 55, 0.9) 10px,
+          rgba(17, 24, 39, 0.9) 10px,
+          rgba(17, 24, 39, 0.9) 20px
+        );
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(148, 163, 184, 0.9);
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+
+    .modal-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      margin-top: 2px;
+    }
+
+    .modal-countdown {
+      color: var(--muted);
+    }
+
+    .modal-close-btn {
+      border-radius: 999px;
+      padding: 4px 10px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.98), rgba(15, 23, 42, 1));
+      color: #e5e7eb;
+      font-size: 10px;
+      cursor: pointer;
+      transition: all 0.12s ease;
+    }
+
+    .modal-close-btn.disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .modal-close-btn:not(.disabled):hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.9);
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: radial-gradient(circle at top, rgba(22, 163, 74, 0.95), rgba(21, 128, 61, 1));
+      color: #ecfdf5;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      box-shadow: 0 16px 40px rgba(22, 163, 74, 0.9);
+      display: none;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .toast span {
+      font-size: 13px;
+    }
+  </style>
 </head>
 <body>
+  <div class="app-shell">
+    <div class="left-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h1>Farm Match Rewards</h1>
+          <span>Match‑3 · Anúncios · PayPal · Painel Pro</span>
+        </div>
+        <div class="badge-pill">
+          <div class="badge-pill-dot"></div>
+          Live Economy
+        </div>
+      </div>
 
-<button class="btn-cfg" onclick="toggleAdmin()">COMANDO CENTRAL ⚙️</button>
+      <div class="game-top-bar">
+        <div class="stat-card">
+          <div class="stat-card-label">Saldo</div>
+          <div class="stat-card-value">
+            <span id="ui-balance">0,0000 €</span>
+          </div>
+          <div class="stat-card-sub">
+            Mínimo para levantar: 5,00 €
+            <div class="progress-bar" style="margin-top:4px;">
+              <div id="ui-balance-progress" class="progress-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Nível</div>
+          <div class="stat-card-value">
+            <span id="ui-level">1</span>
+            <span class="pill">
+              <span class="pill-dot"></span>
+              <span id="ui-tier-label">Tier 1</span>
+            </span>
+          </div>
+          <div class="stat-card-sub">
+            Bónus por nível: <span id="ui-level-bonus">0,00025 €</span>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-label">Utilizador</div>
+          <div class="stat-card-value">
+            <span id="ui-user-id">#0001</span>
+          </div>
+          <div class="stat-card-sub">
+            Login diário: <span id="ui-login-streak">0 dias</span>
+          </div>
+        </div>
+      </div>
 
-<div id="header">
-    <div class="stat"><small>USER ID</small><b id="ui-id">5401881400</b></div>
-    <div class="stat"><small>SALDO</small><b id="ui-bal">€ 0.0000</b></div>
-    <div class="stat"><small>AÇÕES</small><b id="ui-act">20</b></div>
-</div>
+      <div class="game-main">
+        <div class="board-wrapper">
+          <div class="board-header">
+            <div class="board-header-left">
+              <span class="tier-pill" id="ui-tier-pill">Tier 1 · Quinta Básica</span>
+              <span style="font-size:11px;color:var(--muted);" id="ui-tier-items">
+                Itens: 🥕 🌽 🍅 🥚
+              </span>
+            </div>
+            <div style="font-size:11px;color:var(--muted);">
+              Matches hoje: <span id="ui-matches-today">0</span>
+            </div>
+          </div>
+          <div id="board" class="board"></div>
+        </div>
 
-<div id="game-container">
-    <div class="grid" id="grid"></div>
-    <button class="btn-main" onclick="addActions()">VER ANÚNCIO (+10 AÇÕES)</button>
-</div>
+        <div class="mission-panel">
+          <div class="mission-title">
+            <span>Missão do nível</span>
+            <span id="ui-mission-reward" style="color:#bbf7d0;">Recompensa: 0,00025 €</span>
+          </div>
+          <div id="mission-items" class="mission-items"></div>
 
-<div id="admin-panel">
-    <h2>AUDITORIA MASTER</h2>
-    <div class="card">
-        <p>Receita Global (Ads): <b id="adm-rev">€ 0.0000</b></p>
-        <p>Passivo (Saldos): <b id="adm-pass">€ 0.0000</b></p>
+          <div class="actions-panel">
+            <div class="resource-row">
+              <div class="resource-card">
+                <div class="resource-header">
+                  <span>Ações</span>
+                  <span style="font-size:10px;color:var(--muted);">Jogadas restantes</span>
+                </div>
+                <div class="resource-value">
+                  <span id="ui-actions">20</span>
+                </div>
+                <div class="resource-sub">
+                  Sem ações? Vê anúncios para +5 ou +10.
+                </div>
+              </div>
+              <div class="resource-card">
+                <div class="resource-header">
+                  <span>Vidas</span>
+                  <span style="font-size:10px;color:var(--muted);">Regeneram em 3h</span>
+                </div>
+                <div class="resource-value">
+                  <span id="ui-lives">3</span>
+                </div>
+                <div class="resource-sub" id="ui-lives-sub">
+                  Sem vidas? Vê um anúncio para +3.
+                </div>
+              </div>
+            </div>
+
+            <div class="resource-card">
+              <div class="resource-header">
+                <span>Boosters</span>
+                <span style="font-size:10px;color:var(--muted);">3 de cada · Renovam por anúncio</span>
+              </div>
+              <div class="boosters-grid">
+                <button class="booster-btn" data-booster="hammer">
+                  <div class="booster-emoji">🔨</div>
+                  <div class="booster-count" id="ui-booster-hammer">3</div>
+                  <div style="font-size:10px;color:var(--muted);">Martelo</div>
+                </button>
+                <button class="booster-btn" data-booster="shovel">
+                  <div class="booster-emoji">🧹</div>
+                  <div class="booster-count" id="ui-booster-shovel">3</div>
+                  <div style="font-size:10px;color:var(--muted);">Pá</div>
+                </button>
+                <button class="booster-btn" data-booster="tractor">
+                  <div class="booster-emoji">🚜</div>
+                  <div class="booster-count" id="ui-booster-tractor">3</div>
+                  <div style="font-size:10px;color:var(--muted);">Trator</div>
+                </button>
+                <button class="booster-btn" data-booster="watering">
+                  <div class="booster-emoji">💧</div>
+                  <div class="booster-count" id="ui-booster-watering">3</div>
+                  <div style="font-size:10px;color:var(--muted);">Regador</div>
+                </button>
+              </div>
+            </div>
+
+            <div class="resource-card">
+              <div class="resource-header">
+                <span>Ações extra</span>
+                <span style="font-size:10px;color:var(--muted);">Anúncios 300×250</span>
+              </div>
+              <div class="actions-buttons">
+                <button id="btn-actions-5" class="btn btn-ghost btn-small">
+                  +5 ações · 1 anúncio
+                </button>
+                <button id="btn-actions-10" class="btn btn-ghost btn-small">
+                  +10 ações · 2 anúncios
+                </button>
+              </div>
+              <div class="login-daily">
+                <span>Login diário: +0,00025 €</span>
+                <span class="login-streak" id="ui-login-info">Recompensa disponível</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="card">
-        <h4>Simular Outro ID</h4>
-        <input type="number" id="new-id" placeholder="Ex: 808476" style="padding:8px; width:60%;">
-        <button onclick="changeUser()" style="padding:8px;">TROCAR</button>
-    </div>
-    <div class="card">
-        <h4>Lista de Utilizadores</h4>
-        <div id="user-list" style="font-size: 12px;"></div>
-    </div>
-    <button onclick="toggleAdmin()" style="width:100%; padding:15px; background:#333; color:white; border-radius:10px;">VOLTAR</button>
-</div>
 
+    <div class="right-panel">
+      <div class="panel-header">
+        <div class="panel-title">
+          <h1>Painel Admin</h1>
+          <span>Economia · Anúncios · PayPal · Utilizadores</span>
+        </div>
+        <div class="badge-pill">
+          <div class="badge-pill-dot"></div>
+          CPM médio: 1,00 €
+        </div>
+      </div>
+
+      <div class="right-panel-content">
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="tab-economy">Economia</button>
+          <button class="tab-btn" data-tab="tab-users">Utilizadores</button>
+          <button class="tab-btn" data-tab="tab-payments">Pagamentos</button>
+        </div>
+
+        <div id="tab-economy" class="tab-content active">
+          <div class="admin-section-title">Visão global</div>
+          <div class="admin-cards">
+            <div class="admin-card">
+              <div class="admin-card-label">Receita estimada</div>
+              <div class="admin-card-value" id="admin-revenue">0,0000 €</div>
+              <div class="admin-card-sub">Anúncios × 0,001 €</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Saldo emitido</div>
+              <div class="admin-card-value" id="admin-emitted">0,0000 €</div>
+              <div class="admin-card-sub">Matches · Níveis · Login</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Margem teórica</div>
+              <div class="admin-card-value" id="admin-margin">0,0000 €</div>
+              <div class="admin-card-sub">Receita − Passivo</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Anúncios vistos</div>
+              <div class="admin-card-value" id="admin-ads-total">0</div>
+              <div class="admin-card-sub">Ações · Boosters · Vidas</div>
+            </div>
+          </div>
+
+          <div class="admin-section-title">Distribuição de recompensas</div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Valor total</th>
+                <th>Detalhe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Matches</td>
+                <td id="admin-rewards-matches">0,0000 €</td>
+                <td>0,0000005 € por match</td>
+              </tr>
+              <tr>
+                <td>Níveis</td>
+                <td id="admin-rewards-levels">0,0000 €</td>
+                <td>Escala por tier</td>
+              </tr>
+              <tr>
+                <td>Login diário</td>
+                <td id="admin-rewards-login">0,0000 €</td>
+                <td>0,00025 € por dia</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="admin-section-title" style="margin-top:8px;">Anúncios por tipo</div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Tipo</th>
+                <th>Qtd</th>
+                <th>Receita</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ações</td>
+                <td id="admin-ads-actions">0</td>
+                <td id="admin-ads-actions-rev">0,0000 €</td>
+              </tr>
+              <tr>
+                <td>Boosters</td>
+                <td id="admin-ads-boosters">0</td>
+                <td id="admin-ads-boosters-rev">0,0000 €</td>
+              </tr>
+              <tr>
+                <td>Vidas</td>
+                <td id="admin-ads-lives">0</td>
+                <td id="admin-ads-lives-rev">0,0000 €</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="tab-users" class="tab-content">
+          <div class="admin-section-title">Utilizador atual</div>
+          <div class="admin-cards">
+            <div class="admin-card">
+              <div class="admin-card-label">ID</div>
+              <div class="admin-card-value" id="admin-user-id">#0001</div>
+              <div class="admin-card-sub">Utilizador local</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Saldo</div>
+              <div class="admin-card-value" id="admin-user-balance">0,0000 €</div>
+              <div class="admin-card-sub">Disponível para levantamento</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Nível / Tier</div>
+              <div class="admin-card-value" id="admin-user-level">1 / Tier 1</div>
+              <div class="admin-card-sub">Progressão atual</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Anúncios vistos</div>
+              <div class="admin-card-value" id="admin-user-ads">0</div>
+              <div class="admin-card-sub">Este utilizador</div>
+            </div>
+          </div>
+
+          <div class="admin-section-title">Estado de recursos</div>
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Recurso</th>
+                <th>Valor</th>
+                <th>Detalhe</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Ações</td>
+                <td id="admin-user-actions">20</td>
+                <td>Jogadas restantes</td>
+              </tr>
+              <tr>
+                <td>Vidas</td>
+                <td id="admin-user-lives">3</td>
+                <td>Regeneram em 3h</td>
+              </tr>
+              <tr>
+                <td>Boosters</td>
+                <td id="admin-user-boosters">3/3/3/3</td>
+                <td>Martelo / Pá / Trator / Regador</td>
+              </tr>
+              <tr>
+                <td>Matches</td>
+                <td id="admin-user-matches">0</td>
+                <td>Total acumulado</td>
+              </tr>
+              <tr>
+                <td>Níveis concluídos</td>
+                <td id="admin-user-levels-completed">0</td>
+                <td>Todos os tiers</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div id="tab-payments" class="tab-content">
+          <div class="admin-section-title">Pagamentos PayPal</div>
+          <div class="admin-cards">
+            <div class="admin-card">
+              <div class="admin-card-label">Total pago</div>
+              <div class="admin-card-value" id="admin-payments-paid">0,00 €</div>
+              <div class="admin-card-sub">Via PayPal</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Pendente</div>
+              <div class="admin-card-value" id="admin-payments-pending">0,00 €</div>
+              <div class="admin-card-sub">A aguardar aprovação</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Pedidos</div>
+              <div class="admin-card-value" id="admin-payments-count">0</div>
+              <div class="admin-card-sub">Total de pedidos</div>
+            </div>
+            <div class="admin-card">
+              <div class="admin-card-label">Mínimo levantamento</div>
+              <div class="admin-card-value">5,00 €</div>
+              <div class="admin-card-sub">PayPal</div>
+            </div>
+          </div>
+
+          <div class="admin-section-title">Pedidos do utilizador atual</div>
+          <table class="admin-table" id="admin-payments-table">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Valor</th>
+                <th>Estado</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- preenchido via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de anúncio 300x250 -->
+  <div id="ad-modal-backdrop" class="modal-backdrop">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Anúncio de exemplo</span>
+        <span class="modal-tag" id="ad-modal-context">Recompensa</span>
+      </div>
+      <div class="modal-body">
+        <div class="modal-ad-placeholder">
+          AD 300×250
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span class="modal-countdown">
+          Pode fechar em <span id="ad-modal-timer">5</span>s
+        </span>
+        <button id="ad-modal-close" class="modal-close-btn disabled">
+          Fechar anúncio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast">
+    <span>✓</span>
+    <span id="toast-text">Ação concluída</span>
+  </div>
 <script>
-const items = ['🥛', '🥚', '🍯', '🚜'];
-let currentId = "5401881400";
-let db = { "5401881400": { bal: 0, act: 20 } };
-let adRevenue = 0;
+/* ============================================================
+   ESTADO GLOBAL DO JOGO
+   ============================================================ */
 
-let grid = [];
-let selected = null;
-const ROWS = 7;
-const COLS = 7;
-let inputLocked = false;
-
-window.onload = () => {
-    generateGrid();
-    renderGrid();
-    refresh();
+const state = {
+  userId: "USR-" + Math.floor(Math.random() * 999999),
+  balance: 0,
+  level: 1,
+  tier: 1,
+  actions: 20,
+  lives: 3,
+  boosters: {
+    hammer: 3,
+    shovel: 3,
+    tractor: 3,
+    watering: 3
+  },
+  matchesToday: 0,
+  totalMatches: 0,
+  totalLevelsCompleted: 0,
+  loginStreak: 0,
+  lastLogin: null,
+  board: [],
+  mission: null,
+  payments: [],
+  ads: {
+    total: 0,
+    actions: 0,
+    boosters: 0,
+    lives: 0
+  },
+  rewards: {
+    matches: 0,
+    levels: 0,
+    login: 0
+  }
 };
 
-/* --------------------------
-   NÚCLEO MATCH-3
---------------------------- */
+/* ============================================================
+   CONSTANTES DE ECONOMIA
+   ============================================================ */
 
-function generateGrid() {
-    grid = [];
-    for (let r = 0; r < ROWS; r++) {
-        grid[r] = [];
-        for (let c = 0; c < COLS; c++) {
-            grid[r][c] = randomItem();
-        }
+const REWARD_MATCH = 0.0000005;
+
+const REWARD_LEVEL_TIER = {
+  1: 0.00025,
+  2: 0.00040,
+  3: 0.00060,
+  4: 0.00090,
+  5: 0.00130
+};
+
+const REWARD_LOGIN = 0.00025;
+
+const CPM_REVENUE = 0.001; // 1€ CPM → 0.001€ por anúncio
+
+/* ============================================================
+   TABELA DE TIERS E ITENS
+   ============================================================ */
+
+const TIERS = {
+  1: ["🥕", "🌽", "🍅", "🥚"],
+  2: ["🍓", "🍇", "🍉", "🍒"],
+  3: ["🐔", "🐄", "🐑", "🐖"],
+  4: ["🌾", "🍀", "🌻", "🌱"],
+  5: ["🚜", "🏡", "🌋", "🌈"]
+};
+
+/* ============================================================
+   MISSÕES POR NÍVEL
+   ============================================================ */
+
+function generateMission(tier) {
+  const items = TIERS[tier];
+  const mission = [];
+
+  for (let i = 0; i < 2; i++) {
+    const item = items[Math.floor(Math.random() * items.length)];
+    const target = Math.floor(Math.random() * 6) + 4; // 4–10
+    mission.push({
+      item,
+      target,
+      progress: 0
+    });
+  }
+
+  return mission;
+}
+
+/* ============================================================
+   GERAÇÃO DO TABULEIRO
+   ============================================================ */
+
+function generateBoard() {
+  const items = TIERS[state.tier];
+  const board = [];
+
+  for (let i = 0; i < 64; i++) {
+    board.push(items[Math.floor(Math.random() * items.length)]);
+  }
+
+  state.board = board;
+  renderBoard();
+}
+
+/* ============================================================
+   RENDERIZAÇÃO DO TABULEIRO
+   ============================================================ */
+
+function renderBoard() {
+  const boardEl = document.getElementById("board");
+  boardEl.innerHTML = "";
+
+  state.board.forEach((item, index) => {
+    const cell = document.createElement("div");
+    cell.className = "cell";
+    cell.dataset.index = index;
+    cell.textContent = item;
+    cell.addEventListener("click", () => handleCellClick(index));
+    boardEl.appendChild(cell);
+  });
+}
+
+/* ============================================================
+   SELEÇÃO E TROCA DE PEÇAS
+   ============================================================ */
+
+let selectedCell = null;
+
+function handleCellClick(index) {
+  if (state.actions <= 0) {
+    showToast("Sem ações! Veja um anúncio.");
+    return;
+  }
+
+  const cellEl = document.querySelector(`[data-index="${index}"]`);
+
+  if (!selectedCell) {
+    selectedCell = index;
+    cellEl.classList.add("selected");
+    return;
+  }
+
+  if (selectedCell === index) {
+    cellEl.classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
+
+  const diff = Math.abs(selectedCell - index);
+  const validSwap = diff === 1 || diff === 8;
+
+  if (!validSwap) {
+    showToast("Movimento inválido");
+    document
+      .querySelector(`[data-index="${selectedCell}"]`)
+      .classList.remove("selected");
+    selectedCell = null;
+    return;
+  }
+
+  swapPieces(selectedCell, index);
+  document
+    .querySelector(`[data-index="${selectedCell}"]`)
+    .classList.remove("selected");
+  selectedCell = null;
+
+  state.actions--;
+  updateUI();
+  checkMatches();
+}
+
+/* ============================================================
+   TROCA DE PEÇAS
+   ============================================================ */
+
+function swapPieces(a, b) {
+  const temp = state.board[a];
+  state.board[a] = state.board[b];
+  state.board[b] = temp;
+  renderBoard();
+}
+
+/* ============================================================
+   DETEÇÃO DE MATCHES
+   ============================================================ */
+
+function checkMatches() {
+  const matches = [];
+
+  // Horizontal
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 6; c++) {
+      const i = r * 8 + c;
+      if (
+        state.board[i] === state.board[i + 1] &&
+        state.board[i] === state.board[i + 2]
+      ) {
+        matches.push(i, i + 1, i + 2);
+      }
     }
-    removeInitialMatches();
-}
+  }
 
-function randomItem() {
-    return items[Math.floor(Math.random() * items.length)];
-}
-
-function removeInitialMatches() {
-    let matches = findMatches();
-    while (matches.length > 0) {
-        for (let m of matches) {
-            grid[m.r][m.c] = randomItem();
-        }
-        matches = findMatches();
+  // Vertical
+  for (let c = 0; c < 8; c++) {
+    for (let r = 0; r < 6; r++) {
+      const i = r * 8 + c;
+      if (
+        state.board[i] === state.board[i + 8] &&
+        state.board[i] === state.board[i + 16]
+      ) {
+        matches.push(i, i + 8, i + 16);
+      }
     }
+  }
+
+  if (matches.length === 0) return;
+
+  const unique = [...new Set(matches)];
+
+  unique.forEach((i) => {
+    const cell = document.querySelector(`[data-index="${i}"]`);
+    if (cell) cell.classList.add("match");
+  });
+
+  setTimeout(() => {
+    applyMatches(unique);
+  }, 300);
 }
 
-function renderGrid() {
-    const el = document.getElementById("grid");
-    el.innerHTML = "";
+/* ============================================================
+   APLICAÇÃO DE MATCHES
+   ============================================================ */
 
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            const cell = document.createElement("div");
-            cell.className = "cell";
-            cell.innerText = grid[r][c];
+function applyMatches(indices) {
+  indices.forEach((i) => {
+    const item = state.board[i];
 
-            // animação simples de queda inicial
-            cell.style.transform = "translateY(-20px)";
-            setTimeout(() => {
-                cell.style.transform = "translateY(0)";
-            }, 10);
+    // Atualiza missão
+    state.mission.forEach((m) => {
+      if (m.item === item) {
+        m.progress++;
+      }
+    });
 
-            cell.onclick = () => {
-                if (!inputLocked) selectCell(r, c);
-            };
+    // Recompensa por match
+    state.balance += REWARD_MATCH;
+    state.rewards.matches += REWARD_MATCH;
 
-            el.appendChild(cell);
-        }
-    }
+    state.board[i] = null;
+  });
+
+  state.totalMatches += indices.length;
+  state.matchesToday += indices.length;
+
+  updateUI();
+  updateAdmin();
+
+  collapseBoard();
 }
 
-function selectCell(r, c) {
-    if (!selected) {
-        selected = { r, c };
-        highlight(r, c);
-        return;
-    }
+/* ============================================================
+   COLAPSAR TABULEIRO
+   ============================================================ */
 
-    const a = selected;
-    const b = { r, c };
+function collapseBoard() {
+  const items = TIERS[state.tier];
 
-    clearHighlights();
+  for (let c = 0; c < 8; c++) {
+    const col = [];
 
-    if (areAdjacent(a, b)) {
-        trySwap(a, b);
-    }
-
-    selected = null;
-}
-
-function highlight(r, c) {
-    const index = r * COLS + c;
-    document.getElementsByClassName("cell")[index].style.background = "#ffe082";
-}
-
-function clearHighlights() {
-    for (let cell of document.getElementsByClassName("cell")) {
-        cell.style.background = "#fff9c4";
-    }
-}
-
-function areAdjacent(a, b) {
-    return (
-        (a.r === b.r && Math.abs(a.c - b.c) === 1) ||
-        (a.c === b.c && Math.abs(a.r - b.r) === 1)
-    );
-}
-
-function trySwap(a, b) {
-    inputLocked = true;
-
-    const indexA = a.r * COLS + a.c;
-    const indexB = b.r * COLS + b.c;
-
-    const cells = document.getElementsByClassName("cell");
-    const cellA = cells[indexA];
-    const cellB = cells[indexB];
-
-    cellA.classList.add("swap");
-    cellB.classList.add("swap");
-
-    const dx = (b.c - a.c) * 46; // 42px + 4px gap
-    const dy = (b.r - a.r) * 46;
-
-    cellA.style.transform = `translate(${dx}px, ${dy}px)`;
-    cellB.style.transform = `translate(${-dx}px, ${-dy}px)`;
-
-    setTimeout(() => {
-        cellA.style.transform = "";
-        cellB.style.transform = "";
-        cellA.classList.remove("swap");
-        cellB.classList.remove("swap");
-
-        swap(a, b);
-
-        const matches = findMatches();
-        if (matches.length === 0) {
-            swap(a, b);
-            inputLocked = false;
-            renderGrid();
-            return;
-        }
-
-        playGame(); // jogada válida
-        resolveMatches();
-    }, 150);
-}
-
-function swap(a, b) {
-    const temp = grid[a.r][a.c];
-    grid[a.r][a.c] = grid[b.r][b.c];
-    grid[b.r][b.c] = temp;
-}
-
-function findMatches() {
-    let matches = [];
-
-    // horizontais
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS - 2; c++) {
-            const item = grid[r][c];
-            if (item && item === grid[r][c+1] && item === grid[r][c+2]) {
-                matches.push({ r, c });
-                matches.push({ r, c: c+1 });
-                matches.push({ r, c: c+2 });
-            }
-        }
+    for (let r = 0; r < 8; r++) {
+      const i = r * 8 + c;
+      if (state.board[i] !== null) col.push(state.board[i]);
     }
 
-    // verticais
-    for (let c = 0; c < COLS; c++) {
-        for (let r = 0; r < ROWS - 2; r++) {
-            const item = grid[r][c];
-            if (item && item === grid[r+1][c] && item === grid[r+2][c]) {
-                matches.push({ r, c });
-                matches.push({ r: r+1, c });
-                matches.push({ r: r+2, c });
-            }
-        }
+    while (col.length < 8) {
+      col.unshift(items[Math.floor(Math.random() * items.length)]);
     }
 
-    // remover duplicados
-    const seen = {};
-    const unique = [];
-    for (let m of matches) {
-        const key = `${m.r}-${m.c}`;
-        if (!seen[key]) {
-            seen[key] = true;
-            unique.push(m);
-        }
+    for (let r = 0; r < 8; r++) {
+      state.board[r * 8 + c] = col[r];
+    }
+  }
+
+  renderBoard();
+  checkMissionCompletion();
+}
+
+/* ============================================================
+   MISSÃO COMPLETA
+   ============================================================ */
+
+function checkMissionCompletion() {
+  const done = state.mission.every((m) => m.progress >= m.target);
+
+  if (!done) return;
+
+  const reward = REWARD_LEVEL_TIER[state.tier];
+  state.balance += reward;
+  state.rewards.levels += reward;
+
+  state.totalLevelsCompleted++;
+  state.level++;
+
+  if (state.level === 6) state.tier = 2;
+  if (state.level === 16) state.tier = 3;
+  if (state.level === 31) state.tier = 4;
+  if (state.level === 51) state.tier = 5;
+
+  showToast(`Nível concluído! +${reward.toFixed(5)} €`);
+
+  startNewLevel();
+}
+
+/* ============================================================
+   NOVO NÍVEL
+   ============================================================ */
+
+function startNewLevel() {
+  state.mission = generateMission(state.tier);
+  generateBoard();
+  updateUI();
+  updateAdmin();
+}
+
+/* ============================================================
+   LOGIN DIÁRIO
+   ============================================================ */
+
+function handleDailyLogin() {
+  const today = new Date().toDateString();
+
+  if (state.lastLogin !== today) {
+    state.lastLogin = today;
+    state.loginStreak++;
+    state.balance += REWARD_LOGIN;
+    state.rewards.login += REWARD_LOGIN;
+    showToast(`Login diário! +${REWARD_LOGIN.toFixed(5)} €`);
+  }
+}
+
+/* ============================================================
+   ATUALIZAÇÃO DE UI
+   ============================================================ */
+
+function updateUI() {
+  document.getElementById("ui-balance").textContent =
+    state.balance.toFixed(4) + " €";
+
+  const progress = Math.min((state.balance / 5) * 100, 100);
+  document.getElementById("ui-balance-progress").style.width = progress + "%";
+
+  document.getElementById("ui-level").textContent = state.level;
+  document.getElementById("ui-tier-label").textContent = "Tier " + state.tier;
+  document.getElementById("ui-tier-pill").textContent =
+    `Tier ${state.tier} · ${tierName(state.tier)}`;
+
+  document.getElementById("ui-tier-items").textContent =
+    "Itens: " + TIERS[state.tier].join(" ");
+
+  document.getElementById("ui-level-bonus").textContent =
+    REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
+
+  document.getElementById("ui-actions").textContent = state.actions;
+  document.getElementById("ui-lives").textContent = state.lives;
+
+  document.getElementById("ui-booster-hammer").textContent =
+    state.boosters.hammer;
+  document.getElementById("ui-booster-shovel").textContent =
+    state.boosters.shovel;
+  document.getElementById("ui-booster-tractor").textContent =
+    state.boosters.tractor;
+  document.getElementById("ui-booster-watering").textContent =
+    state.boosters.watering;
+
+  document.getElementById("ui-matches-today").textContent =
+    state.matchesToday;
+
+  renderMission();
+}
+
+/* ============================================================
+   NOME DO TIER
+   ============================================================ */
+
+function tierName(tier) {
+  return {
+    1: "Quinta Básica",
+    2: "Frutaria",
+    3: "Animais",
+    4: "Colheitas",
+    5: "Mega Quinta"
+  }[tier];
+}
+
+/* ============================================================
+   RENDERIZAÇÃO DA MISSÃO
+   ============================================================ */
+
+function renderMission() {
+  const container = document.getElementById("mission-items");
+  container.innerHTML = "";
+
+  state.mission.forEach((m) => {
+    const div = document.createElement("div");
+    div.className = "mission-item";
+
+    div.innerHTML = `
+      <div class="mission-emoji">${m.item}</div>
+      <div class="mission-text">
+        <div class="mission-label">Objetivo</div>
+        <div class="mission-progress">${m.progress}/${m.target}</div>
+        <div class="mission-bar">
+          <div class="mission-bar-fill" style="width:${
+            (m.progress / m.target) * 100
+          }%"></div>
+        </div>
+      </div>
+    `;
+
+    container.appendChild(div);
+  });
+
+  document.getElementById("ui-mission-reward").textContent =
+    "Recompensa: " + REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+
+function showToast(msg) {
+  const toast = document.getElementById("toast");
+  document.getElementById("toast-text").textContent = msg;
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+/* ============================================================
+   ATUALIZAÇÃO DO PAINEL ADMIN
+   ============================================================ */
+
+function updateAdmin() {
+  const revenue = state.ads.total * CPM_REVENUE;
+  const emitted =
+    state.rewards.matches + state.rewards.levels + state.rewards.login;
+  const margin = revenue - emitted;
+
+  document.getElementById("admin-revenue").textContent =
+    revenue.toFixed(4) + " €";
+  document.getElementById("admin-emitted").textContent =
+    emitted.toFixed(4) + " €";
+  document.getElementById("admin-margin").textContent =
+    margin.toFixed(4) + " €";
+
+  document.getElementById("admin-ads-total").textContent = state.ads.total;
+  document.getElementById("admin-ads-actions").textContent =
+    state.ads.actions;
+  document.getElementById("admin-ads-boosters").textContent =
+    state.ads.boosters;
+  document.getElementById("admin-ads-lives").textContent = state.ads.lives;
+
+  document.getElementById("admin-ads-actions-rev").textContent =
+    (state.ads.actions * CPM_REVENUE).toFixed(4) + " €";
+  document.getElementById("admin-ads-boosters-rev").textContent =
+    (state.ads.boosters * CPM_REVENUE).toFixed(4) + " €";
+  document.getElementById("admin-ads-lives-rev").textContent =
+    (state.ads.lives * CPM_REVENUE).toFixed(4) + " €";
+
+  document.getElementById("admin-rewards-matches").textContent =
+    state.rewards.matches.toFixed(4) + " €";
+  document.getElementById("admin-rewards-levels").textContent =
+    state.rewards.levels.toFixed(4) + " €";
+  document.getElementById("admin-rewards-login").textContent =
+    state.rewards.login.toFixed(4) + " €";
+
+  document.getElementById("admin-user-id").textContent = state.userId;
+  document.getElementById("admin-user-balance").textContent =
+    state.balance.toFixed(4) + " €";
+  document.getElementById("admin-user-level").textContent =
+    `${state.level} / Tier ${state.tier}`;
+  document.getElementById("admin-user-ads").textContent = state.ads.total;
+
+  document.getElementById("admin-user-actions").textContent = state.actions;
+  document.getElementById("admin-user-lives").textContent = state.lives;
+  document.getElementById("admin-user-boosters").textContent =
+    `${state.boosters.hammer}/${state.boosters.shovel}/${state.boosters.tractor}/${state.boosters.watering}`;
+  document.getElementById("admin-user-matches").textContent =
+    state.totalMatches;
+  document.getElementById("admin-user-levels-completed").textContent =
+    state.totalLevelsCompleted;
+
+  renderPaymentsTable();
+}
+/* ============================================================
+   SISTEMA DE ANÚNCIOS 300×250
+   ============================================================ */
+
+let adCallback = null;
+let adTimer = null;
+
+function showAd(context, callback) {
+  adCallback = callback;
+
+  document.getElementById("ad-modal-context").textContent = context;
+  document.getElementById("ad-modal-backdrop").classList.add("active");
+
+  let timeLeft = 5;
+  const timerEl = document.getElementById("ad-modal-timer");
+  const closeBtn = document.getElementById("ad-modal-close");
+
+  closeBtn.classList.add("disabled");
+
+  adTimer = setInterval(() => {
+    timeLeft--;
+    timerEl.textContent = timeLeft;
+
+    if (timeLeft <= 0) {
+      clearInterval(adTimer);
+      closeBtn.classList.remove("disabled");
+    }
+  }, 1000);
+}
+
+document.getElementById("ad-modal-close").addEventListener("click", () => {
+  const btn = document.getElementById("ad-modal-close");
+  if (btn.classList.contains("disabled")) return;
+
+  document.getElementById("ad-modal-backdrop").classList.remove("active");
+
+  if (adCallback) adCallback();
+  adCallback = null;
+});
+
+/* ============================================================
+   AÇÕES EXTRA (+5 e +10)
+   ============================================================ */
+
+document.getElementById("btn-actions-5").addEventListener("click", () => {
+  showAd("Ações +5", () => {
+    state.actions += 5;
+    state.ads.total++;
+    state.ads.actions++;
+    updateUI();
+    updateAdmin();
+    showToast("+5 ações");
+  });
+});
+
+document.getElementById("btn-actions-10").addEventListener("click", () => {
+  showAd("Ações +10 (1/2)", () => {
+    state.ads.total++;
+    state.ads.actions++;
+
+    showAd("Ações +10 (2/2)", () => {
+      state.actions += 10;
+      state.ads.total++;
+      state.ads.actions++;
+      updateUI();
+      updateAdmin();
+      showToast("+10 ações");
+    });
+  });
+});
+
+/* ============================================================
+   BOOSTERS
+   ============================================================ */
+
+document.querySelectorAll(".booster-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const type = btn.dataset.booster;
+
+    if (state.boosters[type] > 0) {
+      state.boosters[type]--;
+      updateUI();
+      updateAdmin();
+      showToast("Booster usado");
+      return;
     }
 
-    return unique;
+    showAd("Boosters", () => {
+      state.boosters.hammer = 3;
+      state.boosters.shovel = 3;
+      state.boosters.tractor = 3;
+      state.boosters.watering = 3;
+
+      state.ads.total++;
+      state.ads.boosters++;
+
+      updateUI();
+      updateAdmin();
+      showToast("Boosters renovados");
+    });
+  });
+});
+
+/* ============================================================
+   VIDAS
+   ============================================================ */
+
+function loseLife() {
+  state.lives--;
+  updateUI();
+
+  if (state.lives <= 0) {
+    showAd("Vidas", () => {
+      state.lives = 3;
+      state.ads.total++;
+      state.ads.lives++;
+      updateUI();
+      updateAdmin();
+      showToast("+3 vidas");
+    });
+  }
 }
 
-function resolveMatches() {
-    let matches = findMatches();
+/* ============================================================
+   SISTEMA PAYPAL
+   ============================================================ */
 
-    if (matches.length === 0) {
-        inputLocked = false;
-        renderGrid();
-        return;
-    }
+function requestPayment() {
+  if (state.balance < 5) {
+    showToast("Saldo insuficiente para levantar");
+    return;
+  }
 
-    const cells = document.getElementsByClassName("cell");
+  const email = prompt("Insira o seu email PayPal:");
 
-    for (let m of matches) {
-        const index = m.r * COLS + m.c;
-        if (cells[index]) cells[index].classList.add("fade-out");
-    }
+  if (!email || !email.includes("@")) {
+    showToast("Email inválido");
+    return;
+  }
 
-    setTimeout(() => {
-        for (let m of matches) {
-            grid[m.r][m.c] = null;
-        }
+  const payment = {
+    date: new Date().toLocaleString(),
+    amount: state.balance,
+    email,
+    status: "pending"
+  };
 
-        applyGravity();
-        refill();
-        renderGrid();
+  state.payments.push(payment);
 
-        setTimeout(resolveMatches, 150);
-    }, 150);
+  updateAdmin();
+  showToast("Pedido enviado");
+
+  // saldo fica congelado
+  state.balance = 0;
+  updateUI();
 }
 
-function applyGravity() {
-    for (let c = 0; c < COLS; c++) {
-        for (let r = ROWS - 1; r >= 0; r--) {
-            if (grid[r][c] === null) {
-                for (let k = r - 1; k >= 0; k--) {
-                    if (grid[k][c] !== null) {
-                        grid[r][c] = grid[k][c];
-                        grid[k][c] = null;
-                        break;
-                    }
-                }
-            }
-        }
-    }
+function renderPaymentsTable() {
+  const tbody = document.querySelector("#admin-payments-table tbody");
+  tbody.innerHTML = "";
+
+  state.payments.forEach((p) => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${p.date}</td>
+      <td>${p.amount.toFixed(2)} €</td>
+      <td>
+        <span class="status-pill ${p.status}">
+          ${p.status}
+        </span>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  const totalPaid = state.payments
+    .filter((p) => p.status === "paid")
+    .reduce((a, b) => a + b.amount, 0);
+
+  const totalPending = state.payments
+    .filter((p) => p.status === "pending")
+    .reduce((a, b) => a + b.amount, 0);
+
+  document.getElementById("admin-payments-paid").textContent =
+    totalPaid.toFixed(2) + " €";
+  document.getElementById("admin-payments-pending").textContent =
+    totalPending.toFixed(2) + " €";
+  document.getElementById("admin-payments-count").textContent =
+    state.payments.length;
 }
 
-function refill() {
-    for (let r = 0; r < ROWS; r++) {
-        for (let c = 0; c < COLS; c++) {
-            if (grid[r][c] === null) {
-                grid[r][c] = randomItem();
-            }
-        }
-    }
+/* ============================================================
+   TABS DO PAINEL ADMIN
+   ============================================================ */
+
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    document
+      .querySelectorAll(".tab-btn")
+      .forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const tab = btn.dataset.tab;
+
+    document
+      .querySelectorAll(".tab-content")
+      .forEach((c) => c.classList.remove("active"));
+
+    document.getElementById(tab).classList.add("active");
+  });
+});
+
+/* ============================================================
+   INICIALIZAÇÃO DO JOGO
+   ============================================================ */
+
+function init() {
+  state.userId = "USR-" + Math.floor(Math.random() * 999999);
+  document.getElementById("ui-user-id").textContent = state.userId;
+
+  handleDailyLogin();
+  startNewLevel();
+  updateUI();
+  updateAdmin();
 }
 
-/* --------------------------
-   SISTEMA DE AÇÕES / SALDO
---------------------------- */
-
-function playGame() {
-    let u = db[currentId];
-    if (u.act > 0) {
-        u.act--;
-        u.bal += 0.0005;
-        refresh();
-    } else {
-        alert("Sem ações disponíveis!");
-    }
-}
-
-function addActions() {
-    adRevenue += 0.0010;
-    db[currentId].act += 10;
-    refresh();
-    alert("Anúncio concluído! +10 Ações.");
-}
-
-/* --------------------------
-   ADMIN / INTERFACE
---------------------------- */
-
-function changeUser() {
-    const nid = document.getElementById('new-id').value;
-    if (!nid) return;
-    if (!db[nid]) db[nid] = { bal: 0, act: 20 };
-    currentId = nid;
-    refresh();
-    toggleAdmin();
-}
-
-function toggleAdmin() {
-    const p = document.getElementById('admin-panel');
-    p.style.display = p.style.display === 'block' ? 'none' : 'block';
-}
-
-function refresh() {
-    const u = db[currentId];
-    document.getElementById('ui-id').innerText = currentId;
-    document.getElementById('ui-bal').innerText = `€ ${u.bal.toFixed(4)}`;
-    document.getElementById('ui-act').innerText = u.act;
-    
-    document.getElementById('adm-rev').innerText = `€ ${adRevenue.toFixed(4)}`;
-    
-    let totalSaldos = 0;
-    let listHtml = "";
-    for (let id in db) {
-        totalSaldos += db[id].bal;
-        listHtml += `<div>ID: #${id} | Saldo: €${db[id].bal.toFixed(4)}</div>`;
-    }
-    document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
-    document.getElementById('user-list').innerHTML = listHtml;
-}
+init();
 </script>
+
 </body>
 </html>
