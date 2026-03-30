@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Ouro da Quinta v33.79 - INFINITE GRID</title>
+    <title>Ouro da Quinta v33.80 - DRAG & DROP</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { --bg: #fdfae5; --accent: #2e7d32; --white: #ffffff; --brown: #8d6e63; }
-        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; }
+        * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; user-select: none; touch-action: none; }
         body { margin: 0; background: var(--bg); height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
         #game-header { padding: 10px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
@@ -19,18 +19,16 @@
         #mission-bar { background: var(--white); padding: 8px 20px; border-radius: 20px; display: flex; gap: 15px; font-weight: 800; font-size: 14px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin: 5px 0; }
         
         #grid-area { flex-grow: 1; display: flex; align-items: center; justify-content: center; padding: 10px; }
-        #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; padding: 10px; background: var(--brown); border-radius: 12px; }
-        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 20px; transition: transform 0.1s; cursor: pointer; }
-        .cell:active { transform: scale(0.8); }
+        #grid { display: grid; grid-template-columns: repeat(7, 42px); gap: 5px; padding: 10px; background: var(--brown); border-radius: 12px; position: relative; }
+        .cell { width: 42px; height: 42px; background: #fff9c4; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 22px; cursor: pointer; position: relative; transition: transform 0.2s, top 0.3s; }
+        .dragging { opacity: 0.5; transform: scale(1.1); z-index: 10; }
 
-        .ad-placeholder { width: 320px; height: 50px; background: rgba(0,0,0,0.05); border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #888; border-radius: 8px; margin: 5px auto; }
         #footer { background: #000; color: #fff; padding: 12px; text-align: center; font-size: 9px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div id="game-header">
-    <div class="ad-placeholder">BANNER TOPO (€ 0.0010) [cite: 2026-03-30]</div>
     <div id="stats-row">
         <div class="stat-card"><span class="stat-l">Nível</span><span class="stat-v">1</span></div>
         <div class="stat-card"><span class="stat-l">Saldo</span><span class="stat-v" id="bal-ui">€ 0.0007</span></div>
@@ -47,64 +45,61 @@
     <div id="grid"></div>
 </div>
 
-<div class="ad-placeholder">BANNER FUNDO (€ 0.0010) [cite: 2026-03-30]</div>
-
-<div id="footer">ADMIN: 5401881400 | v33.79 | REGENERATIVE GRID SYSTEM</div>
+<div id="footer">ADMIN: 5401881400 | v33.80 | DRAG & DROP ENGINE</div>
 
 <script>
-    const tg = window.Telegram.WebApp;
     const icons = ['🥛', '🥚', '🍯', '🚜'];
     let mission = { '🥛': 8, '🥚': 8, '🍯': 4 };
     let balance = 0.0007, actions = 11;
-    let gridArray = [];
-
-    function getSafeIcon(index) {
-        let possible = [...icons];
-        let row = Math.floor(index / 7);
-        let col = index % 7;
-
-        if (col > 0) possible = possible.filter(icon => icon !== gridArray[index - 1]);
-        if (row > 0) possible = possible.filter(icon => icon !== gridArray[index - 7]);
-        
-        return possible[Math.floor(Math.random() * possible.length)];
-    }
+    let draggedElement = null;
 
     function createGrid() {
         const gridEl = document.getElementById('grid');
         gridEl.innerHTML = '';
-        gridArray = [];
-
         for (let i = 0; i < 49; i++) {
-            const chosen = getSafeIcon(i);
-            gridArray.push(chosen);
-
             const cell = document.createElement('div');
             cell.className = 'cell';
-            cell.innerText = chosen;
-            cell.dataset.id = i;
-            cell.onclick = () => handleMove(cell, i);
+            cell.draggable = true;
+            cell.innerText = icons[Math.floor(Math.random() * icons.length)];
+            
+            // Eventos de Drag and Drop [cite: 2026-03-30]
+            cell.addEventListener('touchstart', (e) => { draggedElement = cell; cell.classList.add('dragging'); });
+            cell.addEventListener('touchend', (e) => {
+                cell.classList.remove('dragging');
+                const touch = e.changedTouches[0];
+                const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                if (target && target.classList.contains('cell') && target !== cell) {
+                    swap(cell, target);
+                }
+            });
             gridEl.appendChild(cell);
         }
     }
 
-    function handleMove(cell, index) {
+    function swap(c1, c2) {
         if (actions <= 0) return;
-
-        const currentIcon = cell.innerText;
-        actions--;
-
-        // Se o ícone clicado for da missão, ganha saldo e atualiza missão
-        if (mission[currentIcon] > 0) {
-            mission[currentIcon]--;
-            balance += 0.0001;
-        }
-
-        // REGENERAÇÃO: Troca o ícone clicado por um novo imediatamente [cite: 2026-03-30]
-        const newIcon = getSafeIcon(index);
-        gridArray[index] = newIcon;
-        cell.innerText = newIcon;
         
+        const temp = c1.innerText;
+        c1.innerText = c2.innerText;
+        c2.innerText = temp;
+        
+        actions--;
+        checkMatches();
         updateUI();
+    }
+
+    function checkMatches() {
+        // Lógica simplificada de match para teste de drag
+        const cells = document.querySelectorAll('.cell');
+        cells.forEach(cell => {
+            const icon = cell.innerText;
+            if (mission[icon] > 0) {
+                // Simula a colheita no match [cite: 2026-03-30]
+                mission[icon]--;
+                balance += 0.0001;
+                cell.innerText = icons[Math.floor(Math.random() * icons.length)]; // Substitui por novo
+            }
+        });
     }
 
     function updateUI() {
@@ -115,7 +110,6 @@
         document.getElementById('act-ui').innerText = actions;
     }
 
-    tg.ready();
     createGrid();
     updateUI();
 </script>
