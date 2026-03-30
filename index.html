@@ -1256,732 +1256,733 @@
     <span>✓</span>
     <span id="toast-text">Ação concluída</span>
   </div>
-<script>
-/* ============================================================
-   ESTADO GLOBAL DO JOGO
-   ============================================================ */
 
-const state = {
-  userId: "USR-" + Math.floor(Math.random() * 999999),
-  balance: 0,
-  level: 1,
-  tier: 1,
-  actions: 20,
-  lives: 3,
-  boosters: {
-    hammer: 3,
-    shovel: 3,
-    tractor: 3,
-    watering: 3
-  },
-  matchesToday: 0,
-  totalMatches: 0,
-  totalLevelsCompleted: 0,
-  loginStreak: 0,
-  lastLogin: null,
-  board: [],
-  mission: null,
-  payments: [],
-  ads: {
-    total: 0,
-    actions: 0,
-    boosters: 0,
-    lives: 0
-  },
-  rewards: {
-    matches: 0,
-    levels: 0,
-    login: 0
+  <script>
+  /* ============================================================
+     ESTADO GLOBAL DO JOGO
+     ============================================================ */
+
+  const state = {
+    userId: "USR-" + Math.floor(Math.random() * 999999),
+    balance: 0,
+    level: 1,
+    tier: 1,
+    actions: 20,
+    lives: 3,
+    boosters: {
+      hammer: 3,
+      shovel: 3,
+      tractor: 3,
+      watering: 3
+    },
+    matchesToday: 0,
+    totalMatches: 0,
+    totalLevelsCompleted: 0,
+    loginStreak: 0,
+    lastLogin: null,
+    board: [],
+    mission: null,
+    payments: [],
+    ads: {
+      total: 0,
+      actions: 0,
+      boosters: 0,
+      lives: 0
+    },
+    rewards: {
+      matches: 0,
+      levels: 0,
+      login: 0
+    }
+  };
+
+  /* ============================================================
+     CONSTANTES DE ECONOMIA
+     ============================================================ */
+
+  const REWARD_MATCH = 0.0000005;
+
+  const REWARD_LEVEL_TIER = {
+    1: 0.00025,
+    2: 0.00040,
+    3: 0.00060,
+    4: 0.00090,
+    5: 0.00130
+  };
+
+  const REWARD_LOGIN = 0.00025;
+
+  const CPM_REVENUE = 0.001; // 1€ CPM → 0.001€ por anúncio
+
+  /* ============================================================
+     TABELA DE TIERS E ITENS
+     ============================================================ */
+
+  const TIERS = {
+    1: ["🥕", "🌽", "🍅", "🥚"],
+    2: ["🍓", "🍇", "🍉", "🍒"],
+    3: ["🐔", "🐄", "🐑", "🐖"],
+    4: ["🌾", "🍀", "🌻", "🌱"],
+    5: ["🚜", "🏡", "🌋", "🌈"]
+  };
+
+  /* ============================================================
+     MISSÕES POR NÍVEL
+     ============================================================ */
+
+  function generateMission(tier) {
+    const items = TIERS[tier];
+    const mission = [];
+
+    for (let i = 0; i < 2; i++) {
+      const item = items[Math.floor(Math.random() * items.length)];
+      const target = Math.floor(Math.random() * 6) + 4; // 4–10
+      mission.push({
+        item,
+        target,
+        progress: 0
+      });
+    }
+
+    return mission;
   }
-};
 
-/* ============================================================
-   CONSTANTES DE ECONOMIA
-   ============================================================ */
+  /* ============================================================
+     GERAÇÃO DO TABULEIRO
+     ============================================================ */
 
-const REWARD_MATCH = 0.0000005;
+  function generateBoard() {
+    const items = TIERS[state.tier];
+    const board = [];
 
-const REWARD_LEVEL_TIER = {
-  1: 0.00025,
-  2: 0.00040,
-  3: 0.00060,
-  4: 0.00090,
-  5: 0.00130
-};
+    for (let i = 0; i < 64; i++) {
+      board.push(items[Math.floor(Math.random() * items.length)]);
+    }
 
-const REWARD_LOGIN = 0.00025;
+    state.board = board;
+    renderBoard();
+  }
 
-const CPM_REVENUE = 0.001; // 1€ CPM → 0.001€ por anúncio
+  /* ============================================================
+     RENDERIZAÇÃO DO TABULEIRO
+     ============================================================ */
 
-/* ============================================================
-   TABELA DE TIERS E ITENS
-   ============================================================ */
+  function renderBoard() {
+    const boardEl = document.getElementById("board");
+    boardEl.innerHTML = "";
 
-const TIERS = {
-  1: ["🥕", "🌽", "🍅", "🥚"],
-  2: ["🍓", "🍇", "🍉", "🍒"],
-  3: ["🐔", "🐄", "🐑", "🐖"],
-  4: ["🌾", "🍀", "🌻", "🌱"],
-  5: ["🚜", "🏡", "🌋", "🌈"]
-};
-
-/* ============================================================
-   MISSÕES POR NÍVEL
-   ============================================================ */
-
-function generateMission(tier) {
-  const items = TIERS[tier];
-  const mission = [];
-
-  for (let i = 0; i < 2; i++) {
-    const item = items[Math.floor(Math.random() * items.length)];
-    const target = Math.floor(Math.random() * 6) + 4; // 4–10
-    mission.push({
-      item,
-      target,
-      progress: 0
+    state.board.forEach((item, index) => {
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.dataset.index = index;
+      cell.textContent = item;
+      cell.addEventListener("click", () => handleCellClick(index));
+      boardEl.appendChild(cell);
     });
   }
 
-  return mission;
-}
+  /* ============================================================
+     SELEÇÃO E TROCA DE PEÇAS
+     ============================================================ */
 
-/* ============================================================
-   GERAÇÃO DO TABULEIRO
-   ============================================================ */
+  let selectedCell = null;
 
-function generateBoard() {
-  const items = TIERS[state.tier];
-  const board = [];
+  function handleCellClick(index) {
+    if (state.actions <= 0) {
+      showToast("Sem ações! Veja um anúncio.");
+      return;
+    }
 
-  for (let i = 0; i < 64; i++) {
-    board.push(items[Math.floor(Math.random() * items.length)]);
-  }
+    const cellEl = document.querySelector(`[data-index="${index}"]`);
 
-  state.board = board;
-  renderBoard();
-}
+    if (!selectedCell) {
+      selectedCell = index;
+      cellEl.classList.add("selected");
+      return;
+    }
 
-/* ============================================================
-   RENDERIZAÇÃO DO TABULEIRO
-   ============================================================ */
+    if (selectedCell === index) {
+      cellEl.classList.remove("selected");
+      selectedCell = null;
+      return;
+    }
 
-function renderBoard() {
-  const boardEl = document.getElementById("board");
-  boardEl.innerHTML = "";
+    const diff = Math.abs(selectedCell - index);
+    const validSwap = diff === 1 || diff === 8;
 
-  state.board.forEach((item, index) => {
-    const cell = document.createElement("div");
-    cell.className = "cell";
-    cell.dataset.index = index;
-    cell.textContent = item;
-    cell.addEventListener("click", () => handleCellClick(index));
-    boardEl.appendChild(cell);
-  });
-}
+    if (!validSwap) {
+      showToast("Movimento inválido");
+      document
+        .querySelector(`[data-index="${selectedCell}"]`)
+        .classList.remove("selected");
+      selectedCell = null;
+      return;
+    }
 
-/* ============================================================
-   SELEÇÃO E TROCA DE PEÇAS
-   ============================================================ */
-
-let selectedCell = null;
-
-function handleCellClick(index) {
-  if (state.actions <= 0) {
-    showToast("Sem ações! Veja um anúncio.");
-    return;
-  }
-
-  const cellEl = document.querySelector(`[data-index="${index}"]`);
-
-  if (!selectedCell) {
-    selectedCell = index;
-    cellEl.classList.add("selected");
-    return;
-  }
-
-  if (selectedCell === index) {
-    cellEl.classList.remove("selected");
-    selectedCell = null;
-    return;
-  }
-
-  const diff = Math.abs(selectedCell - index);
-  const validSwap = diff === 1 || diff === 8;
-
-  if (!validSwap) {
-    showToast("Movimento inválido");
+    swapPieces(selectedCell, index);
     document
       .querySelector(`[data-index="${selectedCell}"]`)
       .classList.remove("selected");
     selectedCell = null;
-    return;
+
+    state.actions--;
+    updateUI();
+    checkMatches();
   }
 
-  swapPieces(selectedCell, index);
-  document
-    .querySelector(`[data-index="${selectedCell}"]`)
-    .classList.remove("selected");
-  selectedCell = null;
+  /* ============================================================
+     TROCA DE PEÇAS
+     ============================================================ */
 
-  state.actions--;
-  updateUI();
-  checkMatches();
-}
+  function swapPieces(a, b) {
+    const temp = state.board[a];
+    state.board[a] = state.board[b];
+    state.board[b] = temp;
+    renderBoard();
+  }
 
-/* ============================================================
-   TROCA DE PEÇAS
-   ============================================================ */
+  /* ============================================================
+     DETEÇÃO DE MATCHES
+     ============================================================ */
 
-function swapPieces(a, b) {
-  const temp = state.board[a];
-  state.board[a] = state.board[b];
-  state.board[b] = temp;
-  renderBoard();
-}
+  function checkMatches() {
+    const matches = [];
 
-/* ============================================================
-   DETEÇÃO DE MATCHES
-   ============================================================ */
-
-function checkMatches() {
-  const matches = [];
-
-  // Horizontal
-  for (let r = 0; r < 8; r++) {
-    for (let c = 0; c < 6; c++) {
-      const i = r * 8 + c;
-      if (
-        state.board[i] === state.board[i + 1] &&
-        state.board[i] === state.board[i + 2]
-      ) {
-        matches.push(i, i + 1, i + 2);
+    // Horizontal
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 6; c++) {
+        const i = r * 8 + c;
+        if (
+          state.board[i] === state.board[i + 1] &&
+          state.board[i] === state.board[i + 2]
+        ) {
+          matches.push(i, i + 1, i + 2);
+        }
       }
     }
-  }
 
-  // Vertical
-  for (let c = 0; c < 8; c++) {
-    for (let r = 0; r < 6; r++) {
-      const i = r * 8 + c;
-      if (
-        state.board[i] === state.board[i + 8] &&
-        state.board[i] === state.board[i + 16]
-      ) {
-        matches.push(i, i + 8, i + 16);
+    // Vertical
+    for (let c = 0; c < 8; c++) {
+      for (let r = 0; r < 6; r++) {
+        const i = r * 8 + c;
+        if (
+          state.board[i] === state.board[i + 8] &&
+          state.board[i] === state.board[i + 16]
+        ) {
+          matches.push(i, i + 8, i + 16);
+        }
       }
     }
-  }
 
-  if (matches.length === 0) return;
+    if (matches.length === 0) return;
 
-  const unique = [...new Set(matches)];
+    const unique = [...new Set(matches)];
 
-  unique.forEach((i) => {
-    const cell = document.querySelector(`[data-index="${i}"]`);
-    if (cell) cell.classList.add("match");
-  });
-
-  setTimeout(() => {
-    applyMatches(unique);
-  }, 300);
-}
-
-/* ============================================================
-   APLICAÇÃO DE MATCHES
-   ============================================================ */
-
-function applyMatches(indices) {
-  indices.forEach((i) => {
-    const item = state.board[i];
-
-    // Atualiza missão
-    state.mission.forEach((m) => {
-      if (m.item === item) {
-        m.progress++;
-      }
+    unique.forEach((i) => {
+      const cell = document.querySelector(`[data-index="${i}"]`);
+      if (cell) cell.classList.add("match");
     });
 
-    // Recompensa por match
-    state.balance += REWARD_MATCH;
-    state.rewards.matches += REWARD_MATCH;
-
-    state.board[i] = null;
-  });
-
-  state.totalMatches += indices.length;
-  state.matchesToday += indices.length;
-
-  updateUI();
-  updateAdmin();
-
-  collapseBoard();
-}
-
-/* ============================================================
-   COLAPSAR TABULEIRO
-   ============================================================ */
-
-function collapseBoard() {
-  const items = TIERS[state.tier];
-
-  for (let c = 0; c < 8; c++) {
-    const col = [];
-
-    for (let r = 0; r < 8; r++) {
-      const i = r * 8 + c;
-      if (state.board[i] !== null) col.push(state.board[i]);
-    }
-
-    while (col.length < 8) {
-      col.unshift(items[Math.floor(Math.random() * items.length)]);
-    }
-
-    for (let r = 0; r < 8; r++) {
-      state.board[r * 8 + c] = col[r];
-    }
+    setTimeout(() => {
+      applyMatches(unique);
+    }, 300);
   }
 
-  renderBoard();
-  checkMissionCompletion();
-}
+  /* ============================================================
+     APLICAÇÃO DE MATCHES
+     ============================================================ */
 
-/* ============================================================
-   MISSÃO COMPLETA
-   ============================================================ */
+  function applyMatches(indices) {
+    indices.forEach((i) => {
+      const item = state.board[i];
 
-function checkMissionCompletion() {
-  const done = state.mission.every((m) => m.progress >= m.target);
+      // Atualiza missão
+      state.mission.forEach((m) => {
+        if (m.item === item) {
+          m.progress++;
+        }
+      });
 
-  if (!done) return;
+      // Recompensa por match
+      state.balance += REWARD_MATCH;
+      state.rewards.matches += REWARD_MATCH;
 
-  const reward = REWARD_LEVEL_TIER[state.tier];
-  state.balance += reward;
-  state.rewards.levels += reward;
+      state.board[i] = null;
+    });
 
-  state.totalLevelsCompleted++;
-  state.level++;
+    state.totalMatches += indices.length;
+    state.matchesToday += indices.length;
 
-  if (state.level === 6) state.tier = 2;
-  if (state.level === 16) state.tier = 3;
-  if (state.level === 31) state.tier = 4;
-  if (state.level === 51) state.tier = 5;
-
-  showToast(`Nível concluído! +${reward.toFixed(5)} €`);
-
-  startNewLevel();
-}
-
-/* ============================================================
-   NOVO NÍVEL
-   ============================================================ */
-
-function startNewLevel() {
-  state.mission = generateMission(state.tier);
-  generateBoard();
-  updateUI();
-  updateAdmin();
-}
-
-/* ============================================================
-   LOGIN DIÁRIO
-   ============================================================ */
-
-function handleDailyLogin() {
-  const today = new Date().toDateString();
-
-  if (state.lastLogin !== today) {
-    state.lastLogin = today;
-    state.loginStreak++;
-    state.balance += REWARD_LOGIN;
-    state.rewards.login += REWARD_LOGIN;
-    showToast(`Login diário! +${REWARD_LOGIN.toFixed(5)} €`);
-  }
-}
-
-/* ============================================================
-   ATUALIZAÇÃO DE UI
-   ============================================================ */
-
-function updateUI() {
-  document.getElementById("ui-balance").textContent =
-    state.balance.toFixed(4) + " €";
-
-  const progress = Math.min((state.balance / 5) * 100, 100);
-  document.getElementById("ui-balance-progress").style.width = progress + "%";
-
-  document.getElementById("ui-level").textContent = state.level;
-  document.getElementById("ui-tier-label").textContent = "Tier " + state.tier;
-  document.getElementById("ui-tier-pill").textContent =
-    `Tier ${state.tier} · ${tierName(state.tier)}`;
-
-  document.getElementById("ui-tier-items").textContent =
-    "Itens: " + TIERS[state.tier].join(" ");
-
-  document.getElementById("ui-level-bonus").textContent =
-    REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
-
-  document.getElementById("ui-actions").textContent = state.actions;
-  document.getElementById("ui-lives").textContent = state.lives;
-
-  document.getElementById("ui-booster-hammer").textContent =
-    state.boosters.hammer;
-  document.getElementById("ui-booster-shovel").textContent =
-    state.boosters.shovel;
-  document.getElementById("ui-booster-tractor").textContent =
-    state.boosters.tractor;
-  document.getElementById("ui-booster-watering").textContent =
-    state.boosters.watering;
-
-  document.getElementById("ui-matches-today").textContent =
-    state.matchesToday;
-
-  renderMission();
-}
-
-/* ============================================================
-   NOME DO TIER
-   ============================================================ */
-
-function tierName(tier) {
-  return {
-    1: "Quinta Básica",
-    2: "Frutaria",
-    3: "Animais",
-    4: "Colheitas",
-    5: "Mega Quinta"
-  }[tier];
-}
-
-/* ============================================================
-   RENDERIZAÇÃO DA MISSÃO
-   ============================================================ */
-
-function renderMission() {
-  const container = document.getElementById("mission-items");
-  container.innerHTML = "";
-
-  state.mission.forEach((m) => {
-    const div = document.createElement("div");
-    div.className = "mission-item";
-
-    div.innerHTML = `
-      <div class="mission-emoji">${m.item}</div>
-      <div class="mission-text">
-        <div class="mission-label">Objetivo</div>
-        <div class="mission-progress">${m.progress}/${m.target}</div>
-        <div class="mission-bar">
-          <div class="mission-bar-fill" style="width:${
-            (m.progress / m.target) * 100
-          }%"></div>
-        </div>
-      </div>
-    `;
-
-    container.appendChild(div);
-  });
-
-  document.getElementById("ui-mission-reward").textContent =
-    "Recompensa: " + REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
-}
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  document.getElementById("toast-text").textContent = msg;
-  toast.classList.add("show");
-  setTimeout(() => toast.classList.remove("show"), 2000);
-}
-
-/* ============================================================
-   ATUALIZAÇÃO DO PAINEL ADMIN
-   ============================================================ */
-
-function updateAdmin() {
-  const revenue = state.ads.total * CPM_REVENUE;
-  const emitted =
-    state.rewards.matches + state.rewards.levels + state.rewards.login;
-  const margin = revenue - emitted;
-
-  document.getElementById("admin-revenue").textContent =
-    revenue.toFixed(4) + " €";
-  document.getElementById("admin-emitted").textContent =
-    emitted.toFixed(4) + " €";
-  document.getElementById("admin-margin").textContent =
-    margin.toFixed(4) + " €";
-
-  document.getElementById("admin-ads-total").textContent = state.ads.total;
-  document.getElementById("admin-ads-actions").textContent =
-    state.ads.actions;
-  document.getElementById("admin-ads-boosters").textContent =
-    state.ads.boosters;
-  document.getElementById("admin-ads-lives").textContent = state.ads.lives;
-
-  document.getElementById("admin-ads-actions-rev").textContent =
-    (state.ads.actions * CPM_REVENUE).toFixed(4) + " €";
-  document.getElementById("admin-ads-boosters-rev").textContent =
-    (state.ads.boosters * CPM_REVENUE).toFixed(4) + " €";
-  document.getElementById("admin-ads-lives-rev").textContent =
-    (state.ads.lives * CPM_REVENUE).toFixed(4) + " €";
-
-  document.getElementById("admin-rewards-matches").textContent =
-    state.rewards.matches.toFixed(4) + " €";
-  document.getElementById("admin-rewards-levels").textContent =
-    state.rewards.levels.toFixed(4) + " €";
-  document.getElementById("admin-rewards-login").textContent =
-    state.rewards.login.toFixed(4) + " €";
-
-  document.getElementById("admin-user-id").textContent = state.userId;
-  document.getElementById("admin-user-balance").textContent =
-    state.balance.toFixed(4) + " €";
-  document.getElementById("admin-user-level").textContent =
-    `${state.level} / Tier ${state.tier}`;
-  document.getElementById("admin-user-ads").textContent = state.ads.total;
-
-  document.getElementById("admin-user-actions").textContent = state.actions;
-  document.getElementById("admin-user-lives").textContent = state.lives;
-  document.getElementById("admin-user-boosters").textContent =
-    `${state.boosters.hammer}/${state.boosters.shovel}/${state.boosters.tractor}/${state.boosters.watering}`;
-  document.getElementById("admin-user-matches").textContent =
-    state.totalMatches;
-  document.getElementById("admin-user-levels-completed").textContent =
-    state.totalLevelsCompleted;
-
-  renderPaymentsTable();
-}
-/* ============================================================
-   SISTEMA DE ANÚNCIOS 300×250
-   ============================================================ */
-
-let adCallback = null;
-let adTimer = null;
-
-function showAd(context, callback) {
-  adCallback = callback;
-
-  document.getElementById("ad-modal-context").textContent = context;
-  document.getElementById("ad-modal-backdrop").classList.add("active");
-
-  let timeLeft = 5;
-  const timerEl = document.getElementById("ad-modal-timer");
-  const closeBtn = document.getElementById("ad-modal-close");
-
-  closeBtn.classList.add("disabled");
-
-  adTimer = setInterval(() => {
-    timeLeft--;
-    timerEl.textContent = timeLeft;
-
-    if (timeLeft <= 0) {
-      clearInterval(adTimer);
-      closeBtn.classList.remove("disabled");
-    }
-  }, 1000);
-}
-
-document.getElementById("ad-modal-close").addEventListener("click", () => {
-  const btn = document.getElementById("ad-modal-close");
-  if (btn.classList.contains("disabled")) return;
-
-  document.getElementById("ad-modal-backdrop").classList.remove("active");
-
-  if (adCallback) adCallback();
-  adCallback = null;
-});
-
-/* ============================================================
-   AÇÕES EXTRA (+5 e +10)
-   ============================================================ */
-
-document.getElementById("btn-actions-5").addEventListener("click", () => {
-  showAd("Ações +5", () => {
-    state.actions += 5;
-    state.ads.total++;
-    state.ads.actions++;
     updateUI();
     updateAdmin();
-    showToast("+5 ações");
+
+    collapseBoard();
+  }
+
+  /* ============================================================
+     COLAPSAR TABULEIRO
+     ============================================================ */
+
+  function collapseBoard() {
+    const items = TIERS[state.tier];
+
+    for (let c = 0; c < 8; c++) {
+      const col = [];
+
+      for (let r = 0; r < 8; r++) {
+        const i = r * 8 + c;
+        if (state.board[i] !== null) col.push(state.board[i]);
+      }
+
+      while (col.length < 8) {
+        col.unshift(items[Math.floor(Math.random() * items.length)]);
+      }
+
+      for (let r = 0; r < 8; r++) {
+        state.board[r * 8 + c] = col[r];
+      }
+    }
+
+    renderBoard();
+    checkMissionCompletion();
+  }
+
+  /* ============================================================
+     MISSÃO COMPLETA
+     ============================================================ */
+
+  function checkMissionCompletion() {
+    const done = state.mission.every((m) => m.progress >= m.target);
+
+    if (!done) return;
+
+    const reward = REWARD_LEVEL_TIER[state.tier];
+    state.balance += reward;
+    state.rewards.levels += reward;
+
+    state.totalLevelsCompleted++;
+    state.level++;
+
+    if (state.level === 6) state.tier = 2;
+    if (state.level === 16) state.tier = 3;
+    if (state.level === 31) state.tier = 4;
+    if (state.level === 51) state.tier = 5;
+
+    showToast(`Nível concluído! +${reward.toFixed(5)} €`);
+
+    startNewLevel();
+  }
+
+  /* ============================================================
+     NOVO NÍVEL
+     ============================================================ */
+
+  function startNewLevel() {
+    state.mission = generateMission(state.tier);
+    generateBoard();
+    updateUI();
+    updateAdmin();
+  }
+
+  /* ============================================================
+     LOGIN DIÁRIO
+     ============================================================ */
+
+  function handleDailyLogin() {
+    const today = new Date().toDateString();
+
+    if (state.lastLogin !== today) {
+      state.lastLogin = today;
+      state.loginStreak++;
+      state.balance += REWARD_LOGIN;
+      state.rewards.login += REWARD_LOGIN;
+      showToast(`Login diário! +${REWARD_LOGIN.toFixed(5)} €`);
+    }
+  }
+
+  /* ============================================================
+     ATUALIZAÇÃO DE UI
+     ============================================================ */
+
+  function updateUI() {
+    document.getElementById("ui-balance").textContent =
+      state.balance.toFixed(4) + " €";
+
+    const progress = Math.min((state.balance / 5) * 100, 100);
+    document.getElementById("ui-balance-progress").style.width = progress + "%";
+
+    document.getElementById("ui-level").textContent = state.level;
+    document.getElementById("ui-tier-label").textContent = "Tier " + state.tier;
+    document.getElementById("ui-tier-pill").textContent =
+      `Tier ${state.tier} · ${tierName(state.tier)}`;
+
+    document.getElementById("ui-tier-items").textContent =
+      "Itens: " + TIERS[state.tier].join(" ");
+
+    document.getElementById("ui-level-bonus").textContent =
+      REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
+
+    document.getElementById("ui-actions").textContent = state.actions;
+    document.getElementById("ui-lives").textContent = state.lives;
+
+    document.getElementById("ui-booster-hammer").textContent =
+      state.boosters.hammer;
+    document.getElementById("ui-booster-shovel").textContent =
+      state.boosters.shovel;
+    document.getElementById("ui-booster-tractor").textContent =
+      state.boosters.tractor;
+    document.getElementById("ui-booster-watering").textContent =
+      state.boosters.watering;
+
+    document.getElementById("ui-matches-today").textContent =
+      state.matchesToday;
+
+    renderMission();
+  }
+
+  /* ============================================================
+     NOME DO TIER
+     ============================================================ */
+
+  function tierName(tier) {
+    return {
+      1: "Quinta Básica",
+      2: "Frutaria",
+      3: "Animais",
+      4: "Colheitas",
+      5: "Mega Quinta"
+    }[tier];
+  }
+
+  /* ============================================================
+     RENDERIZAÇÃO DA MISSÃO
+     ============================================================ */
+
+  function renderMission() {
+    const container = document.getElementById("mission-items");
+    container.innerHTML = "";
+
+    state.mission.forEach((m) => {
+      const div = document.createElement("div");
+      div.className = "mission-item";
+
+      div.innerHTML = `
+        <div class="mission-emoji">${m.item}</div>
+        <div class="mission-text">
+          <div class="mission-label">Objetivo</div>
+          <div class="mission-progress">${m.progress}/${m.target}</div>
+          <div class="mission-bar">
+            <div class="mission-bar-fill" style="width:${
+              (m.progress / m.target) * 100
+            }%"></div>
+          </div>
+        </div>
+      `;
+
+      container.appendChild(div);
+    });
+
+    document.getElementById("ui-mission-reward").textContent =
+      "Recompensa: " + REWARD_LEVEL_TIER[state.tier].toFixed(5) + " €";
+  }
+
+  /* ============================================================
+     TOAST
+     ============================================================ */
+
+  function showToast(msg) {
+    const toast = document.getElementById("toast");
+    document.getElementById("toast-text").textContent = msg;
+    toast.classList.add("show");
+    setTimeout(() => toast.classList.remove("show"), 2000);
+  }
+
+  /* ============================================================
+     ATUALIZAÇÃO DO PAINEL ADMIN
+     ============================================================ */
+
+  function updateAdmin() {
+    const revenue = state.ads.total * CPM_REVENUE;
+    const emitted =
+      state.rewards.matches + state.rewards.levels + state.rewards.login;
+    const margin = revenue - emitted;
+
+    document.getElementById("admin-revenue").textContent =
+      revenue.toFixed(4) + " €";
+    document.getElementById("admin-emitted").textContent =
+      emitted.toFixed(4) + " €";
+    document.getElementById("admin-margin").textContent =
+      margin.toFixed(4) + " €";
+
+    document.getElementById("admin-ads-total").textContent = state.ads.total;
+    document.getElementById("admin-ads-actions").textContent =
+      state.ads.actions;
+    document.getElementById("admin-ads-boosters").textContent =
+      state.ads.boosters;
+    document.getElementById("admin-ads-lives").textContent = state.ads.lives;
+
+    document.getElementById("admin-ads-actions-rev").textContent =
+      (state.ads.actions * CPM_REVENUE).toFixed(4) + " €";
+    document.getElementById("admin-ads-boosters-rev").textContent =
+      (state.ads.boosters * CPM_REVENUE).toFixed(4) + " €";
+    document.getElementById("admin-ads-lives-rev").textContent =
+      (state.ads.lives * CPM_REVENUE).toFixed(4) + " €";
+
+    document.getElementById("admin-rewards-matches").textContent =
+      state.rewards.matches.toFixed(4) + " €";
+    document.getElementById("admin-rewards-levels").textContent =
+      state.rewards.levels.toFixed(4) + " €";
+    document.getElementById("admin-rewards-login").textContent =
+      state.rewards.login.toFixed(4) + " €";
+
+    document.getElementById("admin-user-id").textContent = state.userId;
+    document.getElementById("admin-user-balance").textContent =
+      state.balance.toFixed(4) + " €";
+    document.getElementById("admin-user-level").textContent =
+      `${state.level} / Tier ${state.tier}`;
+    document.getElementById("admin-user-ads").textContent = state.ads.total;
+
+    document.getElementById("admin-user-actions").textContent = state.actions;
+    document.getElementById("admin-user-lives").textContent = state.lives;
+    document.getElementById("admin-user-boosters").textContent =
+      `${state.boosters.hammer}/${state.boosters.shovel}/${state.boosters.tractor}/${state.boosters.watering}`;
+    document.getElementById("admin-user-matches").textContent =
+      state.totalMatches;
+    document.getElementById("admin-user-levels-completed").textContent =
+      state.totalLevelsCompleted;
+
+    renderPaymentsTable();
+  }
+
+  /* ============================================================
+     SISTEMA DE ANÚNCIOS 300×250
+     ============================================================ */
+
+  let adCallback = null;
+  let adTimer = null;
+
+  function showAd(context, callback) {
+    adCallback = callback;
+
+    document.getElementById("ad-modal-context").textContent = context;
+    document.getElementById("ad-modal-backdrop").classList.add("active");
+
+    let timeLeft = 5;
+    const timerEl = document.getElementById("ad-modal-timer");
+    const closeBtn = document.getElementById("ad-modal-close");
+
+    closeBtn.classList.add("disabled");
+
+    adTimer = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+
+      if (timeLeft <= 0) {
+        clearInterval(adTimer);
+        closeBtn.classList.remove("disabled");
+      }
+    }, 1000);
+  }
+
+  document.getElementById("ad-modal-close").addEventListener("click", () => {
+    const btn = document.getElementById("ad-modal-close");
+    if (btn.classList.contains("disabled")) return;
+
+    document.getElementById("ad-modal-backdrop").classList.remove("active");
+
+    if (adCallback) adCallback();
+    adCallback = null;
   });
-});
 
-document.getElementById("btn-actions-10").addEventListener("click", () => {
-  showAd("Ações +10 (1/2)", () => {
-    state.ads.total++;
-    state.ads.actions++;
+  /* ============================================================
+     AÇÕES EXTRA (+5 e +10)
+     ============================================================ */
 
-    showAd("Ações +10 (2/2)", () => {
-      state.actions += 10;
+  document.getElementById("btn-actions-5").addEventListener("click", () => {
+    showAd("Ações +5", () => {
+      state.actions += 5;
       state.ads.total++;
       state.ads.actions++;
       updateUI();
       updateAdmin();
-      showToast("+10 ações");
+      showToast("+5 ações");
     });
   });
-});
 
-/* ============================================================
-   BOOSTERS
-   ============================================================ */
+  document.getElementById("btn-actions-10").addEventListener("click", () => {
+    showAd("Ações +10 (1/2)", () => {
+      state.ads.total++;
+      state.ads.actions++;
 
-document.querySelectorAll(".booster-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const type = btn.dataset.booster;
+      showAd("Ações +10 (2/2)", () => {
+        state.actions += 10;
+        state.ads.total++;
+        state.ads.actions++;
+        updateUI();
+        updateAdmin();
+        showToast("+10 ações");
+      });
+    });
+  });
 
-    if (state.boosters[type] > 0) {
-      state.boosters[type]--;
-      updateUI();
-      updateAdmin();
-      showToast("Booster usado");
+  /* ============================================================
+     BOOSTERS
+     ============================================================ */
+
+  document.querySelectorAll(".booster-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const type = btn.dataset.booster;
+
+      if (state.boosters[type] > 0) {
+        state.boosters[type]--;
+        updateUI();
+        updateAdmin();
+        showToast("Booster usado");
+        return;
+      }
+
+      showAd("Boosters", () => {
+        state.boosters.hammer = 3;
+        state.boosters.shovel = 3;
+        state.boosters.tractor = 3;
+        state.boosters.watering = 3;
+
+        state.ads.total++;
+        state.ads.boosters++;
+
+        updateUI();
+        updateAdmin();
+        showToast("Boosters renovados");
+      });
+    });
+  });
+
+  /* ============================================================
+     VIDAS
+     ============================================================ */
+
+  function loseLife() {
+    state.lives--;
+    updateUI();
+
+    if (state.lives <= 0) {
+      showAd("Vidas", () => {
+        state.lives = 3;
+        state.ads.total++;
+        state.ads.lives++;
+        updateUI();
+        updateAdmin();
+        showToast("+3 vidas");
+      });
+    }
+  }
+
+  /* ============================================================
+     SISTEMA PAYPAL
+     ============================================================ */
+
+  function requestPayment() {
+    if (state.balance < 5) {
+      showToast("Saldo insuficiente para levantar");
       return;
     }
 
-    showAd("Boosters", () => {
-      state.boosters.hammer = 3;
-      state.boosters.shovel = 3;
-      state.boosters.tractor = 3;
-      state.boosters.watering = 3;
+    const email = prompt("Insira o seu email PayPal:");
 
-      state.ads.total++;
-      state.ads.boosters++;
+    if (!email || !email.includes("@")) {
+      showToast("Email inválido");
+      return;
+    }
 
-      updateUI();
-      updateAdmin();
-      showToast("Boosters renovados");
+    const payment = {
+      date: new Date().toLocaleString(),
+      amount: state.balance,
+      email,
+      status: "pending"
+    };
+
+    state.payments.push(payment);
+
+    updateAdmin();
+    showToast("Pedido enviado");
+
+    // saldo fica congelado
+    state.balance = 0;
+    updateUI();
+  }
+
+  function renderPaymentsTable() {
+    const tbody = document.querySelector("#admin-payments-table tbody");
+    tbody.innerHTML = "";
+
+    state.payments.forEach((p) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${p.date}</td>
+        <td>${p.amount.toFixed(2)} €</td>
+        <td>
+          <span class="status-pill ${p.status}">
+            ${p.status}
+          </span>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    const totalPaid = state.payments
+      .filter((p) => p.status === "paid")
+      .reduce((a, b) => a + b.amount, 0);
+
+    const totalPending = state.payments
+      .filter((p) => p.status === "pending")
+      .reduce((a, b) => a + b.amount, 0);
+
+    document.getElementById("admin-payments-paid").textContent =
+      totalPaid.toFixed(2) + " €";
+    document.getElementById("admin-payments-pending").textContent =
+      totalPending.toFixed(2) + " €";
+    document.getElementById("admin-payments-count").textContent =
+      state.payments.length;
+  }
+
+  /* ============================================================
+     TABS DO PAINEL ADMIN
+     ============================================================ */
+
+  document.querySelectorAll(".tab-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      document
+        .querySelectorAll(".tab-btn")
+        .forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+
+      const tab = btn.dataset.tab;
+
+      document
+        .querySelectorAll(".tab-content")
+        .forEach((c) => c.classList.remove("active"));
+
+      document.getElementById(tab).classList.add("active");
     });
   });
-});
 
-/* ============================================================
-   VIDAS
-   ============================================================ */
+  /* ============================================================
+     INICIALIZAÇÃO DO JOGO
+     ============================================================ */
 
-function loseLife() {
-  state.lives--;
-  updateUI();
+  function init() {
+    state.userId = "USR-" + Math.floor(Math.random() * 999999);
+    document.getElementById("ui-user-id").textContent = state.userId;
 
-  if (state.lives <= 0) {
-    showAd("Vidas", () => {
-      state.lives = 3;
-      state.ads.total++;
-      state.ads.lives++;
-      updateUI();
-      updateAdmin();
-      showToast("+3 vidas");
-    });
-  }
-}
-
-/* ============================================================
-   SISTEMA PAYPAL
-   ============================================================ */
-
-function requestPayment() {
-  if (state.balance < 5) {
-    showToast("Saldo insuficiente para levantar");
-    return;
+    handleDailyLogin();
+    startNewLevel();
+    updateUI();
+    updateAdmin();
   }
 
-  const email = prompt("Insira o seu email PayPal:");
-
-  if (!email || !email.includes("@")) {
-    showToast("Email inválido");
-    return;
-  }
-
-  const payment = {
-    date: new Date().toLocaleString(),
-    amount: state.balance,
-    email,
-    status: "pending"
-  };
-
-  state.payments.push(payment);
-
-  updateAdmin();
-  showToast("Pedido enviado");
-
-  // saldo fica congelado
-  state.balance = 0;
-  updateUI();
-}
-
-function renderPaymentsTable() {
-  const tbody = document.querySelector("#admin-payments-table tbody");
-  tbody.innerHTML = "";
-
-  state.payments.forEach((p) => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${p.date}</td>
-      <td>${p.amount.toFixed(2)} €</td>
-      <td>
-        <span class="status-pill ${p.status}">
-          ${p.status}
-        </span>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  const totalPaid = state.payments
-    .filter((p) => p.status === "paid")
-    .reduce((a, b) => a + b.amount, 0);
-
-  const totalPending = state.payments
-    .filter((p) => p.status === "pending")
-    .reduce((a, b) => a + b.amount, 0);
-
-  document.getElementById("admin-payments-paid").textContent =
-    totalPaid.toFixed(2) + " €";
-  document.getElementById("admin-payments-pending").textContent =
-    totalPending.toFixed(2) + " €";
-  document.getElementById("admin-payments-count").textContent =
-    state.payments.length;
-}
-
-/* ============================================================
-   TABS DO PAINEL ADMIN
-   ============================================================ */
-
-document.querySelectorAll(".tab-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    document
-      .querySelectorAll(".tab-btn")
-      .forEach((b) => b.classList.remove("active"));
-    btn.classList.add("active");
-
-    const tab = btn.dataset.tab;
-
-    document
-      .querySelectorAll(".tab-content")
-      .forEach((c) => c.classList.remove("active"));
-
-    document.getElementById(tab).classList.add("active");
-  });
-});
-
-/* ============================================================
-   INICIALIZAÇÃO DO JOGO
-   ============================================================ */
-
-function init() {
-  state.userId = "USR-" + Math.floor(Math.random() * 999999);
-  document.getElementById("ui-user-id").textContent = state.userId;
-
-  handleDailyLogin();
-  startNewLevel();
-  updateUI();
-  updateAdmin();
-}
-
-init();
-</script>
-
+  init();
+  </script>
 </body>
 </html>
