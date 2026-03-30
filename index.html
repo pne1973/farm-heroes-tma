@@ -21,13 +21,19 @@
         .grid { 
             display: grid; grid-template-columns: repeat(7, 42px); gap: 4px; 
             background: #8d6e63; padding: 10px; border-radius: 10px;
-            touch-action: none; /* Impede o scroll de "roubar" o toque */
+            touch-action: none;
         }
         .cell { 
             width: 42px; height: 42px; background: #fff9c4; border-radius: 4px; 
             display: flex; align-items: center; justify-content: center; font-size: 20px; 
             user-select: none;
+            transition: transform 0.15s linear, opacity 0.15s linear;
         }
+
+        /* ANIMAÇÕES MATCH-3 (ESTILO A) */
+        .cell.swap { z-index: 10; }
+        .cell.fade-out { opacity: 0; }
+        .cell.fall { transition: transform 0.2s linear; }
 
         /* ADMIN STYLE */
         #admin-panel { display: none; position: fixed; inset: 0; background: #f4f4f4; z-index: 1000; padding: 20px; overflow-y: auto; touch-action: auto; }
@@ -71,85 +77,313 @@
 </div>
 
 <script>
-    const items = ['🥛', '🥚', '🍯', '🚜'];
-    let currentId = "5401881400";
-    let db = { "5401881400": { bal: 0, act: 20 } };
-    let adRevenue = 0;
+const items = ['🥛', '🥚', '🍯', '🚜'];
+let currentId = "5401881400";
+let db = { "5401881400": { bal: 0, act: 20 } };
+let adRevenue = 0;
 
-    function init() {
-        const grid = document.getElementById('grid');
-        grid.innerHTML = '';
-        for(let i=0; i<49; i++) {
-            const cell = document.createElement('div');
-            cell.className = 'cell';
-            cell.innerText = items[Math.floor(Math.random()*4)];
-            
-            // MÉTODO DE TOQUE DIRETO (Ignora cliques fantasmas) [cite: 2026-03-22]
-            cell.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                playGame();
-            }, {passive: false});
-            
-            // Compatibilidade para PC
-            cell.addEventListener('mousedown', playGame);
-            
-            grid.appendChild(cell);
-        }
-        refresh();
-    }
+let grid = [];
+let selected = null;
+const ROWS = 7;
+const COLS = 7;
+let inputLocked = false;
 
-    function playGame() {
-        let u = db[currentId];
-        if(u.act > 0) {
-            u.act--;
-            u.bal += 0.0005;
-            refresh();
-        } else {
-            alert("Sem ações disponíveis!");
+window.onload = () => {
+    generateGrid();
+    renderGrid();
+    refresh();
+};
+
+/* --------------------------
+   NÚCLEO MATCH-3
+--------------------------- */
+
+function generateGrid() {
+    grid = [];
+    for (let r = 0; r < ROWS; r++) {
+        grid[r] = [];
+        for (let c = 0; c < COLS; c++) {
+            grid[r][c] = randomItem();
         }
     }
+    removeInitialMatches();
+}
 
-    function addActions() {
-        adRevenue += 0.0010;
-        db[currentId].act += 10;
-        refresh();
-        alert("Anúncio concluído! +10 Ações.");
-    }
+function randomItem() {
+    return items[Math.floor(Math.random() * items.length)];
+}
 
-    function changeUser() {
-        const nid = document.getElementById('new-id').value;
-        if(!nid) return;
-        if(!db[nid]) db[nid] = { bal: 0, act: 20 };
-        currentId = nid;
-        refresh();
-        toggleAdmin();
-    }
-
-    function toggleAdmin() {
-        const p = document.getElementById('admin-panel');
-        p.style.display = p.style.display === 'block' ? 'none' : 'block';
-    }
-
-    function refresh() {
-        const u = db[currentId];
-        document.getElementById('ui-id').innerText = currentId;
-        document.getElementById('ui-bal').innerText = `€ ${u.bal.toFixed(4)}`;
-        document.getElementById('ui-act').innerText = u.act;
-        
-        // Update Admin
-        document.getElementById('adm-rev').innerText = `€ ${adRevenue.toFixed(4)}`;
-        
-        let totalSaldos = 0;
-        let listHtml = "";
-        for(let id in db) {
-            totalSaldos += db[id].bal;
-            listHtml += `<div>ID: #${id} | Saldo: €${db[id].bal.toFixed(4)}</div>`;
+function removeInitialMatches() {
+    let matches = findMatches();
+    while (matches.length > 0) {
+        for (let m of matches) {
+            grid[m.r][m.c] = randomItem();
         }
-        document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
-        document.getElementById('user-list').innerHTML = listHtml;
+        matches = findMatches();
+    }
+}
+
+function renderGrid() {
+    const el = document.getElementById("grid");
+    el.innerHTML = "";
+
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const cell = document.createElement("div");
+            cell.className = "cell";
+            cell.innerText = grid[r][c];
+
+            // animação simples de queda inicial
+            cell.style.transform = "translateY(-20px)";
+            setTimeout(() => {
+                cell.style.transform = "translateY(0)";
+            }, 10);
+
+            cell.onclick = () => {
+                if (!inputLocked) selectCell(r, c);
+            };
+
+            el.appendChild(cell);
+        }
+    }
+}
+
+function selectCell(r, c) {
+    if (!selected) {
+        selected = { r, c };
+        highlight(r, c);
+        return;
     }
 
-    window.onload = init;
+    const a = selected;
+    const b = { r, c };
+
+    clearHighlights();
+
+    if (areAdjacent(a, b)) {
+        trySwap(a, b);
+    }
+
+    selected = null;
+}
+
+function highlight(r, c) {
+    const index = r * COLS + c;
+    document.getElementsByClassName("cell")[index].style.background = "#ffe082";
+}
+
+function clearHighlights() {
+    for (let cell of document.getElementsByClassName("cell")) {
+        cell.style.background = "#fff9c4";
+    }
+}
+
+function areAdjacent(a, b) {
+    return (
+        (a.r === b.r && Math.abs(a.c - b.c) === 1) ||
+        (a.c === b.c && Math.abs(a.r - b.r) === 1)
+    );
+}
+
+function trySwap(a, b) {
+    inputLocked = true;
+
+    const indexA = a.r * COLS + a.c;
+    const indexB = b.r * COLS + b.c;
+
+    const cells = document.getElementsByClassName("cell");
+    const cellA = cells[indexA];
+    const cellB = cells[indexB];
+
+    cellA.classList.add("swap");
+    cellB.classList.add("swap");
+
+    const dx = (b.c - a.c) * 46; // 42px + 4px gap
+    const dy = (b.r - a.r) * 46;
+
+    cellA.style.transform = `translate(${dx}px, ${dy}px)`;
+    cellB.style.transform = `translate(${-dx}px, ${-dy}px)`;
+
+    setTimeout(() => {
+        cellA.style.transform = "";
+        cellB.style.transform = "";
+        cellA.classList.remove("swap");
+        cellB.classList.remove("swap");
+
+        swap(a, b);
+
+        const matches = findMatches();
+        if (matches.length === 0) {
+            swap(a, b);
+            inputLocked = false;
+            renderGrid();
+            return;
+        }
+
+        playGame(); // jogada válida
+        resolveMatches();
+    }, 150);
+}
+
+function swap(a, b) {
+    const temp = grid[a.r][a.c];
+    grid[a.r][a.c] = grid[b.r][b.c];
+    grid[b.r][b.c] = temp;
+}
+
+function findMatches() {
+    let matches = [];
+
+    // horizontais
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS - 2; c++) {
+            const item = grid[r][c];
+            if (item && item === grid[r][c+1] && item === grid[r][c+2]) {
+                matches.push({ r, c });
+                matches.push({ r, c: c+1 });
+                matches.push({ r, c: c+2 });
+            }
+        }
+    }
+
+    // verticais
+    for (let c = 0; c < COLS; c++) {
+        for (let r = 0; r < ROWS - 2; r++) {
+            const item = grid[r][c];
+            if (item && item === grid[r+1][c] && item === grid[r+2][c]) {
+                matches.push({ r, c });
+                matches.push({ r: r+1, c });
+                matches.push({ r: r+2, c });
+            }
+        }
+    }
+
+    // remover duplicados
+    const seen = {};
+    const unique = [];
+    for (let m of matches) {
+        const key = `${m.r}-${m.c}`;
+        if (!seen[key]) {
+            seen[key] = true;
+            unique.push(m);
+        }
+    }
+
+    return unique;
+}
+
+function resolveMatches() {
+    let matches = findMatches();
+
+    if (matches.length === 0) {
+        inputLocked = false;
+        renderGrid();
+        return;
+    }
+
+    const cells = document.getElementsByClassName("cell");
+
+    for (let m of matches) {
+        const index = m.r * COLS + m.c;
+        if (cells[index]) cells[index].classList.add("fade-out");
+    }
+
+    setTimeout(() => {
+        for (let m of matches) {
+            grid[m.r][m.c] = null;
+        }
+
+        applyGravity();
+        refill();
+        renderGrid();
+
+        setTimeout(resolveMatches, 150);
+    }, 150);
+}
+
+function applyGravity() {
+    for (let c = 0; c < COLS; c++) {
+        for (let r = ROWS - 1; r >= 0; r--) {
+            if (grid[r][c] === null) {
+                for (let k = r - 1; k >= 0; k--) {
+                    if (grid[k][c] !== null) {
+                        grid[r][c] = grid[k][c];
+                        grid[k][c] = null;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+function refill() {
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (grid[r][c] === null) {
+                grid[r][c] = randomItem();
+            }
+        }
+    }
+}
+
+/* --------------------------
+   SISTEMA DE AÇÕES / SALDO
+--------------------------- */
+
+function playGame() {
+    let u = db[currentId];
+    if (u.act > 0) {
+        u.act--;
+        u.bal += 0.0005;
+        refresh();
+    } else {
+        alert("Sem ações disponíveis!");
+    }
+}
+
+function addActions() {
+    adRevenue += 0.0010;
+    db[currentId].act += 10;
+    refresh();
+    alert("Anúncio concluído! +10 Ações.");
+}
+
+/* --------------------------
+   ADMIN / INTERFACE
+--------------------------- */
+
+function changeUser() {
+    const nid = document.getElementById('new-id').value;
+    if (!nid) return;
+    if (!db[nid]) db[nid] = { bal: 0, act: 20 };
+    currentId = nid;
+    refresh();
+    toggleAdmin();
+}
+
+function toggleAdmin() {
+    const p = document.getElementById('admin-panel');
+    p.style.display = p.style.display === 'block' ? 'none' : 'block';
+}
+
+function refresh() {
+    const u = db[currentId];
+    document.getElementById('ui-id').innerText = currentId;
+    document.getElementById('ui-bal').innerText = `€ ${u.bal.toFixed(4)}`;
+    document.getElementById('ui-act').innerText = u.act;
+    
+    document.getElementById('adm-rev').innerText = `€ ${adRevenue.toFixed(4)}`;
+    
+    let totalSaldos = 0;
+    let listHtml = "";
+    for (let id in db) {
+        totalSaldos += db[id].bal;
+        listHtml += `<div>ID: #${id} | Saldo: €${db[id].bal.toFixed(4)}</div>`;
+    }
+    document.getElementById('adm-pass').innerText = `€ ${totalSaldos.toFixed(4)}`;
+    document.getElementById('user-list').innerHTML = listHtml;
+}
 </script>
 </body>
 </html>
