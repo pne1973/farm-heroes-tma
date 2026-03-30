@@ -6,15 +6,36 @@
 <title>Farm Match Rewards</title>
 
 <style>
+/* ============================
+   RESET & BASE
+   ============================ */
 body {
   margin: 0;
   padding: 0;
   background: #0b0b0f;
   color: #fff;
   font-family: Arial, sans-serif;
+  overflow-x: hidden;
 }
 
-/* Layout principal */
+/* Escala inteligente baseada na largura */
+:root {
+  --scale: calc(100vw / 430); /* 430px = largura base */
+}
+
+* {
+  transform-origin: top left;
+}
+
+/* Wrapper que escala tudo */
+.scaled-ui {
+  transform: scale(var(--scale));
+  width: calc(100vw / var(--scale));
+}
+
+/* ============================
+   LAYOUT
+   ============================ */
 .app-shell {
   display: grid;
   grid-template-columns: 1fr 360px;
@@ -23,7 +44,6 @@ body {
   padding-bottom: 90px;
 }
 
-/* Painéis */
 #game-panel, #admin-panel {
   width: 100%;
 }
@@ -33,7 +53,9 @@ h1 {
   font-size: 22px;
 }
 
-/* Caixas de info */
+/* ============================
+   INFO BOXES
+   ============================ */
 .info-row {
   display: flex;
   flex-wrap: wrap;
@@ -53,7 +75,9 @@ h1 {
   display: block;
 }
 
-/* Espaço publicitário */
+/* ============================
+   BANNER
+   ============================ */
 .ad-banner {
   width: 320px;
   height: 50px;
@@ -66,7 +90,9 @@ h1 {
   font-size: 14px;
 }
 
-/* Grid do jogo */
+/* ============================
+   GRID DO JOGO
+   ============================ */
 .grid {
   display: grid;
   grid-template-columns: repeat(8, 48px);
@@ -93,7 +119,9 @@ h1 {
   background: #252535;
 }
 
-/* Painel Admin */
+/* ============================
+   PAINEL ADMIN
+   ============================ */
 .right-panel {
   background: #15151d;
   padding: 15px;
@@ -102,11 +130,6 @@ h1 {
   border: 1px solid #262636;
 }
 
-.right-panel h2 {
-  margin-top: 0;
-}
-
-/* Tabelas simples */
 .table {
   width: 100%;
   border-collapse: collapse;
@@ -114,14 +137,15 @@ h1 {
   font-size: 12px;
 }
 
-.table th,
-.table td {
+.table th, .table td {
   border-bottom: 1px solid #262636;
   padding: 4px 2px;
   text-align: left;
 }
 
-/* Barra inferior */
+/* ============================
+   BARRA INFERIOR
+   ============================ */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -144,44 +168,9 @@ h1 {
   font-size: 15px;
 }
 
-/* Botões pequenos */
-.btn {
-  background: #222;
-  color: #fff;
-  border: 1px solid #555;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-/* Responsivo / Telegram */
-@media (max-width: 700px) {
-  .app-shell {
-    grid-template-columns: 1fr;
-    padding: 10px;
-    padding-bottom: 90px;
-  }
-
-  .grid {
-    grid-template-columns: repeat(8, 38px);
-  }
-
-  .cell {
-    width: 38px;
-    height: 38px;
-    font-size: 22px;
-  }
-
-  .ad-banner {
-    width: 100%;
-    max-width: 320px;
-  }
-}
-  /* ============================
-   FORÇAR MODO MOBILE NO TELEGRAM
+/* ============================
+   TELEGRAM MOBILE MODE
    ============================ */
-
 body.telegram .app-shell {
   grid-template-columns: 1fr !important;
 }
@@ -193,15 +182,11 @@ body.telegram #admin-panel {
 body.telegram #game-panel {
   width: 100% !important;
 }
-
-body.telegram .right-panel {
-  width: 100% !important;
-}
-
 </style>
 </head>
 <body>
 
+<div class="scaled-ui">
 <div class="app-shell">
 
   <!-- PAINEL DO JOGO -->
@@ -231,10 +216,8 @@ body.telegram .right-panel {
       </div>
     </div>
 
-    <!-- Espaço Publicitário 320x50 -->
     <div class="ad-banner">Espaço Publicitário 320×50</div>
 
-    <!-- Ações extra / anúncios -->
     <div class="info-row">
       <div class="info-box">
         <strong>Ações extra</strong>
@@ -251,64 +234,53 @@ body.telegram .right-panel {
       </div>
     </div>
 
-    <!-- Grid do jogo -->
     <div class="grid" id="gameGrid"></div>
   </div>
+
   <!-- PAINEL ADMIN -->
-  <div id="admin-panel" class="right-panel" style="display:none;">
+  <div id="admin-panel" class="right-panel">
     <h2>Painel Admin</h2>
     <p>Economia · Utilizadores · Estatísticas</p>
 
-    <div>
-      <strong>Visão Global</strong>
-      <p>
-        Receita Estimada (simulada): <span id="adminReceita">0.0000 €</span><br>
-        Saldo Emitido (jogadores): <span id="adminSaldoEmitido">0.0000 €</span><br>
-        Matches totais: <span id="adminMatchesTotais">0</span><br>
-        Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
-        Anúncios vistos: <span id="adminAnunciosVistos">0</span>
-      </p>
-    </div>
+    <p>
+      Receita Estimada (simulada): <span id="adminReceita">0.0000 €</span><br>
+      Saldo Emitido (jogadores): <span id="adminSaldoEmitido">0.0000 €</span><br>
+      Matches totais: <span id="adminMatchesTotais">0</span><br>
+      Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
+      Anúncios vistos: <span id="adminAnunciosVistos">0</span>
+    </p>
 
-    <div>
-      <strong>Distribuição de Recompensa</strong>
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Tipo</th>
-            <th>Valor Total</th>
-            <th>Detalhe</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Matches</td>
-            <td><span id="adminValorMatches">0.0000 €</span></td>
-            <td>0.0000005 € por match</td>
-          </tr>
-          <tr>
-            <td>Login diário</td>
-            <td><span id="adminValorLogin">0.0000 €</span></td>
-            <td>0.00025 € por dia</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Tipo</th>
+          <th>Valor Total</th>
+          <th>Detalhe</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Matches</td>
+          <td><span id="adminValorMatches">0.0000 €</span></td>
+          <td>0.0000005 € por match</td>
+        </tr>
+        <tr>
+          <td>Login diário</td>
+          <td><span id="adminValorLogin">0.0000 €</span></td>
+          <td>0.00025 € por dia</td>
+        </tr>
+      </tbody>
+    </table>
   </div>
 
-</div> <!-- fim .app-shell -->
-
-<!-- BARRA INFERIOR -->
-<div class="bottom-nav">
-  <button onclick="showGame()">Jogo</button>
-  <button onclick="showAdmin()">Admin</button>
 </div>
-
+</div>
 <script>
-  // Detectar Telegram WebApp
+/* Detectar Telegram */
 if (navigator.userAgent.includes("Telegram")) {
   document.body.classList.add("telegram");
 }
+
 /* ============================
    ESTADO GLOBAL
    ============================ */
@@ -322,19 +294,16 @@ let acoesJogadas = 0;
 let vidasRestantes = 5;
 
 let matchesCount = 0;
-let saldo = 0; // em euros (número)
+let saldo = 0;
 const valorPorMatch = 0.0000005;
 const valorLoginDiario = 0.00025;
 
 let anunciosVistos = 0;
 let valorLoginAcumulado = 0;
 
-// login diário simples em localStorage
 const LOGIN_KEY = "farm_match_login_date";
 
-/* ============================
-   ELEMENTOS DE UI
-   ============================ */
+/* ELEMENTOS */
 const gridEl = document.getElementById("gameGrid");
 const saldoEl = document.getElementById("saldo");
 const acoesEl = document.getElementById("acoesRestantes");
@@ -349,26 +318,19 @@ const adminValorMatchesEl = document.getElementById("adminValorMatches");
 const adminReceitaEl = document.getElementById("adminReceita");
 const adminAnunciosVistosEl = document.getElementById("adminAnunciosVistos");
 const adminValorLoginEl = document.getElementById("adminValorLogin");
+
 /* ============================
-   FUNÇÕES DE LOGIN DIÁRIO
+   LOGIN DIÁRIO
    ============================ */
 function isHoje(dateStr) {
   const hoje = new Date();
   const d = new Date(dateStr);
-  return (
-    hoje.getFullYear() === d.getFullYear() &&
-    hoje.getMonth() === d.getMonth() &&
-    hoje.getDate() === d.getDate()
-  );
+  return hoje.toDateString() === d.toDateString();
 }
 
 function atualizarLoginStatus() {
   const last = localStorage.getItem(LOGIN_KEY);
-  if (last && isHoje(last)) {
-    loginStatusEl.textContent = "Já recolhido hoje";
-  } else {
-    loginStatusEl.textContent = "Disponível";
-  }
+  loginStatusEl.textContent = (last && isHoje(last)) ? "Já recolhido hoje" : "Disponível";
 }
 
 function recolherLoginDiario() {
@@ -385,16 +347,15 @@ function recolherLoginDiario() {
 }
 
 /* ============================
-   ANÚNCIOS (SIMULADOS)
+   ANÚNCIOS
    ============================ */
 function verAnuncioAcoes(qtd) {
-  // simulação: espera 2s e dá recompensa
   anunciosVistos++;
   setTimeout(() => {
     acoesRestantes += qtd;
     updateUI();
-    alert("Anúncio concluído! Recebeste +" + qtd + " ações.");
-  }, 2000);
+    alert("Anúncio concluído! +" + qtd + " ações.");
+  }, 1500);
 }
 
 function verAnuncioVidas(qtd) {
@@ -402,10 +363,9 @@ function verAnuncioVidas(qtd) {
   setTimeout(() => {
     vidasRestantes += qtd;
     updateUI();
-    alert("Anúncio concluído! Recebeste +" + qtd + " vidas.");
-  }, 2000);
+    alert("Anúncio concluído! +" + qtd + " vidas.");
+  }, 1500);
 }
-
 /* ============================
    GRID / MATCH-3
    ============================ */
@@ -444,24 +404,16 @@ function findCellElement(r, c) {
 }
 
 function isAdjacent(r1, c1, r2, c2) {
-  const dr = Math.abs(r1 - r2);
-  const dc = Math.abs(c1 - c2);
-  return (dr + dc === 1);
+  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
 }
 
 function onCellClick(e) {
-  if (acoesRestantes <= 0) {
-    alert("Sem ações. Vê um anúncio para ganhar mais.");
-    return;
-  }
-  if (vidasRestantes <= 0) {
-    alert("Sem vidas. Vê um anúncio para ganhar mais.");
-    return;
-  }
+  if (acoesRestantes <= 0) return alert("Sem ações.");
+  if (vidasRestantes <= 0) return alert("Sem vidas.");
 
   const cell = e.currentTarget;
-  const r = parseInt(cell.dataset.row, 10);
-  const c = parseInt(cell.dataset.col, 10);
+  const r = parseInt(cell.dataset.row);
+  const c = parseInt(cell.dataset.col);
 
   if (!selectedCell) {
     selectedCell = { r, c };
@@ -478,72 +430,57 @@ function onCellClick(e) {
   }
 }
 
-/* ============================
-   MATCHES
-   ============================ */
 function findMatches() {
   const matches = [];
+
   // horizontal
   for (let r = 0; r < gridSize; r++) {
     let streak = 1;
     for (let c = 1; c < gridSize; c++) {
-      if (grid[r][c] === grid[r][c - 1]) {
-        streak++;
-      } else {
-        if (streak >= 3) {
-          for (let k = 0; k < streak; k++) {
+      if (grid[r][c] === grid[r][c - 1]) streak++;
+      else {
+        if (streak >= 3)
+          for (let k = 0; k < streak; k++)
             matches.push({ r, c: c - 1 - k });
-          }
-        }
         streak = 1;
       }
     }
-    if (streak >= 3) {
-      for (let k = 0; k < streak; k++) {
+    if (streak >= 3)
+      for (let k = 0; k < streak; k++)
         matches.push({ r, c: gridSize - 1 - k });
-      }
-    }
   }
 
   // vertical
   for (let c = 0; c < gridSize; c++) {
     let streak = 1;
     for (let r = 1; r < gridSize; r++) {
-      if (grid[r][c] === grid[r - 1][c]) {
-        streak++;
-      } else {
-        if (streak >= 3) {
-          for (let k = 0; k < streak; k++) {
+      if (grid[r][c] === grid[r - 1][c]) streak++;
+      else {
+        if (streak >= 3)
+          for (let k = 0; k < streak; k++)
             matches.push({ r: r - 1 - k, c });
-          }
-        }
         streak = 1;
       }
     }
-    if (streak >= 3) {
-      for (let k = 0; k < streak; k++) {
+    if (streak >= 3)
+      for (let k = 0; k < streak; k++)
         matches.push({ r: gridSize - 1 - k, c });
-      }
-    }
   }
 
   return matches;
 }
 
 function removeMatches(matches) {
-  matches.forEach(m => {
-    grid[m.r][m.c] = null;
-  });
+  matches.forEach(m => grid[m.r][m.c] = null);
 
   const qtd = matches.length;
   if (qtd > 0) {
     matchesCount += qtd;
-    const ganho = qtd * valorPorMatch;
-    saldo += ganho;
+    saldo += qtd * valorPorMatch;
     updateUI();
   }
 
-  // fazer cair
+  // cair
   for (let c = 0; c < gridSize; c++) {
     let writeRow = gridSize - 1;
     for (let r = gridSize - 1; r >= 0; r--) {
@@ -558,32 +495,24 @@ function removeMatches(matches) {
   }
 }
 
-/* ============================
-   SWAP + RESOLVE
-   ============================ */
 function swapAndResolve(r1, c1, r2, c2) {
-  // trocar
   const temp = grid[r1][c1];
   grid[r1][c1] = grid[r2][c2];
   grid[r2][c2] = temp;
 
   let matches = findMatches();
   if (matches.length === 0) {
-    // desfaz se não houver matches
-    const temp2 = grid[r1][c1];
+    // desfazer
+    const t = grid[r1][c1];
     grid[r1][c1] = grid[r2][c2];
-    grid[r2][c2] = temp2;
+    grid[r2][c2] = t;
     renderGrid();
     return;
   }
 
-  // jogada válida
   acoesRestantes--;
   acoesJogadas++;
-  // cada jogada consome 1 vida a cada 10 jogadas (exemplo simples)
-  if (acoesJogadas % 10 === 0) {
-    vidasRestantes = Math.max(vidasRestantes - 1, 0);
-  }
+  if (acoesJogadas % 10 === 0) vidasRestantes = Math.max(vidasRestantes - 1, 0);
   updateUI();
 
   const loop = () => {
@@ -618,13 +547,12 @@ function updateUI() {
   adminAnunciosVistosEl.textContent = anunciosVistos;
   adminValorLoginEl.textContent = valorLoginAcumulado.toFixed(4) + " €";
 
-  // receita simulada: 0.001 € por 50 ações
   const receita = (acoesJogadas / 50) * 0.001;
   adminReceitaEl.textContent = receita.toFixed(4) + " €";
 }
 
 /* ============================
-   NAVEGAÇÃO JOGO / ADMIN
+   NAVEGAÇÃO
    ============================ */
 function showGame() {
   if (document.body.classList.contains("telegram")) {
@@ -645,8 +573,9 @@ function showAdmin() {
     document.getElementById("admin-panel").style.display = "block";
   }
 }
+
 /* ============================
-   START
+   INICIALIZAÇÃO
    ============================ */
 createInitialGrid();
 renderGrid();
