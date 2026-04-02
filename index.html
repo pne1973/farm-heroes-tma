@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v35.20 - Fix NaN & Balances</title>
+    <title>Apex Social v35.30 - Inventory & Green Unlock</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -25,10 +25,14 @@
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; }
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; }
+        
+        /* Botão de Compra Dinâmico */
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 80px; transition: all 0.3s; }
+        .btn-buy.unlocked { background: var(--google-green) !important; color: white !important; border-color: var(--google-green) !important; font-weight: bold; }
 
         .market-scroll { max-height: 250px; overflow-y: auto; }
         .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+        .inv-count { font-size: 0.75rem; color: var(--google-blue); font-weight: bold; margin-left: 5px; }
         
         #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; }
         #admin-hub { display: none; background: #000; color: #fff; position: fixed; inset: 0; z-index: 9999; padding: 20px; overflow-y: auto; }
@@ -72,7 +76,7 @@
             <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 KG</span></div>
             <div class="track" style="height:20px; border-radius:10px;"><div id="feed-fill" class="fill-blue"></div></div>
             
-            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO (TEST MODE)<br><small id="sell-preview">Previsto: 0.00🟡 | 0.0000€</small></button>
+            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO (TEST MODE)<br><small id="sell-preview">Previsto: 0.0🟡 | 0.0000€</small></button>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                 <button class="btn btn-ad" onclick="watchAd('feed')">⛽ RAÇÃO</button>
@@ -87,15 +91,14 @@
     </div>
 
     <div id="admin-hub">
-        <div class="flex-between"><h3 style="color:var(--google-red);">APEX ADMIN v35.20</h3><button onclick="toggleAdmin()">FECHAR</button></div>
-        <button class="btn" style="background:var(--google-red); color:white;" onclick="resetStorage()">⚠️ RESET TOTAL (STORAGE)</button>
+        <div class="flex-between"><h3 style="color:var(--google-red);">APEX ADMIN v35.30</h3><button onclick="toggleAdmin()">FECHAR</button></div>
+        <button class="btn" style="background:var(--google-red); color:white;" onclick="resetStorage()">⚠️ RESET TOTAL</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const ADMIN_ID = 5401881400;
 
-        // Função de Sanitização para evitar NaN
         function getSafeValue(key, fallback) {
             const val = localStorage.getItem(key);
             return (val === null || val === "NaN" || isNaN(parseFloat(val))) ? fallback : parseFloat(val);
@@ -113,11 +116,11 @@
             eggTimer: 0,
             eggLimit: 100,
             prodSpeed: 5.0,
-            brlRate: 6.1245,
             boostActive: false,
             boostTime: 0,
             rateV: 1.50,
-            rateR: 0.0050
+            rateR: 0.0050,
+            inventory: JSON.parse(localStorage.getItem('apex_inv')) || {}
         };
 
         function save() {
@@ -129,70 +132,79 @@
             localStorage.setItem('apex_maxChicks', state.maxChickens);
             localStorage.setItem('apex_feedMax', state.feedMax);
             localStorage.setItem('apex_feedCur', state.feedCur);
+            localStorage.setItem('apex_inv', JSON.stringify(state.inventory));
         }
 
         function resetStorage() { localStorage.clear(); location.reload(); }
         function toggleAdmin() { document.getElementById('admin-hub').style.display = (document.getElementById('admin-hub').style.display === 'block') ? 'none' : 'block'; }
 
+        // Mercado com indicadores de inventário e cores
         function loadMarket() {
             const list = document.getElementById('market-list');
             list.innerHTML = ""; 
             for(let i=1; i<=30; i++) {
                 let cost = Math.floor(32 * Math.pow(1.15, i-1));
                 let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                list.innerHTML += `<div class="market-item"><div><b>Lvl ${i} ${icon}</b></div><button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button></div>`;
+                let title = i <= 8 ? `Galinha Lvl ${i}` : i <= 16 ? `Galinheiro Lvl ${i-8}` : i <= 24 ? `Luz LED Lvl ${i-16}` : `Silo Nível ${i}`;
+                let count = state.inventory[i] || 0;
+                
+                list.innerHTML += `
+                    <div class="market-item">
+                        <div>
+                            <b>${title}</b><span class="inv-count"> - ${count}</span>
+                        </div>
+                        <button id="buy-btn-${i}" class="btn-buy ${state.virt >= cost ? 'unlocked' : ''}" 
+                                onclick="buy(${cost}, ${i})">${cost}🟡</button>
+                    </div>`;
             }
         }
 
         function buy(cost, id) {
             if(state.virt >= cost) {
                 state.virt -= cost;
+                state.inventory[id] = (state.inventory[id] || 0) + 1;
+                
                 if(id <= 8) state.chickens++;
                 else if(id <= 16) state.maxChickens += 10;
                 else if(id <= 24) state.prodSpeed += 2.0;
                 else state.feedMax += 5000;
-                updateUI(); save();
+                
+                save();
+                loadMarket();
+                updateUI();
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+        }
+
+        function sell() {
+            let q = Math.floor(state.eggs);
+            if(q >= 1) {
+                state.real += (q * state.rateR) * 0.8;
+                state.vault += (q * state.rateR) * 0.2;
+                state.virt += q * state.rateV;
+                state.eggs = 0;
+                updateUI(); save(); loadMarket();
             }
         }
 
         function watchAd(type) {
             if(type === 'feed') state.feedCur = state.feedMax;
             else { state.boostActive = true; state.boostTime = 600; }
-            updateUI(); save();
-            tg.showAlert(`Teste: ${type} ativado!`);
-        }
-
-        function sell() {
-            let q = Math.floor(state.eggs);
-            if(q >= 1) {
-                let gain = q * state.rateR;
-                state.real += gain * 0.8;
-                state.vault += gain * 0.2;
-                state.virt += q * state.rateV;
-                state.eggs = 0;
-                updateUI(); save();
-            }
+            updateUI(); save(); loadMarket();
         }
 
         function updateUI() {
-            // Garantir que nenhum NaN seja exibido na UI
-            const real = isNaN(state.real) ? 0 : state.real;
-            const virt = isNaN(state.virt) ? 0 : state.virt;
-            const vault = isNaN(state.vault) ? 0 : state.vault;
-
-            document.getElementById('real-bal').innerText = real.toFixed(4) + "€";
-            document.getElementById('brl-bal').innerText = "R$ " + (real * state.brlRate).toFixed(2);
-            document.getElementById('virt-bal').innerText = virt.toFixed(2) + "🟡";
-            document.getElementById('vault-bal').innerText = vault.toFixed(4) + "€";
-            
+            document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
+            document.getElementById('brl-bal').innerText = "R$ " + (state.real * 6.12).toFixed(2);
+            document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('vault-bal').innerText = state.vault.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens} Aves`;
             document.getElementById('chk-fill').style.width = ((state.chickens / state.maxChickens) * 100) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " KG";
             document.getElementById('feed-fill').style.width = ((state.feedCur/state.feedMax)*100) + "%";
             document.getElementById('egg-progress').style.width = ((state.eggTimer/state.eggLimit)*100) + "%";
-            
-            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(2)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
+            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(1)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
             document.getElementById('boost-status').style.display = state.boostActive ? 'inline' : 'none';
         }
 
@@ -201,26 +213,14 @@
                 let multiplier = state.boostActive ? 5 : 1;
                 state.feedCur -= (state.chickens * 0.3);
                 state.eggTimer += (state.chickens * state.prodSpeed * multiplier * 0.2);
-                
-                if(state.boostActive) {
-                    state.boostTime--;
-                    if(state.boostTime <= 0) state.boostActive = false;
-                }
-
-                if(state.eggTimer >= state.eggLimit) { 
-                    state.eggs++; 
-                    state.eggTimer = 0; 
-                    save(); 
-                }
+                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; save(); }
                 updateUI();
             }
         }, 100);
 
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) document.getElementById('admin-link').style.display = 'inline-block';
-            loadMarket(); 
-            updateUI(); 
-            tg.expand();
+            loadMarket(); updateUI(); tg.expand();
         };
     </script>
 </body>
