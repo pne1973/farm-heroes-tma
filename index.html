@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.28 - Production Master</title>
+    <title>Apex Social v33.29 - Final Production Test</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -19,9 +19,8 @@
         .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
         .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
-        /* Botão de Levantamento do Utilizador */
-        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 8px 14px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; font-weight: bold; width: 100%; display: none; transition: opacity 0.2s; }
-        .btn-withdraw:active { opacity: 0.7; }
+        /* Botão de Levantamento PayPal para o Utilizador */
+        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 10px 14px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; font-weight: bold; width: 100%; display: none; box-shadow: 0 2px 4px rgba(26,115,232,0.3); }
 
         .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         
@@ -34,7 +33,7 @@
         .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; color: #3c4043; }
 
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-family: inherit; }
-        .btn-sell { background: var(--google-green); color: white; box-shadow: 0 2px 4px rgba(52,168,83,0.3); }
+        .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
         .btn-buy { background: #dadce0; color: #3c4043; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: none; cursor: pointer; min-width: 85px; font-weight: bold; }
         .can-afford { background: var(--google-yellow) !important; color: white !important; }
@@ -42,12 +41,12 @@
         .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
         .row-info { flex: 1; margin-left: 12px; }
         .row-info b { display: block; font-size: 0.9rem; color: #202124; }
-        .row-info span { font-size: 0.7rem; color: #70757a; }
 
-        /* Estilo do Painel Admin */
+        /* Painel System Admin v33.29 */
         #admin-hub { background: #121212; color: #fff; padding: 25px; border-top: 6px solid var(--google-red); margin-top: 40px; border-radius: 24px 24px 0 0; display: none; font-family: monospace; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .admin-box { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
+        .admin-btn-test { background: #333; color: white; border: 1px solid #444; padding: 10px; border-radius: 8px; width: 100%; cursor: pointer; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -98,14 +97,17 @@
     </div>
 
     <div id="admin-hub">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.28</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.29</div>
         <div class="admin-grid">
             <div class="admin-box"><span class="label">Users</span><b id="adm-u">1</b></div>
-            <div class="admin-box"><span class="label">EUR/BRL</span><b>6.1245</b></div>
+            <div class="admin-box"><span class="label">EUR/BRL</span><b id="curr-rate">6.1245</b></div>
         </div>
-        <button class="btn" style="background:#333; color:white; padding:10px; font-size:0.8rem;" onclick="simulateNewUser()">Simular Pedido de Utilizador</button>
         
-        <div class="label" style="color:var(--google-green); margin-top:20px;">PayPal Pendentes (Admin Only)</div>
+        <div class="label" style="color:var(--google-yellow); margin-bottom:10px;">Simulador de Teste Multi-Utilizador</div>
+        <button class="admin-btn-test" onclick="simulateNewUser()">Gerar Pedido Simulado</button>
+        <button class="admin-btn-test" onclick="resetState()">Resetar Minha Conta</button>
+        
+        <div class="label" style="color:var(--google-green); margin-top:20px;">Pedidos de Levantamento PayPal [cite: 2026-03-22]</div>
         <div id="adm-pays" style="background:#1e1e1e; padding:10px; border-radius:8px; margin-top:10px;">
             <div id="no-payments" style="font-size:0.7rem; color:#777;">Sem pedidos pendentes.</div>
         </div>
@@ -113,56 +115,46 @@
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400; // ID do Administrador
+        const ADMIN_ID = 5401881400; // Seu ID conforme instruído [cite: 2026-03-26]
         let users = []; 
         
         let state = {
             id: 5401881400, eggs: 0, virt: 10, real: 0, piggy: 0,
             chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000, 
             eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001,
-            levels: { chk: 1, cp: 1, silo: 1, logistics: 0, auto: 0, bio: 0, incub: 0, genetic: 0, solar: 0, export: 0, drone: 0, staff: 0, lab: 0, storage: 0, brand: 0 }
+            levels: { chk: 1, cp: 1, silo: 1 }
         };
 
         const catalog = [
-            { id: 'chk', n: "Nova Galinha", d: "+Produção base", i: "🐔", p: 20 },
-            { id: 'cp', n: "Galinheiro", d: "+5 Vagas aves", i: "🏠", p: 100 },
-            { id: 'silo', n: "Silo Industrial", d: "+5kg ração", i: "🏗️", p: 240 },
-            { id: 'logistics', n: "Logística 🚚", d: "+15% Venda global", i: "📦", p: 300 },
-            { id: 'auto', n: "Alimentador Auto", d: "-10% gasto ração", i: "🤖", p: 500 },
-            { id: 'bio', n: "Selo BIO 🌿", d: "Dobro de Saldo Real", i: "⭐", p: 1000 },
-            { id: 'incub', n: "Incubadora", d: "+20% Velocidade", i: "🥚", p: 1500 },
-            { id: 'genetic', n: "Genética XL", d: "+50% Saldo Virtual", i: "🧬", p: 2500 }
+            { id: 'chk', n: "Nova Galinha", i: "🐔", p: 32 },
+            { id: 'cp', n: "Galinheiro", i: "🏠", p: 160 },
+            { id: 'silo', n: "Silo Industrial", i: "🏗️", p: 240 }
         ];
 
-        // LÓGICA DE ANÚNCIO COM RETENÇÃO DE 30s (v33.28)
+        // LÓGICA DE RETENÇÃO OBRIGATÓRIA 30S [cite: 2026-03-22]
         function watchAd() {
-            const adUrl = "https://www.google.com"; // Substituir pelo seu Direct Link
-            const TEMPO_MINIMO = 30000; // 30 segundos obrigatórios
+            const adUrl = "https://www.google.com"; 
+            const TEMPO_MINIMO = 30000; 
             
-            tg.showConfirm("Vê o anúncio completo (30s) para repor a ração. Continuar?", (ok) => {
+            tg.showConfirm("Vê o anúncio por 30s para repor a ração. Continuar?", (ok) => {
                 if(ok) {
                     const startTime = Date.now();
-                    sessionStorage.setItem('ad_start_time', startTime);
                     window.open(adUrl, '_blank');
                     
                     const checkReturn = setInterval(() => {
                         if (document.visibilityState === 'visible') {
-                            const now = Date.now();
-                            const decorrido = now - startTime;
-
+                            const decorrido = Date.now() - startTime;
                             if (decorrido >= TEMPO_MINIMO) {
                                 state.feedCur = state.feedMax;
                                 updateUI();
-                                sessionStorage.removeItem('ad_start_time');
                                 clearInterval(checkReturn);
-                                tg.showAlert("✅ Perfeito! Stock reabastecido com bónus de visualização.");
+                                tg.showAlert("✅ Recompensa entregue! Stock reabastecido.");
                             } else {
                                 const faltam = Math.ceil((TEMPO_MINIMO - decorrido) / 1000);
-                                tg.showAlert(`⚠️ Ainda faltam ${faltam} segundos. Por favor, vê o anúncio até ao fim para ganhar a ração.`);
+                                tg.showAlert(`⚠️ Faltam ${faltam}s de anúncio para validar a recompensa.`);
                             }
                         }
                     }, 2000);
-
                     setTimeout(() => clearInterval(checkReturn), 180000);
                 }
             });
@@ -181,7 +173,7 @@
             document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
             
-            // MOSTRAR BOTÃO DE LEVANTAMENTO SE SALDO REAL > 0
+            // Controle do botão de levantamento (Mínimo sugerido de 5000 XP/pontos, mas aqui baseado em saldo real) [cite: 2026-03-22]
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
             
             let vG = Math.floor(state.eggs) * state.rateV;
@@ -217,6 +209,7 @@
             }
         }
 
+        // SOLICITAÇÃO DE LEVANTAMENTO PAYPAL PELO UTILIZADOR [cite: 2026-03-22]
         function requestWithdraw() {
             tg.showConfirm(`Confirmar levantamento de ${state.real.toFixed(4)}€ para o seu PayPal?`, (ok) => {
                 if(ok) {
@@ -224,14 +217,18 @@
                     state.real = 0;
                     updateUI();
                     refreshAdminList();
-                    tg.showAlert("Pedido enviado! O Admin processará o pagamento via PayPal brevemente.");
+                    tg.showAlert("Pedido enviado! Verifique o painel admin para processar.");
                 }
             });
         }
 
+        // FERRAMENTAS DE TESTE ADMIN [cite: 2026-03-26]
         function simulateNewUser() {
-            users.push({ id: Math.floor(Math.random()*9e8), valor: (Math.random()*10).toFixed(4) });
+            const mockId = Math.floor(Math.random()*900000000);
+            const mockVal = (Math.random()*15).toFixed(4);
+            users.push({ id: mockId, valor: parseFloat(mockVal) });
             refreshAdminList();
+            tg.showAlert(`Simulado: Pedido de ${mockVal}€ do Utilizador ${mockId}`);
         }
 
         function refreshAdminList() {
@@ -240,14 +237,16 @@
             if(users.length === 0) { container.innerHTML = 'Sem pedidos pendentes.'; return; }
             container.innerHTML = users.map((u, i) => `
                 <div class="flex-between" style="border-bottom:1px solid #333; padding:8px 0; font-size:0.75rem;">
-                    <span>ID: ${u.id} (${(u.valor * 6.1245).toFixed(2)} BRL)</span>
-                    <button onclick="processPay(${i})" style="background:var(--google-green); color:white; border:none; border-radius:4px; padding:3px 8px;">PAY</button>
+                    <span>User: ${u.id} | <b>${u.valor.toFixed(4)}€</b> (R$ ${(u.valor * 6.1245).toFixed(2)})</span>
+                    <button onclick="processPay(${i})" style="background:var(--google-green); color:white; border:none; border-radius:4px; padding:4px 10px; cursor:pointer; font-weight:bold;">PAY</button>
                 </div>
             `).join('');
         }
 
         function processPay(i) { users.splice(i, 1); refreshAdminList(); }
+        function resetState() { state.real = 0; state.virt = 10; state.eggs = 0; updateUI(); }
 
+        // LOOP DE PRODUÇÃO [cite: 2026-03-22]
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur = Math.max(0, state.feedCur - (2 * state.chickens));
@@ -269,12 +268,7 @@
         }
 
         function claimPiggy() {
-            if(state.piggy > 0) {
-                state.real += state.piggy;
-                state.piggy = 0;
-                updateUI();
-                tg.showAlert("Cofre recolhido!");
-            }
+            if(state.piggy > 0) { state.real += state.piggy; state.piggy = 0; updateUI(); }
         }
 
         window.onload = () => {
