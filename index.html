@@ -3,196 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v36.00 - Real Economy</title>
+    <title>Apex Social v36.12 - Secure Checkout</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
             --google-blue: #1a73e8; --google-green: #34a853; 
-            --google-red: #ea4335; --bg: #f8f9fa; --text: #3c4043; 
+            --google-red: #ea4335; --bg: #f8f9fa; --text: #3c4043;
         }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
         
-        /* Espaço Publicitário Superior */
-        .ad-banner { background: #eee; border: 1px dashed #ccc; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; color: #999; margin-bottom: 12px; border-radius: 8px; }
+        .ad-slot { background: #fff; border: 1px solid #ddd; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #70757a; margin-bottom: 12px; border-radius: 12px; }
 
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
-        .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        .real-val { font-size: 1.8rem; color: var(--google-green); font-weight: 700; }
+        .balance-hero { text-align: center; padding: 10px 0; }
+        .balance-val { font-size: 2.2rem; color: var(--google-green); font-weight: 800; line-height: 1; }
         
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; }
-        .fill-yellow { height: 100%; background: #fbbc05; width: 0%; transition: width 0.1s linear; }
-        .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
+        .fill-egg { height: 100%; background: #fbbc05; width: 0%; transition: width 0.3s ease; }
+        .fill-feed { height: 100%; background: var(--google-blue); width: 100%; }
 
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; transition: 0.2s; }
+        .btn-main { border: none; border-radius: 24px; padding: 16px; font-weight: 700; width: 100%; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-bottom: 10px; }
         .btn-sell { background: var(--google-blue); color: white; }
         
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px; border-radius: 12px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 90px; }
-        .btn-buy.can-afford { background: #e8f0fe; border-color: var(--google-blue); color: var(--google-blue); font-weight: bold; }
-        .btn-paypal { background: #0070ba; color: white !important; border: none; }
+        .market-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
+        .upgrade-info b { display: block; font-size: 0.95rem; }
+        .upgrade-info span { font-size: 0.7rem; color: #70757a; }
 
-        .market-scroll { max-height: 350px; overflow-y: auto; }
-        .market-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
-        .benefit-text { font-size: 0.62rem; color: #70757a; display: block; margin-top: 2px; }
+        .btn-pay { 
+            border-radius: 12px; border: 1px solid #dadce0; padding: 8px 12px; min-width: 95px;
+            display: flex; flex-direction: column; align-items: center; cursor: pointer; font-family: inherit;
+        }
+        .btn-pay.wallet { background: #e8f0fe; color: var(--google-blue); border-color: var(--google-blue); }
+        .btn-pay.paypal { background: #0070ba; color: white; border: none; }
+        .btn-pay b { font-size: 0.85rem; }
+        .btn-pay small { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; }
     </style>
 </head>
 <body>
 
-    <div class="ad-banner">PUBLICIDADE - ANUNCIE AQUI</div>
+    <div class="ad-slot">ANÚNCIO: MONETIZAÇÃO ATIVA</div>
 
-    <div id="ui-main">
-        <div class="card">
-            <div style="text-align: center;">
-                <span class="label">O SEU SALDO DISPONÍVEL</span>
-                <div class="real-val" id="real-bal">0.0000€</div>
-                <div style="font-size:0.85rem; color:#70757a;" id="brl-bal">R$ 0.00</div>
-            </div>
+    <div class="card balance-hero">
+        <span style="font-size: 0.75rem; font-weight: 700; color: #70757a;">CARTEIRA REAL</span>
+        <div class="balance-val" id="display-euro">0.0000€</div>
+        <div id="display-brl" style="color: #70757a; font-size: 0.9rem; margin-top: 4px;">R$ 0.00</div>
+    </div>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
+            <span>ESTADO DA QUINTA</span>
+            <span id="ave-count">1/10 Aves</span>
+        </div>
+        <div class="track"><div id="egg-bar" class="fill-egg"></div></div>
+        
+        <div style="margin: 10px 0; font-size: 0.9rem;">
+            🥚 Ovos em Stock: <b id="egg-total">0</b>
+            <span id="turbo-label" style="display:none; color:var(--google-red); float:right; font-weight:800;">⚡ TURBO ATIVO</span>
         </div>
 
-        <div class="card">
-            <div style="display: flex; justify-content: space-between;">
-                <span class="label">Produção de Ovos</span>
-                <span id="chk-info" style="font-size:0.75rem; font-weight:bold;">1/10 Aves</span>
-            </div>
-            <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
-            
-            <div style="margin: 10px 0; font-size: 0.9rem;">
-                🥚 Stock: <b id="egg-count">0</b> 
-                <span id="boost-status" style="color:var(--google-red); font-size:0.7rem; margin-left:10px; display:none;">🔥 BOOST ATIVO</span>
-            </div>
+        <div style="font-size: 0.7rem; font-weight: 700; color: #70757a; margin-top: 10px;">RESERVATÓRIO DE RAÇÃO</div>
+        <div class="track" style="height: 16px;"><div id="feed-bar" class="fill-feed"></div></div>
+        
+        <button class="btn-main btn-sell" onclick="sellAll()">VENDER PRODUÇÃO<br><small id="preview-val">Valor Estimado: 0.0000€</small></button>
+    </div>
 
-            <div class="label">Nível de Ração</div>
-            <div class="track" style="height:18px;"><div id="feed-fill" class="fill-blue"></div></div>
-            
-            <button class="btn btn-sell" onclick="sell()">RECOLHER E VENDER<br><small id="sell-preview">Previsto: 0.0000€</small></button>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button class="btn" style="background:#fff; border:1px solid #ddd;" onclick="buyItem(0.50, 'feed')">⛽ +RAÇÃO (0.50€)</button>
-                <button class="btn" style="background:#fff; border:1px solid #ddd;" onclick="buyItem(2.00, 'boost')">⚡ BOOST (2.00€)</button>
-            </div>
-        </div>
+    <div class="ad-slot" style="height:40px;">PUBLICIDADE PARCEIRA</div>
 
-        <div class="ad-banner" style="height:40px;">PUBLICIDADE - GOOGLE ADS</div>
-
-        <div class="card">
-            <div class="label" style="margin-bottom:10px;">🛒 Expansões (Débito em Saldo / PayPal)</div>
-            <div class="market-scroll" id="market-list"></div>
-        </div>
+    <div class="card">
+        <div style="font-size: 0.75rem; font-weight: 700; color: #70757a; margin-bottom: 12px;">LOJA DE EXPANSÕES (PAGAMENTO SEGURO)</div>
+        <div id="market-container"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
+        const ADMIN_ID = "5401881400"; // [cite: 2026-03-22]
 
-        let state = {
-            eggs: parseFloat(localStorage.getItem('apex_eggs')) || 0,
-            real: parseFloat(localStorage.getItem('apex_real')) || 0.00,
-            chickens: parseInt(localStorage.getItem('apex_chickens')) || 1,
-            maxChickens: parseInt(localStorage.getItem('apex_maxChicks')) || 10,
+        let user = {
+            id: ADMIN_ID,
+            real: parseFloat(localStorage.getItem('apex_real')) || 0.0041, //
+            eggs: parseInt(localStorage.getItem('apex_eggs')) || 0,
+            chickens: parseInt(localStorage.getItem('apex_chicks')) || 1,
+            maxChicks: parseInt(localStorage.getItem('apex_max')) || 5,
+            feed: 4854, //
             feedMax: 10000,
-            feedCur: 10000,
-            eggTimer: 0,
-            prodSpeed: 5.0,
-            rateR: 0.0050, // Valor de cada ovo em Euro
-            boostActive: false,
-            inventory: JSON.parse(localStorage.getItem('apex_inv')) || {}
+            timer: 0,
+            speed: 2.5,
+            isTurbo: false
         };
 
-        function save() {
-            localStorage.setItem('apex_eggs', state.eggs);
-            localStorage.setItem('apex_real', state.real);
-            localStorage.setItem('apex_chickens', state.chickens);
-            localStorage.setItem('apex_maxChicks', state.maxChickens);
-            localStorage.setItem('apex_inv', JSON.stringify(state.inventory));
-        }
+        const upgrades = [
+            { id: 'f1', name: 'Ração Premium', desc: 'Enche o silo imediatamente.', cost: 0.50 },
+            { id: 'b1', name: 'Booster Turbo', desc: 'Produção 5x por 5 minutos.', cost: 1.20 },
+            { id: 'c1', name: 'Ave Nível Superior', desc: '+1.5 ovo/ciclo e +Velocidade.', cost: 2.50 },
+            { id: 'h1', name: 'Novo Pavilhão', desc: '+15 vagas no galinheiro.', cost: 8.00 }
+        ];
 
-        function loadMarket() {
-            const list = document.getElementById('market-list');
-            list.innerHTML = ""; 
-            
-            for(let i=1; i<=20; i++) {
-                let cost = (0.50 * Math.pow(1.4, i-1)).toFixed(2);
-                let title, benefit, type;
-
-                if(i <= 5) { title = `Galinha Lvl ${i}`; benefit = `+Velocidade e +1 ovo.`; type="bird"; }
-                else if(i <= 10) { title = `Galinheiro Lvl ${i-5}`; benefit = `+20 Vagas progressivas.`; type="house"; }
-                else { title = `Luz LED Lvl ${i-10}`; benefit = `+50% Produtividade.`; type="led"; }
-
-                let isPaypal = state.real < cost;
-                
-                list.innerHTML += `
+        function renderMarket() {
+            const container = document.getElementById('market-container');
+            container.innerHTML = "";
+            upgrades.forEach(u => {
+                const hasBalance = user.real >= u.cost;
+                container.innerHTML += `
                     <div class="market-item">
-                        <div style="flex: 1;">
-                            <b>${title}</b>
-                            <span class="benefit-text">${benefit}</span>
+                        <div class="upgrade-info">
+                            <b>${u.name}</b>
+                            <span>${u.desc}</span>
                         </div>
-                        <button class="btn-buy ${isPaypal ? 'btn-paypal' : 'can-afford'}" 
-                                onclick="buyItem(${cost}, '${type}', ${i})">
-                            ${isPaypal ? '💳 PayPal ' : '💸 Debitar '}${cost}€
-                        </button>
+                        <div class="btn-pay ${hasBalance ? 'wallet' : 'paypal'}" onclick="checkout(${u.cost}, '${u.id}')">
+                            <b>${u.cost.toFixed(2)}€</b>
+                            <small>${hasBalance ? 'Usar Saldo' : 'PayPal'}</small>
+                        </div>
                     </div>`;
-            }
+            });
         }
 
-        function buyItem(cost, type, id) {
-            if(state.real >= cost) {
-                state.real -= cost;
-                processUpgrade(type, id);
-                tg.showScanQrPopup({ text: "Processando débito de saldo..." });
-                setTimeout(() => { tg.closeScanQrPopup(); updateUI(); save(); loadMarket(); }, 1000);
+        function checkout(cost, type) {
+            if (user.real >= cost) {
+                user.real -= cost;
+                apply(type);
+                tg.HapticFeedback.notificationOccurred('success');
+                updateUI();
             } else {
-                tg.showConfirm(`Saldo insuficiente (${state.real.toFixed(2)}€). Deseja pagar ${cost}€ via PayPal?`, (ok) => {
-                    if(ok) {
-                        // Simulação de Checkout PayPal
-                        window.open(`https://www.paypal.com/checkoutnow?amount=${cost}`, '_blank');
-                        // No ambiente real, o webhook confirmaria a compra:
-                        processUpgrade(type, id);
-                        updateUI(); save(); loadMarket();
+                // Correção do redirecionamento PayPal
+                tg.showConfirm(`Saldo insuficiente (${user.real.toFixed(4)}€). Abrir checkout PayPal de ${cost.toFixed(2)}€?`, (confirm) => {
+                    if(confirm) {
+                        const paypalURL = `https://www.paypal.com/checkoutnow?amount=${cost}&currency=EUR&receiver=${ADMIN_ID}`;
+                        tg.openLink(paypalURL); 
                     }
                 });
             }
         }
 
-        function processUpgrade(type, id) {
-            if(type === 'bird') { state.chickens++; state.prodSpeed += 2; }
-            if(type === 'house') { state.maxChickens += 20; }
-            if(type === 'led') { state.prodSpeed *= 1.5; }
-            if(type === 'feed') { state.feedCur = state.feedMax; }
-            if(type === 'boost') { state.boostActive = true; setTimeout(()=> state.boostActive = false, 300000); }
-            tg.HapticFeedback.notificationOccurred('success');
+        function apply(type) {
+            if(type === 'f1') user.feed = user.feedMax;
+            if(type === 'b1') { user.isTurbo = true; setTimeout(() => user.isTurbo = false, 300000); }
+            if(type === 'c1') { if(user.chickens < user.maxChicks) { user.chickens++; user.speed += 2; } else { tg.showAlert("Sem espaço!"); } }
+            if(type === 'h1') user.maxChicks += 15;
+            save(); renderMarket();
         }
 
-        function sell() {
-            let q = Math.floor(state.eggs);
-            if(q >= 1) {
-                state.real += (q * state.rateR);
-                state.eggs = 0;
-                updateUI(); save(); loadMarket();
+        function sellAll() {
+            if(user.eggs > 0) {
+                user.real += (user.eggs * 0.0050);
+                user.eggs = 0;
                 tg.HapticFeedback.impactOccurred('medium');
+                updateUI(); save(); renderMarket();
             }
         }
 
+        function save() {
+            localStorage.setItem('apex_real', user.real);
+            localStorage.setItem('apex_eggs', user.eggs);
+            localStorage.setItem('apex_chicks', user.chickens);
+            localStorage.setItem('apex_max', user.maxChicks);
+        }
+
         function updateUI() {
-            document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
-            document.getElementById('brl-bal').innerText = "R$ " + (state.real * 6.12).toFixed(2);
-            document.getElementById('egg-count').innerText = Math.floor(state.eggs);
-            document.getElementById('chk-info').innerText = `${state.chickens}/${state.maxChickens} Aves`;
-            document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax*100) + "%";
-            document.getElementById('egg-progress').style.width = (state.eggTimer) + "%";
-            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateR).toFixed(4)}€`;
-            document.getElementById('boost-status').style.display = state.boostActive ? 'inline' : 'none';
+            document.getElementById('display-euro').innerText = user.real.toFixed(4) + "€";
+            document.getElementById('display-brl').innerText = "R$ " + (user.real * 6.1245).toFixed(2);
+            document.getElementById('egg-total').innerText = user.eggs;
+            document.getElementById('ave-count').innerText = `${user.chickens}/${user.maxChicks} Aves`;
+            document.getElementById('feed-bar').style.width = (user.feed / user.feedMax * 100) + "%";
+            document.getElementById('egg-bar').style.width = user.timer + "%";
+            document.getElementById('preview-val').innerText = `Valor Estimado: ${(user.eggs * 0.0050).toFixed(4)}€`;
+            document.getElementById('turbo-label').style.display = user.isTurbo ? 'block' : 'none';
         }
 
         setInterval(() => {
-            if(state.feedCur > 0) {
-                state.feedCur -= (state.chickens * 0.5);
-                let mult = state.boostActive ? 5 : 1;
-                state.eggTimer += (state.prodSpeed * 0.1 * mult);
-                if(state.eggTimer >= 100) { state.eggs++; state.eggTimer = 0; }
+            if(user.feed > 0) {
+                user.feed -= (user.chickens * 0.3);
+                let mult = user.isTurbo ? 5 : 1;
+                user.timer += (user.speed * 0.4 * mult);
+                if(user.timer >= 100) { user.eggs++; user.timer = 0; save(); }
                 updateUI();
             }
         }, 100);
 
-        window.onload = () => { loadMarket(); updateUI(); tg.expand(); };
+        window.onload = () => { tg.expand(); renderMarket(); updateUI(); };
     </script>
 </body>
 </html>
