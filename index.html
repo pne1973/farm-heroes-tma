@@ -1,32 +1,245 @@
-let farm = {
-    eggs: 0,
-    virtualCash: 10.00,  // Moeda para a Quinta (ex: BioCoins)
-    realBalance: 0.00,   // Saldo para Levantamento (€)
-    
-    // Taxas de Conversão (Exemplo)
-    virtualRate: 0.50,   // Ganha 0.50 BC por cada ovo
-    realRate: 0.0001     // Ganha 0.0001€ por cada ovo (CPM 1€)
-};
+<!DOCTYPE html>
+<html lang="pt-pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Egg Tycoon Pro - Gestão de Quinta</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-bg: #f0f2f5;
+            --tg-btn: #2481cc;
+            --virtual-color: #f1c40f; /* Cor Moeda da Quinta */
+            --real-color: #2ecc71;    /* Cor Saldo Real */
+            --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
 
-// FUNÇÃO ÚNICA DE VENDA
-function sellEggs() {
-    if (farm.eggs >= 1) {
-        let eggsToSell = Math.floor(farm.eggs);
+        body {
+            font-family: -apple-system, system-ui, sans-serif;
+            background-color: var(--tg-bg);
+            margin: 0; padding: 15px;
+            color: #333;
+            user-select: none;
+        }
+
+        /* Topo: Carteira Real */
+        .real-wallet {
+            background: linear-gradient(135deg, #1d2b64, #2481cc);
+            color: white;
+            padding: 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 15px rgba(36, 129, 204, 0.3);
+        }
+        .real-wallet span { font-size: 0.75rem; opacity: 0.8; text-transform: uppercase; letter-spacing: 0.5px; }
+        .real-wallet b { font-size: 1.5rem; display: block; margin-top: 2px; }
+
+        /* Stats do Jogo */
+        .stats-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px;
+        }
+        .stat-card {
+            background: white; padding: 15px; border-radius: 16px;
+            text-align: center; box-shadow: var(--card-shadow);
+        }
+        .stat-card span { font-size: 0.7rem; color: #888; font-weight: bold; text-transform: uppercase; }
+        .stat-card b { font-size: 1.2rem; display: block; margin-top: 5px; }
+        .stat-card b.virtual { color: var(--virtual-color); }
+
+        /* Monitor de Produção */
+        .production-box {
+            background: white; padding: 20px; border-radius: 24px;
+            margin-bottom: 20px; box-shadow: var(--card-shadow);
+        }
+        .resource-info { display: flex; justify-content: space-around; font-size: 0.9rem; margin-bottom: 15px; }
         
-        // 1. Calcula o ganho virtual para reinvestir
-        let gainVirtual = eggsToSell * farm.virtualRate;
-        farm.virtualCash += gainVirtual;
+        .progress-bar { width: 100%; height: 12px; background: #eee; border-radius: 6px; margin: 10px 0; overflow: hidden; }
+        #feed-fill { height: 100%; background: #e67e22; width: 100%; transition: width 0.3s linear; }
+
+        /* Botões */
+        .btn {
+            border: none; border-radius: 14px; padding: 16px;
+            font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 12px;
+            font-size: 1rem; transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.98); }
+        .btn-sell { background: var(--real-color); color: white; }
+        .btn-ad { background: #e67e22; color: white; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-shop { 
+            background: white; color: #333; border: 1px solid #ddd; 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .btn:disabled { opacity: 0.5; filter: grayscale(1); }
+
+        /* Modal */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 999; align-items: center; justify-content: center;
+        }
+        .modal-content { background: white; width: 80%; padding: 30px; border-radius: 28px; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <div class="real-wallet" onclick="openWallet()">
+        <div>
+            <span>Saldo Real para Levantamento</span>
+            <b id="real-balance">0.0000€</b>
+        </div>
+        <div style="font-size: 1.5rem;">🏦</div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <span>Ovos Produzidos</span>
+            <b id="egg-count">0</b>
+        </div>
+        <div class="stat-card">
+            <span>Capital Quinta (Virtual)</span>
+            <b class="virtual" id="virtual-cash">10.00🟡</b>
+        </div>
+    </div>
+
+    <div class="production-box">
+        <div class="resource-info">
+            <span>🐔 Galinhas: <b id="count-chickens">1</b>/<span id="max-vagas">5</span></span>
+            <span>🏠 Galinheiros: <b id="count-coops">1</b></span>
+        </div>
         
-        // 2. Calcula o ganho real para a carteira
-        let gainReal = eggsToSell * farm.realRate;
-        farm.realBalance += gainReal;
-        
-        // Reseta os ovos
-        farm.eggs = 0;
-        
+        <div style="text-align: center; font-size: 0.8rem; color: #666;">Stock de Ração</div>
+        <div class="progress-bar">
+            <div id="feed-fill"></div>
+        </div>
+
+        <button class="btn btn-sell" onclick="sellProduction()">Vender Produção Atual</button>
+        <button class="btn btn-ad" onclick="watchAd('feed')">📺 Ração Grátis (Anúncio)</button>
+    </div>
+
+    <h3>Mercado de Expansão (🟡)</h3>
+    <button class="btn btn-shop" id="shop-chicken" onclick="buyAsset('chicken')">
+        <span>+1 Galinha</span>
+        <b id="price-chicken">20.00🟡</b>
+    </button>
+    
+    <button class="btn btn-shop" id="shop-coop" onclick="buyAsset('coop')">
+        <span>+1 Galinheiro (+5 vagas)</span>
+        <b id="price-coop">100.00🟡</b>
+    </button>
+
+    <div id="modal" class="modal" onclick="closeWallet()">
+        <div class="modal-content">
+            <h3>Informação de Levantamento</h3>
+            <p>Venda ovos para acumular saldo real.</p>
+            <hr style="border: 0.5px solid #eee; margin: 15px 0;">
+            <p style="font-size: 0.8rem; color: #888;">Levantamento disponível a partir de 5.00€ via PayPal ou Revolut.</p>
+            <button class="btn btn-sell" style="margin-top: 10px;">Solicitar Levantamento</button>
+        </div>
+    </div>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+
+        // Configuração da Economia
+        let farm = {
+            eggs: 0,
+            virtualCash: 10.00,  // Moeda para comprar galinhas
+            realBalance: 0.00,   // Moeda para levantar
+            chickens: 1,
+            coops: 1,
+            feed: 100,
+            
+            // Taxas por cada OVO vendido
+            rateVirtual: 0.50,   // Ganha 0.50 🟡 por ovo
+            rateReal: 0.0001,    // Ganha 0.0001€ por ovo
+            
+            prices: { chicken: 20, coop: 100 }
+        };
+
+        function updateUI() {
+            // Atualizar Números
+            document.getElementById('egg-count').innerText = Math.floor(farm.eggs);
+            document.getElementById('virtual-cash').innerText = farm.virtualCash.toFixed(2) + "🟡";
+            document.getElementById('real-balance').innerText = farm.realBalance.toFixed(4) + "€";
+            
+            document.getElementById('count-chickens').innerText = farm.chickens;
+            document.getElementById('count-coops').innerText = farm.coops;
+            document.getElementById('max-vagas').innerText = farm.coops * 5;
+            
+            // Barra de Ração
+            document.getElementById('feed-fill').style.width = farm.feed + "%";
+
+            // Preços e Botões
+            document.getElementById('price-chicken').innerText = farm.prices.chicken.toFixed(2) + "🟡";
+            document.getElementById('price-coop').innerText = farm.prices.coop.toFixed(2) + "🟡";
+            
+            document.getElementById('shop-chicken').disabled = (farm.virtualCash < farm.prices.chicken || farm.chickens >= farm.coops * 5);
+            document.getElementById('shop-coop').disabled = (farm.virtualCash < farm.prices.coop);
+        }
+
+        // Loop de Produção (1 seg)
+        setInterval(() => {
+            if (farm.feed > 0 && farm.chickens > 0) {
+                // Consumo (0.4% por galinha por segundo)
+                farm.feed = Math.max(0, farm.feed - (0.4 * farm.chickens));
+                // Produção (0.1 ovo por galinha)
+                farm.eggs += (farm.chickens * 0.1);
+                updateUI();
+            }
+        }, 1000);
+
+        // AÇÃO PRINCIPAL: VENDA DUPLA
+        function sellProduction() {
+            if (farm.eggs >= 1) {
+                let sold = Math.floor(farm.eggs);
+                
+                // Ganho Virtual (🟡)
+                let gainVirtual = sold * farm.rateVirtual;
+                farm.virtualCash += gainVirtual;
+                
+                // Ganho Real (€)
+                let gainReal = sold * farm.rateReal;
+                farm.realBalance += gainReal;
+                
+                farm.eggs = 0;
+                tg.HapticFeedback.notificationOccurred('success');
+                updateUI();
+                
+                alert(`Venda realizada!\n+ ${gainVirtual.toFixed(2)}🟡 para a Quinta\n+ ${gainReal.toFixed(4)}€ de Saldo Real`);
+            }
+        }
+
+        // Compras de Expansão (Usa apenas Moeda Virtual)
+        function buyAsset(type) {
+            if (type === 'chicken' && farm.virtualCash >= farm.prices.chicken) {
+                farm.virtualCash -= farm.prices.chicken;
+                farm.chickens++;
+                farm.prices.chicken = Math.round(farm.prices.chicken * 1.3);
+            } else if (type === 'coop' && farm.virtualCash >= farm.prices.coop) {
+                farm.virtualCash -= farm.prices.coop;
+                farm.coops++;
+                farm.prices.coop = Math.round(farm.prices.coop * 1.5);
+            }
+            updateUI();
+        }
+
+        // Simulação de Anúncio
+        function watchAd(type) {
+            alert("A carregar patrocínio...");
+            setTimeout(() => {
+                if (type === 'feed') farm.feed = 100;
+                updateUI();
+                alert("Ração abastecida! Obrigado por apoiar a quinta.");
+            }, 1000);
+        }
+
+        function openWallet() { document.getElementById('modal').style.display = 'flex'; }
+        function closeWallet() { document.getElementById('modal').style.display = 'none'; }
+
         updateUI();
-        
-        // Notificação de sucesso com os dois valores
-        alert(`Venda Concluída!\n+ ${gainVirtual.toFixed(2)} BC (Quinta)\n+ ${gainReal.toFixed(4)} € (Real)`);
-    }
-}
+    </script>
+</body>
+</html>
