@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v35.10 - Test Mode</title>
+    <title>Apex Social v35.20 - Fix NaN & Balances</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -18,7 +18,7 @@
 
         .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; position: relative; }
-        .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.05s linear; }
+        .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
         .fill-red { height: 100%; background: var(--google-red); width: 0%; transition: width 0.3s; }
 
@@ -46,7 +46,7 @@
                 </div>
                 <div style="text-align: right;">
                     <span class="label">Capital Quinta</span>
-                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">10.00🟡</div>
+                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">0.00🟡</div>
                 </div>
             </div>
         </div>
@@ -87,33 +87,60 @@
     </div>
 
     <div id="admin-hub">
-        <div class="flex-between"><h3 style="color:var(--google-red);">TEST MONITOR v35.10</h3><button onclick="toggleAdmin()">FECHAR</button></div>
+        <div class="flex-between"><h3 style="color:var(--google-red);">APEX ADMIN v35.20</h3><button onclick="toggleAdmin()">FECHAR</button></div>
         <button class="btn" style="background:var(--google-red); color:white;" onclick="resetStorage()">⚠️ RESET TOTAL (STORAGE)</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
-        
-        // Carregamento persistente [cite: 2026-03-22]
-        let state = JSON.parse(localStorage.getItem('apex_state')) || {
-            eggs: 0, virt: 100.00, real: 0, vault: 0, 
-            chickens: 1, maxChickens: 10, feedMax: 10000, feedCur: 10000, 
-            eggTimer: 0, eggLimit: 100, prodSpeed: 5.0, // Velocidade base aumentada para teste
-            brlRate: 6.1245, boostActive: false, boostTime: 0,
-            rateV: 1.50, rateR: 0.0050 // Ganhos aumentados para teste
+        const ADMIN_ID = 5401881400;
+
+        // Função de Sanitização para evitar NaN
+        function getSafeValue(key, fallback) {
+            const val = localStorage.getItem(key);
+            return (val === null || val === "NaN" || isNaN(parseFloat(val))) ? fallback : parseFloat(val);
+        }
+
+        let state = {
+            eggs: getSafeValue('apex_eggs', 0),
+            virt: getSafeValue('apex_virt', 100.00),
+            real: getSafeValue('apex_real', 0),
+            vault: getSafeValue('apex_vault', 0),
+            chickens: getSafeValue('apex_chickens', 1),
+            maxChickens: getSafeValue('apex_maxChicks', 10),
+            feedMax: getSafeValue('apex_feedMax', 10000),
+            feedCur: getSafeValue('apex_feedCur', 10000),
+            eggTimer: 0,
+            eggLimit: 100,
+            prodSpeed: 5.0,
+            brlRate: 6.1245,
+            boostActive: false,
+            boostTime: 0,
+            rateV: 1.50,
+            rateR: 0.0050
         };
 
-        function save() { localStorage.setItem('apex_state', JSON.stringify(state)); }
-        function resetStorage() { localStorage.removeItem('apex_state'); location.reload(); }
+        function save() {
+            localStorage.setItem('apex_eggs', state.eggs);
+            localStorage.setItem('apex_virt', state.virt);
+            localStorage.setItem('apex_real', state.real);
+            localStorage.setItem('apex_vault', state.vault);
+            localStorage.setItem('apex_chickens', state.chickens);
+            localStorage.setItem('apex_maxChicks', state.maxChickens);
+            localStorage.setItem('apex_feedMax', state.feedMax);
+            localStorage.setItem('apex_feedCur', state.feedCur);
+        }
+
+        function resetStorage() { localStorage.clear(); location.reload(); }
         function toggleAdmin() { document.getElementById('admin-hub').style.display = (document.getElementById('admin-hub').style.display === 'block') ? 'none' : 'block'; }
 
         function loadMarket() {
             const list = document.getElementById('market-list');
+            list.innerHTML = ""; 
             for(let i=1; i<=30; i++) {
                 let cost = Math.floor(32 * Math.pow(1.15, i-1));
                 let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                list.innerHTML += `<div class="market-item"><div><b>Lvl ${i} ${icon}</b></div><button class="btn btn-buy" onclick="buy(${cost}, i)">${cost}🟡</button></div>`;
+                list.innerHTML += `<div class="market-item"><div><b>Lvl ${i} ${icon}</b></div><button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button></div>`;
             }
         }
 
@@ -130,9 +157,9 @@
 
         function watchAd(type) {
             if(type === 'feed') state.feedCur = state.feedMax;
-            else { state.boostActive = true; state.boostTime = 600; } // Boost de 10 minutos
+            else { state.boostActive = true; state.boostTime = 600; }
             updateUI(); save();
-            tg.showAlert(`Teste: ${type} ativado instantaneamente!`);
+            tg.showAlert(`Teste: ${type} ativado!`);
         }
 
         function sell() {
@@ -140,7 +167,7 @@
             if(q >= 1) {
                 let gain = q * state.rateR;
                 state.real += gain * 0.8;
-                state.vault += gain * 0.2; // Cofre de Retenção
+                state.vault += gain * 0.2;
                 state.virt += q * state.rateV;
                 state.eggs = 0;
                 updateUI(); save();
@@ -148,16 +175,23 @@
         }
 
         function updateUI() {
-            document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
-            document.getElementById('brl-bal').innerText = "R$ " + (state.real * state.brlRate).toFixed(2);
-            document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
-            document.getElementById('vault-bal').innerText = state.vault.toFixed(4) + "€";
+            // Garantir que nenhum NaN seja exibido na UI
+            const real = isNaN(state.real) ? 0 : state.real;
+            const virt = isNaN(state.virt) ? 0 : state.virt;
+            const vault = isNaN(state.vault) ? 0 : state.vault;
+
+            document.getElementById('real-bal').innerText = real.toFixed(4) + "€";
+            document.getElementById('brl-bal').innerText = "R$ " + (real * state.brlRate).toFixed(2);
+            document.getElementById('virt-bal').innerText = virt.toFixed(2) + "🟡";
+            document.getElementById('vault-bal').innerText = vault.toFixed(4) + "€";
+            
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens} Aves`;
-            document.getElementById('chk-fill').style.width = (state.chickens / state.maxChickens) * 100 + "%";
+            document.getElementById('chk-fill').style.width = ((state.chickens / state.maxChickens) * 100) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " KG";
-            document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax)*100 + "%";
-            document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
+            document.getElementById('feed-fill').style.width = ((state.feedCur/state.feedMax)*100) + "%";
+            document.getElementById('egg-progress').style.width = ((state.eggTimer/state.eggLimit)*100) + "%";
+            
             document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(2)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
             document.getElementById('boost-status').style.display = state.boostActive ? 'inline' : 'none';
         }
@@ -173,14 +207,20 @@
                     if(state.boostTime <= 0) state.boostActive = false;
                 }
 
-                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; save(); }
+                if(state.eggTimer >= state.eggLimit) { 
+                    state.eggs++; 
+                    state.eggTimer = 0; 
+                    save(); 
+                }
                 updateUI();
             }
         }, 100);
 
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) document.getElementById('admin-link').style.display = 'inline-block';
-            loadMarket(); updateUI(); tg.expand();
+            loadMarket(); 
+            updateUI(); 
+            tg.expand();
         };
     </script>
 </body>
