@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.26 - Production Master</title>
+    <title>Apex Social v33.27 - Production Master</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -19,13 +19,10 @@
         .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
         .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
-        /* Botão de Levantamento do Utilizador */
         .btn-withdraw { margin-top: 8px; background: var(--google-blue); color: white; border: none; padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
 
         .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
-        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
         
-        /* Barras de Progresso */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #dadce0; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
@@ -42,9 +39,7 @@
         .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
         .row-info { flex: 1; margin-left: 12px; }
         .row-info b { display: block; font-size: 0.9rem; color: #202124; }
-        .row-info span { font-size: 0.7rem; color: #70757a; }
 
-        /* Estilo do Painel Admin */
         #admin-hub { background: #121212; color: #fff; padding: 25px; border-top: 6px solid var(--google-red); margin-top: 40px; border-radius: 24px 24px 0 0; display: none; font-family: monospace; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .admin-box { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
@@ -67,13 +62,8 @@
     </div>
 
     <div class="piggy-bank" onclick="claimPiggy()">
-        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
+        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b><br><small>20% de bónus automático</small></div>
         <b id="piggy-val">0.0000€</b>
-    </div>
-
-    <div class="market-banner">
-        <div class="flex-between"><span>🌾 <b>Mercado de Milho</b></span><button class="btn-buy can-afford" onclick="buyFeed()">COMPRAR 1KG</button></div>
-        <div style="margin-top:5px; font-size:0.85rem;">1kg = <span id="corn-price">10.00</span>🟡 <span id="trend">▲</span></div>
     </div>
 
     <div class="card">
@@ -81,14 +71,10 @@
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
-        
-        <div style="margin-top: 10px;"><b class="label">Próximo Ovo</b></div>
-        <div class="track" style="height: 8px;">
-            <div id="egg-progress" class="fill-yellow"></div>
-        </div>
+        <div class="track" style="height: 8px;"><div id="egg-progress" class="fill-yellow"></div></div>
 
         <div style="margin-top: 15px;"><b class="label">Ração</b></div>
-        <div class="flex-between" style="font-size:0.75rem; color: #70757a;"><b id="feed-kg">5.000 kg</b><span id="consume-rate">Gasto: 20g/s</span></div>
+        <div class="flex-between" style="font-size:0.75rem; color: #70757a;"><b id="feed-kg">5.000 kg</b><span>Gasto: Dinâmico</span></div>
         <div class="track feed-track">
             <div id="feed-fill" class="fill-blue"></div>
             <div class="feed-overlay" id="feed-pct">100%</div>
@@ -103,17 +89,15 @@
     </div>
 
     <div id="admin-hub">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.26</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.27</div>
         <div class="admin-grid">
             <div class="admin-box"><span class="label">Users</span><b id="adm-u">1</b></div>
             <div class="admin-box"><span class="label">EUR/BRL</span><b>6.1245</b></div>
         </div>
-        <div class="label" style="color:var(--google-yellow); margin-bottom:10px;">Simulador de Teste</div>
         <button class="btn" style="background:#333; color:white; padding:10px; font-size:0.8rem;" onclick="simulateNewUser()">Simular Novo Utilizador</button>
-        
         <div class="label" style="color:var(--google-green); margin-top:20px;">PayPal Pendentes</div>
         <div id="adm-pays" style="background:#1e1e1e; padding:10px; border-radius:8px; margin-top:10px;">
-            <div id="no-payments" style="font-size:0.7rem; color:#777;">Nenhum pedido pendente.</div>
+            <div id="no-payments" style="font-size:0.7rem; color:#777;">Sem pedidos.</div>
         </div>
     </div>
 
@@ -137,34 +121,34 @@
             { id: 'auto', n: "Alimentador Auto", d: "-10% gasto ração", i: "🤖", p: 500 },
             { id: 'bio', n: "Selo BIO 🌿", d: "Dobro de Saldo Real", i: "⭐", p: 1000 },
             { id: 'incub', n: "Incubadora", d: "+20% Velocidade", i: "🥚", p: 1500 },
-            { id: 'genetic', n: "Genética XL", d: "+50% Saldo Virtual", i: "🧬", p: 2500 },
-            { id: 'solar', n: "Painéis Solares", d: "Custos reduzidos", i: "☀️", p: 4000 },
-            { id: 'export', n: "Licença Export", d: "+25% Saldo Real", i: "🌍", p: 7500 },
-            { id: 'drone', n: "Drones Entrega", d: "+5% Bónus venda", i: "🛸", p: 12000 },
-            { id: 'staff', n: "Equipa Técnica", d: "Produção 24/7", i: "👥", p: 20000 },
-            { id: 'lab', n: "Laboratório", d: "Ovos de Ouro", i: "🧪", p: 35000 },
-            { id: 'storage', n: "Câmara Fria", d: "Stock ilimitado", i: "❄️", p: 60000 },
-            { id: 'brand', n: "Franchise Global", d: "Multiplicador x2", i: "🏢", p: 100000 }
+            { id: 'genetic', n: "Genética XL", d: "+50% Saldo Virtual", i: "🧬", p: 2500 }
         ];
 
-        // SISTEMA DE ANÚNCIO ADSTERRA COM DUPLA DETEÇÃO [cite: 2026-03-22]
+        // LÓGICA DE ANÚNCIO INFALÍVEL (v33.27)
         function watchAd() {
-            const adUrl = "https://www.google.com"; 
+            const adUrl = "https://www.google.com"; // Substituir pelo seu Direct Link
+            
             tg.showConfirm("Ver anúncio para repor 100% da ração?", (ok) => {
                 if(ok) {
+                    sessionStorage.setItem('ad_watching', 'true');
                     window.open(adUrl, '_blank');
-                    const deliverReward = () => {
-                        if (state.feedCur < state.feedMax) {
-                            state.feedCur = state.feedMax;
-                            updateUI();
-                            tg.showAlert("✅ Stock Reposto! O seu esforço valeu a pena.");
+                    
+                    // Intervalo de verificação ativa
+                    const checkReturn = setInterval(() => {
+                        if (sessionStorage.getItem('ad_watching') === 'true') {
+                            // Se o utilizador voltou e a app está visível
+                            if (document.visibilityState === 'visible') {
+                                state.feedCur = state.feedMax;
+                                updateUI();
+                                sessionStorage.removeItem('ad_watching');
+                                clearInterval(checkReturn);
+                                tg.showAlert("✅ Recompensa entregue! Stock reabastecido.");
+                            }
                         }
-                        window.removeEventListener('focus', deliverReward);
-                        document.removeEventListener('visibilitychange', handleVisibility);
-                    };
-                    const handleVisibility = () => { if (document.visibilityState === 'visible') deliverReward(); };
-                    window.addEventListener('focus', deliverReward, { once: true });
-                    document.addEventListener('visibilitychange', handleVisibility, { once: true });
+                    }, 1000);
+
+                    // Timeout de segurança (2 minutos)
+                    setTimeout(() => clearInterval(checkReturn), 120000);
                 }
             });
         }
@@ -174,7 +158,6 @@
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
             document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
-            document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('egg-progress').style.width = (state.eggTimer / state.eggLimit * 100) + "%";
             
             let p = (state.feedCur / state.feedMax) * 100;
@@ -183,6 +166,10 @@
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
             
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
+            
+            let vG = Math.floor(state.eggs) * state.rateV;
+            let rG = Math.floor(state.eggs) * state.rateR;
+            document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}€`;
             renderUpgrades();
         }
 
@@ -196,7 +183,7 @@
                 container.innerHTML += `
                     <div class="row-item">
                         <div style="font-size:1.6rem;">${u.i}</div>
-                        <div class="row-info"><b>${u.n} (Lvl ${lvl})</b><span>${u.d}</span></div>
+                        <div class="row-info"><b>${u.n} (Lvl ${lvl})</b></div>
                         <button class="btn-buy ${canBuy?'can-afford':''}" onclick="buy('${u.id}', ${cost})" ${!canBuy?'disabled':''}>${cost}🟡</button>
                     </div>`;
             });
@@ -209,59 +196,46 @@
                 if(id==='chk') state.chickens++;
                 if(id==='cp') state.coops++;
                 if(id==='silo') state.feedMax += 5000;
-                if(id==='incub') state.eggLimit = Math.max(10, state.eggLimit * 0.8);
                 updateUI();
             }
         }
 
         function requestWithdraw() {
-            tg.showConfirm(`Solicitar levantamento de ${state.real.toFixed(4)}€ via PayPal?`, (ok) => {
+            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
                 if(ok) {
                     users.push({ id: state.id, valor: state.real });
                     state.real = 0;
                     updateUI();
                     refreshAdminList();
-                    tg.showAlert("Pedido enviado com sucesso!");
+                    tg.showAlert("Pedido enviado!");
                 }
             });
         }
 
-        // LÓGICA DE SIMULAÇÃO ADMIN [cite: 2026-03-22, 2026-03-26]
         function simulateNewUser() {
-            const mockId = Math.floor(Math.random() * 900000000);
-            const mockValor = (Math.random() * 10).toFixed(4);
-            users.push({ id: mockId, valor: parseFloat(mockValor) });
+            users.push({ id: Math.floor(Math.random()*9e8), valor: (Math.random()*5).toFixed(4) });
             refreshAdminList();
         }
 
         function refreshAdminList() {
             const container = document.getElementById('adm-pays');
             document.getElementById('adm-u').innerText = users.length + 1;
-            if(users.length === 0) {
-                container.innerHTML = '<div id="no-payments" style="font-size:0.7rem; color:#777;">Nenhum pedido pendente.</div>';
-                return;
-            }
+            if(users.length === 0) { container.innerHTML = 'Sem pedidos.'; return; }
             container.innerHTML = users.map((u, i) => `
                 <div class="flex-between" style="border-bottom:1px solid #333; padding:8px 0; font-size:0.75rem;">
-                    <span>ID: ${u.id} (R$ ${(u.valor * 6.1245).toFixed(2)})</span>
-                    <button onclick="processPay(${i})" style="background:var(--google-green); color:white; border:none; border-radius:4px; padding:3px 8px; cursor:pointer;">PAY</button>
+                    <span>ID: ${u.id} (${(u.valor * 6.1245).toFixed(2)} BRL)</span>
+                    <button onclick="processPay(${i})" style="background:var(--google-green); color:white; border:none; border-radius:4px; padding:3px 8px;">PAY</button>
                 </div>
             `).join('');
         }
 
-        function processPay(index) {
-            users.splice(index, 1);
-            refreshAdminList();
-        }
+        function processPay(i) { users.splice(i, 1); refreshAdminList(); }
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens / 10));
+                state.feedCur = Math.max(0, state.feedCur - (2 * state.chickens));
                 state.eggTimer += (state.chickens * 0.5);
-                if(state.eggTimer >= state.eggLimit) {
-                    state.eggs++;
-                    state.eggTimer = 0;
-                }
+                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
                 updateUI();
             }
         }, 100);
@@ -280,7 +254,7 @@
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
                 document.getElementById('admin-hub').style.display = 'block';
-                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; margin-left:5px; vertical-align:middle;">ADMIN</span>';
+                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; margin-left:5px;">ADMIN</span>';
             }
             updateUI();
             tg.expand();
