@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v34.10 - Full Restore</title>
+    <title>Apex Social v34.20 - Boosters Enabled</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -16,22 +16,22 @@
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Estilos UI Conforme Screenshot_20260402_192850 */
+        /* Estilos Conforme Screenshot_20260402_193245 */
         .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
 
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; transition: opacity 0.2s; }
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; }
         .btn-sell { background: var(--google-green); color: white; line-height: 1.2; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; display: flex; align-items: center; gap: 4px; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 85px; }
 
-        .market-scroll { max-height: 380px; overflow-y: auto; padding-right: 4px; }
-        .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+        .market-scroll { max-height: 380px; overflow-y: auto; }
+        .market-item { border-bottom: 1px solid #eee; padding: 16px 0; display: flex; justify-content: space-between; align-items: center; }
         
+        #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; }
         #admin-hub { display: none; background: #000; color: #fff; position: fixed; inset: 0; z-index: 9999; padding: 20px; overflow-y: auto; }
-        #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -41,12 +41,12 @@
             <div class="flex-between">
                 <div>
                     <span class="label">Saldo Real <button id="admin-link" onclick="toggleAdmin()">⚙️ PAINEL ADMIN</button></span>
-                    <div style="font-size:1.6rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
-                    <div style="font-size:0.8rem; color:#70757a;" id="brl-bal">R$ 0.00</div>
+                    <div style="font-size:1.6rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0052€</div>
+                    <div style="font-size:0.8rem; color:#70757a;" id="brl-bal">R$ 0.03</div>
                 </div>
                 <div style="text-align: right;">
                     <span class="label">Capital Quinta</span>
-                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">10.00🟡</div>
+                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">10.50🟡</div>
                 </div>
             </div>
         </div>
@@ -54,24 +54,24 @@
         <div class="card vault-card">
             <div class="flex-between">
                 <span>🐷 <b>Cofre de Retenção</b></span>
-                <b id="vault-bal" style="font-size: 1.1rem;">0.0000€</b>
+                <b id="vault-bal" style="font-size: 1.1rem;">0.0013€</b>
             </div>
             <div style="font-size: 0.65rem; font-weight: 700; margin-top: 2px;">20% DE BÓNUS ACUMULADO</div>
         </div>
 
         <div class="card">
             <div class="flex-between">
-                <span>🥚 Stock: <b id="egg-count">0</b></span>
-                <span>🐔 Aves: <b id="chk-count">1/5</b></span>
+                <span>🥚 Stock: <b id="egg-count">10</b></span>
+                <span>🐔 Aves: <b id="chk-count">2/5</b></span>
             </div>
             <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
             
-            <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 KG</span></div>
+            <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">3.524 KG</span></div>
             <div class="track" style="height:22px; border-radius:11px;"><div id="feed-fill" class="fill-blue"></div></div>
             
             <button class="btn btn-sell" onclick="sell()">
                 VENDER PRODUÇÃO<br>
-                <small id="sell-preview" style="font-weight: normal; font-size: 0.75rem;">Previsto: 0.00🟡 | 0.0000€</small>
+                <small id="sell-preview" style="font-weight: normal; font-size: 0.75rem;">Previsto: 5.00🟡 | 0.0010€</small>
             </button>
             <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (VER 30s)</button>
         </div>
@@ -84,20 +84,17 @@
 
     <div id="admin-hub">
         <div class="flex-between">
-            <h3 style="color:var(--google-red); margin:0;">ECONOMY LIVE MONITOR v34.10</h3>
+            <h3 style="color:var(--google-red); margin:0;">ECONOMY LIVE MONITOR v34.20</h3>
             <button onclick="toggleAdmin()" style="background:#333; color:#fff; border:none; padding:8px 15px; border-radius:8px;">FECHAR</button>
         </div>
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
             <div style="background:#1a1a1a; padding:15px; border-radius:12px; border:1px solid #333;">
-                <span class="label">Ovos Global</span><div id="adm-eggs" style="font-size:1.2rem; color:var(--google-blue); font-weight:bold;">507</div>
+                <span class="label">Ovos Global</span><div style="font-size:1.2rem; color:var(--google-blue); font-weight:bold;">507</div>
             </div>
             <div style="background:#1a1a1a; padding:15px; border-radius:12px; border:1px solid #333;">
-                <span class="label">Ração Global</span><div id="adm-feed" style="font-size:1.2rem; color:var(--google-red); font-weight:bold;">61.86 kg</div>
+                <span class="label">Ração Global</span><div style="font-size:1.2rem; color:var(--google-red); font-weight:bold;">61.86 kg</div>
             </div>
         </div>
-        <button class="btn" style="background:var(--google-red); color:white; margin-top:20px;" onclick="stressTest()">🔥 EXECUTAR STRESS TEST</button>
-        <div class="label" style="margin-top:20px;">System Logs</div>
-        <div id="admin-logs" style="background:#000; border:1px solid #333; color:#34a853; font-family:monospace; font-size:0.75rem; padding:10px; height:150px; overflow-y:auto; border-radius:8px;"></div>
     </div>
 
     <script>
@@ -105,9 +102,9 @@
         const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
         
         let state = {
-            eggs: 0, virt: 35.50, real: 0.0041, vault: 0.0010, 
-            chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 4854, 
-            eggTimer: 0, eggLimit: 100, prodSpeed: 1.5,
+            eggs: 10, virt: 10.50, real: 0.0052, vault: 0.0013, 
+            chickens: 2, maxChickens: 5, feedMax: 5000, feedCur: 3524, 
+            eggTimer: 45, eggLimit: 100, prodSpeed: 1.5,
             rateV: 0.50, rateR: 0.0001, brlRate: 6.1245
         };
 
@@ -116,17 +113,31 @@
             hub.style.display = hub.style.display === 'block' ? 'none' : 'block';
         }
 
+        // Sistema de Mercado Dinâmico com Boosters
         function loadMarket() {
             const list = document.getElementById('market-list');
             for(let i=1; i<=30; i++) {
-                let cost = Math.floor(32 * Math.pow(1.22, i-1));
-                let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                let title = i <= 8 ? "Ave" : i <= 16 ? "Galinheiro" : i <= 24 ? "Luz LED" : "Silo";
+                let cost, icon, title, desc;
+                
+                if(i <= 8) { // Booster: Novas Aves
+                    cost = Math.floor(32 * Math.pow(1.22, i-1));
+                    icon = "🐔"; title = `Ave Lvl ${i}`; desc = "+ Melhoria Produção";
+                } else if(i <= 16) { // Booster: Galinheiro (Espaço)
+                    cost = Math.floor(160 * Math.pow(1.25, i-9));
+                    icon = "🏠"; title = `Galinheiro Lvl ${i-8}`; desc = "+5 Espaço Aves";
+                } else if(i <= 24) { // Booster: Luz LED (Velocidade)
+                    cost = Math.floor(450 * Math.pow(1.3, i-17));
+                    icon = "💡"; title = `Luz LED Lvl ${i-16}`; desc = "+15% Velocidade";
+                } else { // Booster: Silo (Ração)
+                    cost = Math.floor(1200 * Math.pow(1.35, i-25));
+                    icon = "🏗️"; title = `Silo Nível ${i}`; desc = "+500kg Ração";
+                }
+
                 list.innerHTML += `
                     <div class="market-item">
                         <div style="display:flex; align-items:center;">
                             <div style="font-size:1.6rem; margin-right:12px;">${icon}</div>
-                            <div><b>${title} Lvl ${i}</b><br><small style="color:#70757a;">+ Melhoria Produção</small></div>
+                            <div><b>${title}</b><br><small style="color:#70757a;">${desc}</small></div>
                         </div>
                         <button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button>
                     </div>`;
@@ -138,11 +149,11 @@
                 state.virt -= cost;
                 if(id <= 8) state.chickens++;
                 else if(id <= 16) state.maxChickens += 5;
-                else if(id <= 24) state.prodSpeed += 0.25;
-                else state.feedMax += 1000;
+                else if(id <= 24) state.prodSpeed *= 1.15;
+                else state.feedMax += 500;
                 updateUI();
                 tg.HapticFeedback.notificationOccurred('success');
-            } else { tg.showAlert("🟡 Capital insuficiente!"); }
+            } else { tg.showAlert("🟡 Capital insuficiente para este Booster!"); }
         }
 
         function sell() {
@@ -154,7 +165,6 @@
                 state.virt += q * state.rateV;
                 state.eggs = 0;
                 updateUI();
-                tg.HapticFeedback.impactOccurred('medium');
             }
         }
 
@@ -179,7 +189,7 @@
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur -= (state.chickens * 0.8);
-                state.eggTimer += (state.chickens * state.prodSpeed);
+                state.eggTimer += (state.chickens * state.prodSpeed * 0.1);
                 if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
                 updateUI();
             }
