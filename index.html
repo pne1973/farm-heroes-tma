@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v34.00 - Admin & User Full</title>
+    <title>Apex Social v34.10 - Full Restore</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -16,31 +16,22 @@
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Estilo do Cofre */
+        /* Estilos UI Conforme Screenshot_20260402_192850 */
         .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
-        
-        /* Barras de Progresso */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
-        .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
+        .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
 
-        /* Botões */
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; }
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; transition: opacity 0.2s; }
         .btn-sell { background: var(--google-green); color: white; line-height: 1.2; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #ddd; min-width: 80px; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; display: flex; align-items: center; gap: 4px; }
 
-        /* Mercado */
-        .market-scroll { max-height: 250px; overflow-y: auto; padding-right: 5px; }
-        .market-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .market-scroll { max-height: 380px; overflow-y: auto; padding-right: 4px; }
+        .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
         
-        /* PAINEL ADMIN AVANÇADO */
         #admin-hub { display: none; background: #000; color: #fff; position: fixed; inset: 0; z-index: 9999; padding: 20px; overflow-y: auto; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 15px 0; }
-        .stat-box { background: #1a1a1a; padding: 12px; border-radius: 12px; border: 1px solid #333; }
-        .stat-val { font-size: 1.1rem; font-weight: bold; color: var(--google-blue); margin-top: 4px; }
-        .log-area { background: #000; border: 1px solid #333; color: #34a853; font-family: monospace; font-size: 0.7rem; padding: 10px; height: 120px; overflow-y: auto; border-radius: 8px; margin-top: 10px; }
-        #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 4px 8px; border-radius: 6px; font-size: 0.6rem; cursor: pointer; margin-left: 8px; }
+        #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; vertical-align: middle; }
     </style>
 </head>
 <body>
@@ -50,26 +41,38 @@
             <div class="flex-between">
                 <div>
                     <span class="label">Saldo Real <button id="admin-link" onclick="toggleAdmin()">⚙️ PAINEL ADMIN</button></span>
-                    <div style="font-size:1.5rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
+                    <div style="font-size:1.6rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
+                    <div style="font-size:0.8rem; color:#70757a;" id="brl-bal">R$ 0.00</div>
                 </div>
                 <div style="text-align: right;">
                     <span class="label">Capital Quinta</span>
-                    <div id="virt-bal" style="font-size:1.2rem; color:var(--google-yellow); font-weight: 500;">10.00🟡</div>
+                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">10.00🟡</div>
                 </div>
             </div>
         </div>
 
         <div class="card vault-card">
-            <div class="flex-between"><span>🐷 <b>Cofre de Retenção</b></span><b id="vault-bal">0.0000€</b></div>
-            <div class="label" style="color: #ad1457; margin-top: 4px;">20% de bónus acumulado</div>
+            <div class="flex-between">
+                <span>🐷 <b>Cofre de Retenção</b></span>
+                <b id="vault-bal" style="font-size: 1.1rem;">0.0000€</b>
+            </div>
+            <div style="font-size: 0.65rem; font-weight: 700; margin-top: 2px;">20% DE BÓNUS ACUMULADO</div>
         </div>
 
         <div class="card">
-            <div class="flex-between"><span>🥚 Stock: <b id="egg-count">0</b></span><span>🐔 Aves: <b id="chk-count">1/5</b></span></div>
+            <div class="flex-between">
+                <span>🥚 Stock: <b id="egg-count">0</b></span>
+                <span>🐔 Aves: <b id="chk-count">1/5</b></span>
+            </div>
             <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
-            <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 kg</span></div>
-            <div class="track" style="height:20px; border-radius:10px;"><div id="feed-fill" class="fill-blue"></div></div>
-            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="sell-preview">Previsto: 0.00🟡 | 0.0000€</small></button>
+            
+            <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 KG</span></div>
+            <div class="track" style="height:22px; border-radius:11px;"><div id="feed-fill" class="fill-blue"></div></div>
+            
+            <button class="btn btn-sell" onclick="sell()">
+                VENDER PRODUÇÃO<br>
+                <small id="sell-preview" style="font-weight: normal; font-size: 0.75rem;">Previsto: 0.00🟡 | 0.0000€</small>
+            </button>
             <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (VER 30s)</button>
         </div>
 
@@ -81,39 +84,20 @@
 
     <div id="admin-hub">
         <div class="flex-between">
-            <h3 style="color:var(--google-red); margin:0;">ECONOMY LIVE MONITOR v34.00</h3>
-            <button onclick="toggleAdmin()" style="background:#333; color:#fff; border:none; padding:8px 12px; border-radius:8px;">FECHAR</button>
+            <h3 style="color:var(--google-red); margin:0;">ECONOMY LIVE MONITOR v34.10</h3>
+            <button onclick="toggleAdmin()" style="background:#333; color:#fff; border:none; padding:8px 15px; border-radius:8px;">FECHAR</button>
         </div>
-
-        <div class="admin-grid">
-            <div class="stat-box"><span class="label">Ovos Global</span><div class="stat-val" id="adm-eggs">507</div></div>
-            <div class="stat-box"><span class="label">Ração Global</span><div class="stat-val" id="adm-feed" style="color:var(--google-red);">61.86 kg</div></div>
-            <div class="stat-box"><span class="label">Ads Vistas</span><div class="stat-val" id="adm-ads" style="color:var(--google-green);">24</div></div>
-            <div class="stat-box"><span class="label">Users Ativos</span><div class="stat-val" id="adm-users">1,804</div></div>
-        </div>
-
-        <div class="stat-box" style="margin-bottom:10px;">
-            <span class="label">Câmbio: 1 EUR = 6.1245 BRL</span><br>
-            <span class="label">Admin ID: 5401881400</span>
-        </div>
-
-        <button class="btn" style="background:var(--google-red); color:white;" onclick="stressTest()">🔥 EXECUTAR STRESS TEST (500 BOTS)</button>
-        
-        <div class="label" style="color:#aaa; margin-top:10px;">Atividade do Sistema</div>
-        <div class="log-area" id="admin-logs">
-            [18:34:41] ECONOMY: Monitor ativo v34.00<br>
-            [18:34:41] AUTH: ID 5401881400 validado como Admin
-        </div>
-
-        <div class="stat-box" style="margin-top:15px;">
-            <span class="label">PayPal Payouts Pendentes</span>
-            <div id="adm-payouts" style="margin-top:5px; font-size:0.75rem;">
-                <div class="flex-between" style="border-top:1px solid #333; padding:5px 0;">
-                    <span>ID: 550132720 | 0.2003€</span>
-                    <button style="background:var(--google-green); color:white; border:none; padding:2px 6px; border-radius:4px;">PAY</button>
-                </div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:20px;">
+            <div style="background:#1a1a1a; padding:15px; border-radius:12px; border:1px solid #333;">
+                <span class="label">Ovos Global</span><div id="adm-eggs" style="font-size:1.2rem; color:var(--google-blue); font-weight:bold;">507</div>
+            </div>
+            <div style="background:#1a1a1a; padding:15px; border-radius:12px; border:1px solid #333;">
+                <span class="label">Ração Global</span><div id="adm-feed" style="font-size:1.2rem; color:var(--google-red); font-weight:bold;">61.86 kg</div>
             </div>
         </div>
+        <button class="btn" style="background:var(--google-red); color:white; margin-top:20px;" onclick="stressTest()">🔥 EXECUTAR STRESS TEST</button>
+        <div class="label" style="margin-top:20px;">System Logs</div>
+        <div id="admin-logs" style="background:#000; border:1px solid #333; color:#34a853; font-family:monospace; font-size:0.75rem; padding:10px; height:150px; overflow-y:auto; border-radius:8px;"></div>
     </div>
 
     <script>
@@ -121,11 +105,10 @@
         const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
         
         let state = {
-            eggs: 0, virt: 10.00, real: 0, vault: 0, 
-            chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 5000, 
+            eggs: 0, virt: 35.50, real: 0.0041, vault: 0.0010, 
+            chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 4854, 
             eggTimer: 0, eggLimit: 100, prodSpeed: 1.5,
-            rateV: 0.50, rateR: 0.0001,
-            globalEggs: 507, globalFeed: 61.86, globalAds: 24, globalUsers: 1804
+            rateV: 0.50, rateR: 0.0001, brlRate: 6.1245
         };
 
         function toggleAdmin() {
@@ -133,22 +116,20 @@
             hub.style.display = hub.style.display === 'block' ? 'none' : 'block';
         }
 
-        function addLog(msg) {
-            const logs = document.getElementById('admin-logs');
-            const time = new Date().toLocaleTimeString();
-            logs.innerHTML = `[${time}] ${msg}<br>` + logs.innerHTML;
-        }
-
         function loadMarket() {
             const list = document.getElementById('market-list');
             for(let i=1; i<=30; i++) {
                 let cost = Math.floor(32 * Math.pow(1.22, i-1));
                 let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                list.innerHTML += `<div class="market-item">
-                    <div style="font-size:1.4rem; margin-right:12px;">${icon}</div>
-                    <div style="flex-grow:1;"><b>Lvl ${i}</b></div>
-                    <button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button>
-                </div>`;
+                let title = i <= 8 ? "Ave" : i <= 16 ? "Galinheiro" : i <= 24 ? "Luz LED" : "Silo";
+                list.innerHTML += `
+                    <div class="market-item">
+                        <div style="display:flex; align-items:center;">
+                            <div style="font-size:1.6rem; margin-right:12px;">${icon}</div>
+                            <div><b>${title} Lvl ${i}</b><br><small style="color:#70757a;">+ Melhoria Produção</small></div>
+                        </div>
+                        <button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button>
+                    </div>`;
             }
         }
 
@@ -157,69 +138,49 @@
                 state.virt -= cost;
                 if(id <= 8) state.chickens++;
                 else if(id <= 16) state.maxChickens += 5;
-                else if(id <= 24) state.prodSpeed += 0.2;
+                else if(id <= 24) state.prodSpeed += 0.25;
                 else state.feedMax += 1000;
-                addLog(`USER: Comprou Expansão Lvl ${id}`);
                 updateUI();
-            }
+                tg.HapticFeedback.notificationOccurred('success');
+            } else { tg.showAlert("🟡 Capital insuficiente!"); }
         }
 
         function sell() {
-            if(state.eggs >= 1) {
-                let gain = state.eggs * state.rateR;
-                state.real += gain * 0.8;
-                state.vault += gain * 0.2;
-                state.virt += state.eggs * state.rateV;
-                addLog(`ECONOMY: Venda de ${state.eggs} ovos (+${gain.toFixed(4)}€)`);
+            let q = Math.floor(state.eggs);
+            if(q >= 1) {
+                let gainReal = q * state.rateR;
+                state.real += gainReal * 0.8;
+                state.vault += gainReal * 0.2; //
+                state.virt += q * state.rateV;
                 state.eggs = 0;
                 updateUI();
+                tg.HapticFeedback.impactOccurred('medium');
             }
         }
 
         function watchAd() {
-            window.open("https://www.google.com", "_blank");
-            setTimeout(() => {
-                state.feedCur = state.feedMax;
-                state.globalAds++;
-                addLog("ADS: Recompensa de ração atribuída");
-                updateUI();
-                tg.showAlert("Ração Reposta!");
-            }, 30000);
-        }
-
-        function stressTest() {
-            tg.showConfirm("Simular carga de 500 bots?", (ok) => {
-                if(ok) {
-                    state.globalUsers += 500;
-                    addLog("STRESS: 500 bots injetados no sistema");
-                    updateUI();
-                }
-            });
+            window.open("https://www.google.com", '_blank');
+            setTimeout(() => { state.feedCur = state.feedMax; updateUI(); }, 30000);
         }
 
         function updateUI() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
+            document.getElementById('brl-bal').innerText = "R$ " + (state.real * state.brlRate).toFixed(2);
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
             document.getElementById('vault-bal').innerText = state.vault.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens}`;
-            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
+            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " KG";
             document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax)*100 + "%";
             document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
             document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(2)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
-            
-            document.getElementById('adm-eggs').innerText = state.globalEggs;
-            document.getElementById('adm-feed').innerText = state.globalFeed.toFixed(2) + " kg";
-            document.getElementById('adm-ads').innerText = state.globalAds;
-            document.getElementById('adm-users').innerText = state.globalUsers.toLocaleString();
         }
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                state.feedCur -= (state.chickens * 1.1);
-                state.globalFeed += 0.001;
+                state.feedCur -= (state.chickens * 0.8);
                 state.eggTimer += (state.chickens * state.prodSpeed);
-                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.globalEggs++; state.eggTimer = 0; }
+                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
                 updateUI();
             }
         }, 100);
