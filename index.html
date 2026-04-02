@@ -3,98 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social - Egg Tycoon v33.12</title>
+    <title>Apex Social - v33.12</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --tg-bg: #f4f7f9; --primary: #1a73e8; --secondary: #34a853; --warn: #fbbc05; --danger: #ea4335; --virtual: #f1c40f; }
-        body { font-family: 'Roboto', sans-serif; background: var(--tg-bg); margin: 0; padding: 10px; color: #202124; user-select: none; }
+        :root { --tg-bg: #f8f9fa; --google-blue: #1a73e8; --google-green: #34a853; --google-yellow: #fbbc05; --google-red: #ea4335; }
+        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--tg-bg); margin: 0; padding: 12px; color: #3c4043; }
         
-        /* Dashboard Estilo Google Edition */
-        .card { background: white; border-radius: 12px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.12); margin-bottom: 12px; }
-        .balance-label { font-size: 0.75rem; color: #5f6368; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 700; }
-        .balance-val { font-size: 1.5rem; font-weight: 500; display: block; margin-top: 4px; }
+        /* Layout Cards */
+        .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
         
-        /* Cofre de Retenção */
-        .piggy-bank { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); border: none; color: #d81b60; display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; cursor: pointer; }
+        /* Dinheiro e Moeda */
+        .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; }
+        .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
+        .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
+        /* Cofre (Piggy Bank) */
+        .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        
         /* Mercado de Milho */
-        .market-card { background: #fff; border-left: 4px solid var(--warn); padding: 10px; font-size: 0.85rem; margin-bottom: 15px; }
-        .price-up { color: var(--secondary); font-weight: bold; }
-        .price-down { color: var(--danger); font-weight: bold; }
+        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 12px; }
+        .trend-up { color: var(--google-green); }
+        .trend-down { color: var(--google-red); }
 
-        /* Farm Core */
-        .farm-view { text-align: center; position: relative; }
-        .feed-bar-container { background: #e8eaed; height: 28px; border-radius: 14px; overflow: hidden; position: relative; margin: 15px 0; border: 1px solid #dadce0; }
-        #feed-progress { height: 100%; background: var(--warn); width: 100%; transition: width 0.5s ease; }
-        .feed-text { position: absolute; width: 100%; text-align: center; line-height: 28px; font-size: 0.8rem; font-weight: bold; color: #3c4043; }
+        /* Barra de Ração */
+        .feed-header { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 5px; font-weight: bold; }
+        .feed-track { background: #e8eaed; height: 30px; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid #dadce0; }
+        #feed-fill { height: 100%; background: var(--google-yellow); width: 100%; transition: width 0.4s linear; }
+        .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 30px; font-weight: bold; font-size: 0.8rem; }
 
-        /* Botões de Ação */
-        .btn-main { background: var(--primary); color: white; border: none; border-radius: 24px; padding: 16px; width: 100%; font-weight: 500; font-size: 1rem; cursor: pointer; margin-bottom: 8px; box-shadow: 0 1px 2px rgba(60,64,67,0.3); }
-        .btn-ad { background: white; color: var(--primary); border: 1px solid #dadce0; }
+        /* Botões */
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; font-size: 1rem; width: 100%; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
+        .btn-sell { background: var(--google-green); color: white; }
+        .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
         
-        /* Loja */
-        .shop-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
-        .shop-icon { width: 40px; height: 40px; border-radius: 8px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
-        .shop-info { flex: 1; }
-        .shop-info b { font-size: 0.9rem; display: block; }
+        /* Shop */
+        .shop-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
+        .shop-info { flex: 1; margin-left: 10px; }
+        .shop-info b { display: block; font-size: 0.9rem; }
         .shop-info span { font-size: 0.75rem; color: #70757a; }
-        .buy-btn { background: #f1f3f4; border: none; border-radius: 16px; padding: 6px 12px; font-size: 0.85rem; font-weight: bold; min-width: 70px; }
-        .buy-btn:active { background: #e8eaed; }
+        .buy-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 18px; padding: 6px 14px; font-weight: bold; }
 
-        #golden-egg { position: fixed; font-size: 3rem; z-index: 1000; cursor: pointer; display: none; filter: drop-shadow(0 0 10px gold); }
+        /* Admin & Affiliates */
+        .admin-tag { background: var(--google-red); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+        #golden-egg { position: fixed; font-size: 3rem; cursor: pointer; display: none; z-index: 9999; filter: drop-shadow(0 0 10px gold); }
     </style>
 </head>
 <body>
 
-    <div id="golden-egg" onclick="catchGolden()">🥚</div>
+    <div id="golden-egg" onclick="catchGolden()">🥚✨</div>
 
     <div class="card">
-        <div style="display: flex; justify-content: space-between;">
+        <div class="flex-between">
             <div>
-                <span class="balance-label">Saldo Real</span>
-                <b class="balance-val" id="real-bal">0.0000 --</b>
+                <span class="label">Saldo Real <span id="admin-indicator"></span></span>
+                <div class="val-real" id="real-bal">0.0000 --</div>
             </div>
             <div style="text-align: right;">
-                <span class="balance-label">Capital Quinta</span>
-                <b class="balance-val" id="virt-bal" style="color: var(--virtual);">10.00🟡</b>
+                <span class="label">Capital Quinta</span>
+                <div class="val-virt" id="virt-bal">10.00🟡</div>
             </div>
         </div>
     </div>
 
-    <div class="piggy-bank" onclick="openPiggy()">
-        <span>🐷 Cofre Acumulado:</span>
-        <span id="piggy-val">0.0000 --</span>
+    <div class="piggy-bank" onclick="claimPiggy()">
+        <div>🐷 <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
+        <b id="piggy-val">0.0000 --</b>
     </div>
 
-    <div class="market-card">
+    <div class="market-banner">
         🌾 <b>Mercado de Milho:</b> 1kg = <span id="corn-price">10.00</span>🟡 
-        <span id="price-trend" class="price-up">▲</span>
-    </div>
-
-    <div class="card farm-view">
-        <div style="display: flex; justify-content: space-around; margin-bottom: 10px;">
-            <span>📦 Stock: <b id="egg-count">0</b></span>
-            <span>🐔 Aves: <b id="chk-count">1</b>/<b id="chk-max">5</b></span>
-        </div>
-        
-        <div class="feed-bar-container">
-            <div id="feed-progress"></div>
-            <div class="feed-text" id="feed-display">5.000 kg (100%)</div>
-        </div>
-
-        <button class="btn-main" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
-        <button class="btn-main btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (GRÁTIS)</button>
+        <span id="market-trend" class="trend-up">▲</span>
+        <br><small>Preço flutua a cada 30s. Compra no momento certo!</small>
     </div>
 
     <div class="card">
-        <h3 style="margin-top: 0; font-size: 1rem;">Expansões e Upgrades</h3>
-        <div id="shop-list"></div>
+        <div class="flex-between" style="margin-bottom: 10px;">
+            <span>🥚 Stock: <b id="egg-count">0</b></span>
+            <span>🐔 Aves: <b id="chk-count">1/5</b></span>
+        </div>
+        
+        <div class="feed-header">
+            <span id="feed-kg">5.000 kg</span>
+            <span id="consume-rate">Gasto: 20g/s</span>
+        </div>
+        <div class="feed-track">
+            <div id="feed-fill"></div>
+            <div class="feed-overlay" id="feed-pct">100%</div>
+        </div>
+
+        <div style="margin-top: 15px;">
+            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
+            <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin-top: 0; font-size: 1rem;">Mercado de Expansão</h3>
+        <div id="shop-items"></div>
+        <button class="btn" style="background:#eee; font-size:0.8rem; margin-top:10px;" onclick="copyInvite()">🔗 COPIAR LINK DE CONVITE (AFILIADOS)</button>
+    </div>
+
+    <div id="admin-panel" class="card" style="display:none; border-color: var(--google-red);">
+        <h3 style="color:var(--google-red); margin-top:0;">Painel Administrativo</h3>
+        <p style="font-size:0.8rem;">ID: 5401881400 | Total Users: 1 | PayPal Pendentes: 0</p>
+        <button class="btn" style="background:var(--google-red); color:white;" onclick="alert('Lista de pagamentos limpa.')">LIMPAR LISTA PAYPAL</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const isAdmin = tg.initDataUnsafe?.user?.id == 5401881400;
-        const locale = tg.initDataUnsafe?.user?.language_code === 'pt-BR' ? { s: 'R$', r: 1 } : { s: '€', r: 1 };
+        const myID = 5401881400;
+        const currency = tg.initDataUnsafe?.user?.language_code === 'pt-BR' ? { s: 'R$', r: 1 } : { s: '€', r: 1 };
 
         let state = {
             eggs: 0, virt: 10, real: 0, piggy: 0,
@@ -102,78 +121,82 @@
             feedMax: 5000, feedCur: 5000, cornPrice: 10.00,
             rateV: 0.50, rateR: 0.0001,
             upgrades: {
-                chk: { n: "Nova Galinha", d: "+Produção", p: 20, i: "🐔" },
-                cp: { n: "Galinheiro", d: "+5 Espaço", p: 100, i: "🏠" },
-                sl: { n: "Silo Industrial", d: "+5kg Capacidade", p: 150, i: "🏗️" },
-                lt: { n: "Iluminação LED", d: "+20% Velocidade", p: 200, i: "💡" }
+                chk: { n: "Nova Galinha", d: "+Produção ovos", p: 20, i: "🐔" },
+                cp: { n: "Galinheiro", d: "+5 vagas aves", p: 100, i: "🏠" },
+                sl: { n: "Silo Industrial", d: "+5kg capacidade", p: 150, i: "🏗️" },
+                lt: { n: "Iluminação LED", d: "+10% Valor Real", p: 250, i: "💡" }
             }
         };
 
-        function save() { localStorage.setItem('apex_social_v33', JSON.stringify(state)); }
+        function save() { localStorage.setItem('apex_v33_final', JSON.stringify(state)); }
         function load() {
-            const saved = localStorage.getItem('apex_social_v33');
-            if(saved) state = JSON.parse(saved);
+            const s = localStorage.getItem('apex_v33_final');
+            if(s) state = JSON.parse(s);
+            if(tg.initDataUnsafe?.user?.id == myID) {
+                document.getElementById('admin-panel').style.display = 'block';
+                document.getElementById('admin-indicator').innerHTML = '<span class="admin-tag">ADMIN</span>';
+            }
         }
 
-        function updateUI() {
-            document.getElementById('real-bal').innerText = state.real.toFixed(4) + locale.s;
+        function update() {
+            document.getElementById('real-bal').innerText = state.real.toFixed(4) + currency.s;
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
-            document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + locale.s;
+            document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + currency.s;
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
-            document.getElementById('chk-count').innerText = state.chickens;
-            document.getElementById('chk-max').innerText = state.coops * 5;
+            document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('corn-price').innerText = state.cornPrice.toFixed(2);
 
-            let pct = (state.feedCur / state.feedMax) * 100;
-            document.getElementById('feed-progress').style.width = pct + "%";
-            document.getElementById('feed-display').innerText = (state.feedCur/1000).toFixed(3) + " kg (" + Math.ceil(pct) + "%)";
+            let p = (state.feedCur / state.feedMax) * 100;
+            document.getElementById('feed-fill').style.width = p + "%";
+            document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
+            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
+            document.getElementById('consume-rate').innerText = "Gasto: " + (state.chickens * 20) + "g/s";
 
             let vG = Math.floor(state.eggs) * state.rateV;
             let rG = Math.floor(state.eggs) * state.rateR;
-            document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}${locale.s}`;
+            document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}${currency.s}`;
             
             renderShop();
         }
 
         function renderShop() {
-            const list = document.getElementById('shop-list');
-            list.innerHTML = '';
+            const container = document.getElementById('shop-items');
+            container.innerHTML = '';
             for(let id in state.upgrades) {
                 let u = state.upgrades[id];
-                let disabled = state.virt < u.p || (id === 'chk' && state.chickens >= state.coops*5);
-                list.innerHTML += `
-                    <div class="shop-item">
-                        <div class="shop-icon">${u.i}</div>
+                let canBuy = state.virt >= u.p && !(id === 'chk' && state.chickens >= state.coops*5);
+                container.innerHTML += `
+                    <div class="shop-row">
+                        <div style="font-size:1.5rem;">${u.i}</div>
                         <div class="shop-info"><b>${u.n}</b><span>${u.d}</span></div>
-                        <button class="buy-btn" onclick="buy('${id}')" ${disabled ? 'disabled' : ''}>${u.p}🟡</button>
+                        <button class="buy-btn" onclick="buy('${id}')" ${!canBuy?'disabled':''}>${u.p}🟡</button>
                     </div>`;
             }
         }
 
-        // Loop de Produção
+        // ECONOMIA
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens));
                 state.eggs += (state.chickens * 0.1);
-                updateUI();
+                update();
             }
         }, 1000);
 
-        // Flutuação do Mercado de Milho (6h simuladas a cada 30s para teste)
         setInterval(() => {
-            let change = (Math.random() * 4) - 2;
-            state.cornPrice = Math.max(5, state.cornPrice + change);
-            document.getElementById('price-trend').innerText = change > 0 ? "▲" : "▼";
-            document.getElementById('price-trend').className = change > 0 ? "price-up" : "price-down";
+            let diff = (Math.random() * 4) - 2;
+            state.cornPrice = Math.max(5, state.cornPrice + diff);
+            document.getElementById('market-trend').innerText = diff > 0 ? "▲" : "▼";
+            document.getElementById('market-trend').className = diff > 0 ? "trend-up" : "trend-down";
         }, 30000);
 
         function sell() {
-            let qty = Math.floor(state.eggs);
-            if(qty >= 1) {
-                state.virt += (qty * state.rateV);
-                let gainR = (qty * state.rateR);
-                state.real += (gainR * 0.8); // 80% vai para o saldo
-                state.piggy += (gainR * 0.2); // 20% vai para o cofre
+            let q = Math.floor(state.eggs);
+            if(q >= 1) {
+                state.virt += (q * state.rateV);
+                let gainR = (q * state.rateR);
+                state.real += (gainR * 0.8);
+                state.piggy += (gainR * 0.2); // 20% retenção cofre
                 state.eggs = 0;
                 tg.HapticFeedback.impactOccurred('medium');
                 save();
@@ -184,52 +207,52 @@
             let u = state.upgrades[id];
             if(state.virt >= u.p) {
                 state.virt -= u.p;
-                if(id === 'chk') state.chickens++;
-                if(id === 'cp') state.coops++;
-                if(id === 'sl') state.feedMax += 5000;
-                if(id === 'lt') state.rateR *= 1.1;
+                if(id==='chk') state.chickens++;
+                if(id==='cp') state.coops++;
+                if(id==='sl') state.feedMax += 5000;
+                if(id==='lt') state.rateR *= 1.1;
                 u.p = Math.round(u.p * 1.6);
                 save();
-                updateUI();
+                update();
             }
         }
 
-        function openPiggy() {
-            tg.showConfirm(`Desejas quebrar o Cofre e receber ${state.piggy.toFixed(4)}${locale.s}? (Requer ver anúncio)`, (ok) => {
-                if(ok) {
-                    state.real += state.piggy;
-                    state.piggy = 0;
-                    updateUI();
-                    tg.showAlert("Cofre resgatado com sucesso!");
-                }
+        function claimPiggy() {
+            if(state.piggy <= 0) return;
+            tg.showConfirm(`Desejas resgatar ${state.piggy.toFixed(4)}${currency.s} do cofre? (Requer ver AD)`, (ok) => {
+                if(ok) { state.real += state.piggy; state.piggy = 0; update(); save(); }
             });
         }
 
         function watchAd() {
-            tg.showConfirm("Ver anúncio para repor ração?", (ok) => {
-                if(ok) { state.feedCur = state.feedMax; updateUI(); }
+            tg.showConfirm("Assistir anúncio para repor ração?", (ok) => {
+                if(ok) { state.feedCur = state.feedMax; update(); }
             });
         }
 
         function catchGolden() {
             document.getElementById('golden-egg').style.display = 'none';
             state.virt += 50;
-            tg.showAlert("Ovo de Ouro! +50🟡");
-            updateUI();
+            tg.showAlert("Ovo de Ouro capturado! +50🟡");
+            update();
         }
 
-        // Aparecimento Ovo de Ouro
         setInterval(() => {
             if(Math.random() < 0.1) {
-                const el = document.getElementById('golden-egg');
-                el.style.left = Math.random() * 80 + "%";
-                el.style.top = Math.random() * 80 + "%";
+                let el = document.getElementById('golden-egg');
+                el.style.left = Math.random()*80 + "%"; el.style.top = Math.random()*80 + "%";
                 el.style.display = 'block';
-                setTimeout(() => el.style.display = 'none', 8000);
+                setTimeout(() => el.style.display='none', 6000);
             }
-        }, 45000);
+        }, 40000);
 
-        window.onload = () => { load(); updateUI(); tg.expand(); };
+        function copyInvite() {
+            const link = `https://t.me/SuaBotApp?start=${tg.initDataUnsafe?.user?.id || 'user'}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Link de convite copiado!");
+        }
+
+        window.onload = () => { load(); update(); tg.expand(); };
     </script>
 </body>
 </html>
