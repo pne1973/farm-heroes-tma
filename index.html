@@ -1,510 +1,235 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-pt">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Farm Match Rewards</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Granja Pro - Telegram</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root {
+            --tg-theme-bg-color: #f4f7f6;
+            --tg-theme-button-color: #2481cc;
+            --primary: #2ecc71;
+            --secondary: #e67e22;
+            --danger: #e74c3c;
+        }
 
-<style>
-/* ============================
-   RESET
-============================ */
-body {
-  margin: 0;
-  padding: 0;
-  background: #0b0b0f;
-  color: #fff;
-  font-family: Arial, sans-serif;
-  overflow-x: hidden;
-}
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--tg-theme-bg-color);
+            margin: 0; padding: 15px;
+            color: #333;
+            user-select: none;
+        }
 
-/* ============================
-   GAME SCREEN (compacto agressivo)
-============================ */
-#game-screen {
-  padding: 0 8px;
-  padding-top: 0; /* colado ao topo */
-}
+        .header-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
 
-.info-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 6px;
-}
+        .card {
+            background: white;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            text-align: center;
+        }
 
-.info-box {
-  background: #15151d;
-  padding: 6px 8px;
-  border-radius: 6px;
-  border: 1px solid #262636;
-  font-size: 12px;
-  flex: 1;
-  min-width: 120px;
-}
+        .card span { font-size: 0.75rem; color: #888; text-transform: uppercase; display: block; }
+        .card b { font-size: 1.2rem; color: var(--tg-theme-button-color); }
 
-.ad-banner {
-  width: 100%;
-  height: 36px;
-  background: #222;
-  border: 1px solid #444;
-  margin: 6px auto;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 12px;
-}
+        .main-display {
+            background: white;
+            padding: 20px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            position: relative;
+        }
 
-/* ============================
-   GRID RESPONSIVO (máximo)
-============================ */
-.grid {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 3px;
-  margin-top: 6px;
-}
+        .resource-bar {
+            width: 100%;
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
 
-.cell {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  background: #1c1c26;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  cursor: pointer;
-  transition: 0.1s;
-}
+        #feed-bar-inner {
+            height: 100%;
+            background: var(--secondary);
+            width: 100%;
+            transition: width 0.3s;
+        }
 
-.cell.selected {
-  background: #252535;
-  transform: scale(1.08);
-  box-shadow: 0 0 0 2px #4caf50;
-}
+        .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: opacity 0.2s;
+        }
 
-/* ============================
-   ADMIN SCREEN (separado)
-============================ */
-#admin-screen {
-  display: none;
-  padding: 15px;
-  background: #15151d;
-  min-height: 100vh;
-}
+        .btn-sell { background: var(--primary); color: white; }
+        .btn-feed { background: var(--secondary); color: white; }
+        .btn-upgrade { background: #eee; color: #333; display: flex; justify-content: space-between; align-items: center; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-#admin-screen h2 {
-  margin-top: 0;
-}
+        .inventory-info {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-around;
+        }
 
-.admin-box {
-  background: #1c1c26;
-  padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #262636;
-  margin-bottom: 10px;
-}
-
-/* ============================
-   BOTTOM NAV
-============================ */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  background: #000;
-  border-top: 1px solid #444;
-  display: flex;
-  justify-content: space-around;
-  padding: 8px 0;
-}
-
-.bottom-nav button {
-  background: #222;
-  color: #fff;
-  border: 1px solid #555;
-  padding: 6px 14px;
-  border-radius: 8px;
-  font-size: 14px;
-}
-</style>
+        h3 { margin: 20px 0 10px; font-size: 1.1rem; }
+    </style>
 </head>
-
 <body>
 
-<!-- ============================
-     GAME SCREEN
-============================ -->
-<div id="game-screen">
-
-  <div class="info-row">
-    <div class="info-box">
-      <strong>Saldo:</strong>
-      <span id="saldo">0.0000 €</span><br>
-      <small>Mínimo: 5,00 €</small>
+    <div class="header-stats">
+        <div class="card">
+            <span>Ovos em Stock</span>
+            <b id="egg-count">0</b>
+        </div>
+        <div class="card">
+            <span>Saldo</span>
+            <b id="cash-count">0.00€</b>
+        </div>
     </div>
 
-    <div class="info-box">
-      <strong>Ações:</strong>
-      <span id="acoesRestantes">20</span><br>
-      <small>1 jogada = 1 ação</small>
+    <div class="main-display">
+        <div class="inventory-info">
+            <span>🐔 Galinhas: <b id="chicken-count">1</b>/<span id="max-chickens">5</span></span>
+            <span>🏠 Galinheiros: <b id="coop-count">1</b></span>
+        </div>
+        
+        <span>Stock de Ração</span>
+        <div class="resource-bar">
+            <div id="feed-bar-inner"></div>
+        </div>
+        <button class="btn btn-feed" onclick="buyFeed()">Comprar Ração (5.00€)</button>
+        <button class="btn btn-sell" onclick="sellEggs()">Vender Ovos (0.15€/un)</button>
     </div>
 
-    <div class="info-box">
-      <strong>Vidas:</strong>
-      <span id="vidasRestantes">5</span><br>
-      <small>Sem vidas? Ver anúncio.</small>
-    </div>
+    <h3>Gestão da Quinta</h3>
+    
+    <button class="btn btn-upgrade" id="buy-chicken-btn" onclick="buyChicken()">
+        <span>+1 Galinha</span>
+        <b id="cost-chicken">20.00€</b>
+    </button>
 
-    <div class="info-box">
-      <strong>Matches:</strong>
-      <span id="matchesCount">0</span><br>
-      <small>0.0000005 € por match</small>
-    </div>
-  </div>
+    <button class="btn btn-upgrade" id="buy-coop-btn" onclick="buyCoop()">
+        <span>+1 Galinheiro (+5 vagas)</span>
+        <b id="cost-coop">100.00€</b>
+    </button>
 
-  <div class="ad-banner">Espaço Publicitário 320×36</div>
+    <button class="btn btn-upgrade" id="upgrade-feed-btn" onclick="upgradeFeed()">
+        <span>Melhorar Qualidade Ração</span>
+        <b id="cost-feed-level">50.00€</b>
+    </button>
 
-  <div class="info-row">
-    <div class="info-box">
-      <strong>Ações extra</strong><br>
-      <button onclick="verAnuncioAcoes(5)">Ver anúncio (+5)</button>
-    </div>
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
 
-    <div class="info-box">
-      <strong>Vidas extra</strong><br>
-      <button onclick="verAnuncioVidas(3)">Ver anúncio (+3)</button>
-    </div>
+        let farm = {
+            eggs: 0,
+            cash: 5.00, // Começa com algum dinheiro para ração inicial
+            chickens: 1,
+            coops: 1,
+            feed: 100, // Porcentagem
+            feedQuality: 1, // Multiplicador de produção
+            
+            prices: {
+                chicken: 20,
+                coop: 100,
+                feedLevel: 50,
+                eggValue: 0.15,
+                feedRefill: 5
+            }
+        };
 
-    <div class="info-box">
-      <strong>Login diário</strong><br>
-      <span id="loginStatus">Disponível</span><br>
-      <button onclick="recolherLoginDiario()">Recolher</button>
-    </div>
-  </div>
+        function updateUI() {
+            document.getElementById('egg-count').innerText = Math.floor(farm.eggs);
+            document.getElementById('cash-count').innerText = farm.cash.toFixed(2) + "€";
+            document.getElementById('chicken-count').innerText = farm.chickens;
+            document.getElementById('coop-count').innerText = farm.coops;
+            document.getElementById('max-chickens').innerText = farm.coops * 5;
+            document.getElementById('feed-bar-inner').style.width = farm.feed + "%";
 
-  <div class="grid" id="gameGrid"></div>
-</div>
+            // Atualizar Botões
+            document.getElementById('buy-chicken-btn').disabled = (farm.cash < farm.prices.chicken || farm.chickens >= farm.coops * 5);
+            document.getElementById('buy-coop-btn').disabled = (farm.cash < farm.prices.coop);
+            document.getElementById('upgrade-feed-btn').disabled = (farm.cash < farm.prices.feedLevel);
+        }
 
-<!-- ============================
-     ADMIN SCREEN
-============================ -->
-<div id="admin-screen">
-  <h2>Painel Admin</h2>
+        // Loop de Produção
+        setInterval(() => {
+            if (farm.feed > 0 && farm.chickens > 0) {
+                // Cada galinha consome ração e produz ovos
+                let consumption = 0.5 * farm.chickens;
+                farm.feed = Math.max(0, farm.feed - consumption);
+                
+                // Produção baseada na qualidade da ração
+                farm.eggs += (farm.chickens * 0.1 * farm.feedQuality);
+                updateUI();
+            }
+        }, 1000);
 
-  <div class="admin-box">
-    Receita Estimada: <span id="adminReceita">0.0000 €</span><br>
-    Saldo Emitido: <span id="adminSaldoEmitido">0.0000 €</span><br>
-    Matches totais: <span id="adminMatchesTotais">0</span><br>
-    Ações jogadas: <span id="adminAcoesJogadas">0</span><br>
-    Anúncios vistos: <span id="adminAnunciosVistos">0</span>
-  </div>
-</div>
+        function sellEggs() {
+            if (farm.eggs >= 1) {
+                farm.cash += Math.floor(farm.eggs) * farm.prices.eggValue;
+                farm.eggs = 0;
+                updateUI();
+            }
+        }
 
-<!-- ============================
-     BOTTOM NAV
-============================ -->
-<div class="bottom-nav">
-  <button onclick="showGame()">Jogo</button>
-  <button onclick="showAdmin()">Admin</button>
-</div>
+        function buyFeed() {
+            if (farm.cash >= farm.prices.feedRefill) {
+                farm.cash -= farm.prices.feedRefill;
+                farm.feed = 100;
+                updateUI();
+            }
+        }
 
-<script>
-/* ============================
-   ESTADO GLOBAL
-============================ */
-const items = ["🥚","🍅","🥕","🌽"];
-const gridSize = 8;
-let grid = [];
-let selectedCell = null;
+        function buyChicken() {
+            if (farm.cash >= farm.prices.chicken && farm.chickens < farm.coops * 5) {
+                farm.cash -= farm.prices.chicken;
+                farm.chickens++;
+                farm.prices.chicken = Math.round(farm.prices.chicken * 1.2);
+                document.getElementById('cost-chicken').innerText = farm.prices.chicken.toFixed(2) + "€";
+                updateUI();
+            }
+        }
 
-let acoesRestantes = 20;
-let acoesJogadas = 0;
-let vidasRestantes = 5;
+        function buyCoop() {
+            if (farm.cash >= farm.prices.coop) {
+                farm.cash -= farm.prices.coop;
+                farm.coops++;
+                farm.prices.coop = Math.round(farm.prices.coop * 1.5);
+                document.getElementById('cost-coop').innerText = farm.prices.coop.toFixed(2) + "€";
+                updateUI();
+            }
+        }
 
-let matchesCount = 0;
-let saldo = 0;
-const valorPorMatch = 0.0000005;
-const valorLoginDiario = 0.00025;
+        function upgradeFeed() {
+            if (farm.cash >= farm.prices.feedLevel) {
+                farm.cash -= farm.prices.feedLevel;
+                farm.feedQuality += 0.5;
+                farm.prices.feedLevel = Math.round(farm.prices.feedLevel * 2);
+                document.getElementById('cost-feed-level').innerText = farm.prices.feedLevel.toFixed(2) + "€";
+                updateUI();
+            }
+        }
 
-let anunciosVistos = 0;
-let valorLoginAcumulado = 0;
-
-const LOGIN_KEY = "farm_match_login_date";
-
-/* ELEMENTOS */
-const gridEl = document.getElementById("gameGrid");
-const saldoEl = document.getElementById("saldo");
-const acoesEl = document.getElementById("acoesRestantes");
-const vidasEl = document.getElementById("vidasRestantes");
-const matchesEl = document.getElementById("matchesCount");
-const loginStatusEl = document.getElementById("loginStatus");
-
-const adminSaldoEmitidoEl = document.getElementById("adminSaldoEmitido");
-const adminMatchesTotaisEl = document.getElementById("adminMatchesTotais");
-const adminAcoesJogadasEl = document.getElementById("adminAcoesJogadas");
-const adminReceitaEl = document.getElementById("adminReceita");
-const adminAnunciosVistosEl = document.getElementById("adminAnunciosVistos");
-
-/* ============================
-   LOGIN DIÁRIO
-============================ */
-function isHoje(dateStr) {
-  const hoje = new Date();
-  const d = new Date(dateStr);
-  return hoje.toDateString() === d.toDateString();
-}
-
-function atualizarLoginStatus() {
-  const last = localStorage.getItem(LOGIN_KEY);
-  loginStatusEl.textContent = (last && isHoje(last)) ? "Já recolhido hoje" : "Disponível";
-}
-
-function recolherLoginDiario() {
-  const last = localStorage.getItem(LOGIN_KEY);
-  if (last && isHoje(last)) {
-    alert("Já recolheste o login diário hoje.");
-    return;
-  }
-  saldo += valorLoginDiario;
-  valorLoginAcumulado += valorLoginDiario;
-  localStorage.setItem(LOGIN_KEY, new Date().toISOString());
-  atualizarLoginStatus();
-  updateUI();
-}
-
-/* ============================
-   ANÚNCIOS
-============================ */
-function verAnuncioAcoes(qtd) {
-  anunciosVistos++;
-  setTimeout(() => {
-    acoesRestantes += qtd;
-    updateUI();
-    alert("Anúncio concluído! +" + qtd + " ações.");
-  }, 1500);
-}
-
-function verAnuncioVidas(qtd) {
-  anunciosVistos++;
-  setTimeout(() => {
-    vidasRestantes += qtd;
-    updateUI();
-    alert("Anúncio concluído! +" + qtd + " vidas.");
-  }, 1500);
-}
-
-/* ============================
-   GRID / MATCH-3
-============================ */
-function randomItem() {
-  return items[Math.floor(Math.random() * items.length)];
-}
-
-function createInitialGrid() {
-  grid = [];
-  for (let r = 0; r < gridSize; r++) {
-    const row = [];
-    for (let c = 0; c < gridSize; c++) {
-      row.push(randomItem());
-    }
-    grid.push(row);
-  }
-}
-
-function renderGrid() {
-  gridEl.innerHTML = "";
-  for (let r = 0; r < gridSize; r++) {
-    for (let c = 0; c < gridSize; c++) {
-      const cell = document.createElement("div");
-      cell.className = "cell";
-      cell.textContent = grid[r][c];
-      cell.dataset.row = r;
-      cell.dataset.col = c;
-      cell.addEventListener("click", onCellClick);
-      gridEl.appendChild(cell);
-    }
-  }
-}
-
-function findCellElement(r, c) {
-  return gridEl.querySelector(`.cell[data-row="${r}"][data-col="${c}"]`);
-}
-
-function isAdjacent(r1, c1, r2, c2) {
-  return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
-}
-
-function onCellClick(e) {
-  if (acoesRestantes <= 0) return alert("Sem ações.");
-  if (vidasRestantes <= 0) return alert("Sem vidas.");
-
-  const cell = e.currentTarget;
-  const r = parseInt(cell.dataset.row);
-  const c = parseInt(cell.dataset.col);
-
-  if (!selectedCell) {
-    selectedCell = { r, c };
-    cell.classList.add("selected");
-  } else {
-    const prev = selectedCell;
-    const prevEl = findCellElement(prev.r, prev.c);
-    if (prevEl) prevEl.classList.remove("selected");
-    selectedCell = null;
-
-    if (isAdjacent(prev.r, prev.c, r, c)) {
-      swapAndResolve(prev.r, prev.c, r, c);
-    }
-  }
-}
-
-function findMatches() {
-  const matches = [];
-
-  // horizontal
-  for (let r = 0; r < gridSize; r++) {
-    let streak = 1;
-    for (let c = 1; c < gridSize; c++) {
-      if (grid[r][c] === grid[r][c - 1]) streak++;
-      else {
-        if (streak >= 3)
-          for (let k = 0; k < streak; k++)
-            matches.push({ r, c: c - 1 - k });
-        streak = 1;
-      }
-    }
-    if (streak >= 3)
-      for (let k = 0; k < streak; k++)
-        matches.push({ r, c: gridSize - 1 - k });
-  }
-
-  // vertical
-  for (let c = 0; c < gridSize; c++) {
-    let streak = 1;
-    for (let r = 1; r < gridSize; r++) {
-      if (grid[r][c] === grid[r - 1][c]) streak++;
-      else {
-        if (streak >= 3)
-          for (let k = 0; k < streak; k++)
-            matches.push({ r: r - 1 - k, c });
-        streak = 1;
-      }
-    }
-    if (streak >= 3)
-      for (let k = 0; k < streak; k++)
-        matches.push({ r: gridSize - 1 - k, c });
-  }
-
-  return matches;
-}
-
-function removeMatches(matches) {
-  matches.forEach(m => grid[m.r][m.c] = null);
-
-  const qtd = matches.length;
-  if (qtd > 0) {
-    matchesCount += qtd;
-    saldo += qtd * valorPorMatch;
-    updateUI();
-  }
-
-  // cair
-  for (let c = 0; c < gridSize; c++) {
-    let writeRow = gridSize - 1;
-    for (let r = gridSize - 1; r >= 0; r--) {
-      if (grid[r][c] !== null) {
-        grid[writeRow][c] = grid[r][c];
-        writeRow--;
-      }
-    }
-    for (let r = writeRow; r >= 0; r--) {
-      grid[r][c] = randomItem();
-    }
-  }
-}
-
-function swapAndResolve(r1, c1, r2, c2) {
-  const temp = grid[r1][c1];
-  grid[r1][c1] = grid[r2][c2];
-  grid[r2][c2] = temp;
-
-  let matches = findMatches();
-  if (matches.length === 0) {
-    const t = grid[r1][c1];
-    grid[r1][c1] = grid[r2][c2];
-    grid[r2][c2] = t;
-    renderGrid();
-    return;
-  }
-
-  acoesRestantes--;
-  acoesJogadas++;
-  if (acoesJogadas % 10 === 0) vidasRestantes = Math.max(vidasRestantes - 1, 0);
-  updateUI();
-
-  const loop = () => {
-    matches = findMatches();
-    if (matches.length > 0) {
-      removeMatches(matches);
-      renderGrid();
-      setTimeout(loop, 150);
-    } else {
-      renderGrid();
-    }
-  };
-
-  removeMatches(matches);
-  renderGrid();
-  setTimeout(loop, 150);
-}
-
-/* ============================
-   UI / ADMIN
-============================ */
-function updateUI() {
-  acoesEl.textContent = acoesRestantes;
-  vidasEl.textContent = vidasRestantes;
-  matchesEl.textContent = matchesCount;
-  saldoEl.textContent = saldo.toFixed(4) + " €";
-
-  adminSaldoEmitidoEl.textContent = saldo.toFixed(4) + " €";
-  adminMatchesTotaisEl.textContent = matchesCount;
-  adminAcoesJogadasEl.textContent = acoesJogadas;
-  adminAnunciosVistosEl.textContent = anunciosVistos;
-
-  const receita = (acoesJogadas / 50) * 0.001;
-  adminReceitaEl.textContent = receita.toFixed(4) + " €";
-}
-
-/* ============================
-   TROCA DE ECRÃS
-============================ */
-function showGame() {
-  document.getElementById("game-screen").style.display = "block";
-  document.getElementById("admin-screen").style.display = "none";
-}
-
-function showAdmin() {
-  document.getElementById("game-screen").style.display = "none";
-  document.getElementById("admin-screen").style.display = "block";
-}
-
-/* ============================
-   INICIALIZAÇÃO
-============================ */
-createInitialGrid();
-renderGrid();
-atualizarLoginStatus();
-updateUI();
-showGame();
-</script>
-
-</body>
-</html>
-
-
+        updateUI();
+    </script>
 </body>
 </html>
