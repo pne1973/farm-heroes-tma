@@ -3,102 +3,107 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Egg Tycoon v4.5 - Precision Farm</title>
+    <title>Egg Tycoon v5.0 - Ultimate Expansion</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root {
-            --tg-bg: #f0f4f7;
-            --primary: #2ecc71;
-            --virtual: #f1c40f;
-            --real: #2481cc;
-        }
-
-        body { font-family: sans-serif; background: var(--tg-bg); margin: 0; padding: 10px; color: #333; }
-
+        :root { --tg-bg: #f0f4f7; --primary: #2ecc71; --virtual: #f1c40f; --real: #2481cc; }
+        body { font-family: sans-serif; background: var(--tg-bg); margin: 0; padding: 10px; color: #333; overflow-x: hidden; }
+        
+        /* Layout de Saldo */
         .wallet-grid { display: grid; gap: 8px; margin-bottom: 12px; }
-        .card { background: white; padding: 12px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        .card { background: white; padding: 12px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid transparent; }
         
-        .rates { background: #fff; border-radius: 20px; padding: 8px; margin-bottom: 12px; display: flex; justify-content: space-around; font-size: 0.75rem; border: 1px dashed #bbb; }
-
+        /* Painel Central */
         .farm-container { background: white; border-radius: 20px; padding: 15px; text-align: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        
-        /* Barra de Ração com Texto de Peso */
         .feed-header { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 5px; font-weight: bold; color: #e67e22; }
         .progress-bar { background: #eee; height: 24px; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #ddd; }
         #feed-bar { height: 100%; background: linear-gradient(90deg, #e67e22, #f39c12); width: 100%; transition: width 0.3s linear; }
         .feed-text-overlay { position: absolute; width: 100%; text-align: center; line-height: 24px; font-size: 0.75rem; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); font-weight: bold; }
 
+        /* Estilo da Loja */
+        .shop-section { margin-top: 20px; padding-bottom: 30px; }
+        .shop-item { background: white; padding: 12px; border-radius: 15px; display: flex; align-items: center; gap: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); border: 1px solid #eee; }
+        .shop-icon { font-size: 1.8rem; background: #f8f9fa; padding: 8px; border-radius: 12px; }
+        .shop-info { flex-grow: 1; }
+        .shop-info h4 { margin: 0; font-size: 0.9rem; color: #2c3e50; }
+        .shop-info p { margin: 2px 0 0; font-size: 0.7rem; color: #7f8c8d; }
+        .buy-btn { background: #fff; border: 1px solid var(--virtual); padding: 8px 12px; border-radius: 10px; font-weight: bold; min-width: 80px; transition: 0.2s; }
+        .buy-btn:disabled { opacity: 0.5; border-color: #ccc; }
+
         .btn { border: none; border-radius: 12px; padding: 15px; font-weight: bold; width: 100%; cursor: pointer; margin-bottom: 8px; }
         .btn-sell { background: var(--primary); color: white; }
         .btn-ad { background: #e67e22; color: white; }
-
-        .shop-item { background: white; padding: 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-        .shop-info { flex-grow: 1; }
-        .shop-info h4 { margin: 0; font-size: 0.9rem; }
-        .buy-btn { background: #fff; border: 1px solid var(--virtual); padding: 8px 12px; border-radius: 8px; font-weight: bold; min-width: 70px; }
     </style>
 </head>
 <body>
 
     <div class="wallet-grid">
-        <div class="card" style="border-left: 5px solid var(--real);">
+        <div class="card" style="border-left-color: var(--real);">
             <div><small>SALDO REAL</small><br><b id="real-bal">0.0000€</b></div>
-            <span>💵</span>
+            <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" width="30">
         </div>
-        <div class="card" style="border-left: 5px solid var(--virtual);">
-            <div><small>CAPITAL QUINTA</small><br><b id="virt-bal">10.00🟡</b></div>
-            <span>🟡</span>
+        <div class="card" style="border-left-color: var(--virtual);">
+            <div><small>CAPITAL DA QUINTA</small><br><b id="virt-bal">10.00🟡</b></div>
+            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="25">
         </div>
-    </div>
-
-    <div class="rates">
-        <span>1 🥚 = <b>0.50</b>🟡</span>
-        <span>1 🥚 = <b>0.0001</b>€</span>
     </div>
 
     <div class="farm-container">
-        <div style="display: flex; justify-content: space-around; margin-bottom: 15px;">
-            <span>🥚 Stock: <b id="egg-count">0</b></span>
-            <span>🐔 Aves: <b id="chk-count">1</b>/<b id="chk-max">5</b></span>
+        <div style="display: flex; justify-content: space-around; margin-bottom: 15px; font-weight: bold;">
+            <span>🥚 Stock: <span id="egg-count">0</span></span>
+            <span>🐔 Aves: <span id="chk-count">1</span>/<span id="chk-max">5</span></span>
         </div>
 
         <div class="feed-header">
-            <span>Stock de Ração</span>
+            <span>Ração em Stock</span>
             <span id="feed-weight">5.000 kg</span>
         </div>
         <div class="progress-bar">
             <div id="feed-bar"></div>
             <div class="feed-text-overlay" id="feed-pct">100%</div>
         </div>
-        <p style="font-size: 0.65rem; color: #888; margin-top: 5px;">Consumo atual: <span id="consume-rate">20</span>g /seg</p>
+        <p style="font-size: 0.65rem; color: #888; margin-top: 5px;">Consumo: <span id="consume-rate">20</span>g /seg</p>
         
         <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000€</small></button>
-        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR +5KG RAÇÃO (AD)</button>
+        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (AD)</button>
     </div>
 
-    <h3 style="margin-left: 10px;">Melhorias da Quinta</h3>
-    <div id="shop-list">
-        <div class="shop-item">
-            <img src="https://cdn-icons-png.flaticon.com/512/1864/1864470.png" width="35">
-            <div class="shop-info"><h4>Nova Galinha</h4><p>+Produção</p></div>
-            <button class="buy-btn" id="b-chk" onclick="buy('chk')"><span id="p-chk">20</span>🟡</button>
-        </div>
-        <div class="shop-item">
-            <img src="https://cdn-icons-png.flaticon.com/512/2662/2662207.png" width="35">
-            <div class="shop-info"><h4>Galinheiro</h4><p>+5 Espaço</p></div>
-            <button class="buy-btn" id="b-coop" onclick="buy('coop')"><span id="p-coop">100</span>🟡</button>
-        </div>
+    <div class="shop-section">
+        <h3 style="margin-left: 5px;">Mercado de Expansão</h3>
+        
+        <div id="shop-list">
+            </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         let state = {
             eggs: 0, virtual: 10, real: 0, chickens: 1, coops: 1,
-            feedMax: 5000, // 5kg em gramas
-            feedCurrent: 5000,
-            rateV: 0.50, rateR: 0.0001,
-            prices: { chk: 20, coop: 100 }
+            feedMax: 5000, feedCurrent: 5000,
+            rateV: 0.50, rateR: 0.0001, prodSpeed: 0.1,
+            upgrades: {
+                chk: { n: "Nova Galinha", d: "+Produção de ovos", p: 20, i: "🐔" },
+                coop: { n: "Galinheiro", d: "+5 Vagas de aves", p: 100, i: "🏠" },
+                silo: { n: "Silo Industrial", d: "+5kg Cap. Ração", p: 150, i: "🏗️" },
+                light: { n: "Iluminação", d: "+20% Produtividade", p: 200, i: "💡" },
+                bio: { n: "Selo Bio", d: "+15% Valor Real (€)", p: 300, i: "🌿" },
+                clean: { n: "Auto-Limpeza", d: "-10% Gasto Ração", p: 250, i: "🧹" }
+            }
         };
+
+        function renderShop() {
+            const list = document.getElementById('shop-list');
+            list.innerHTML = '';
+            for (let id in state.upgrades) {
+                let up = state.upgrades[id];
+                list.innerHTML += `
+                    <div class="shop-item">
+                        <div class="shop-icon">${up.i}</div>
+                        <div class="shop-info"><h4>${up.n}</h4><p>${up.d}</p></div>
+                        <button class="buy-btn" id="b-${id}" onclick="buy('${id}')">${up.p}🟡</button>
+                    </div>`;
+            }
+        }
 
         function update() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
@@ -107,32 +112,30 @@
             document.getElementById('chk-count').innerText = state.chickens;
             document.getElementById('chk-max').innerText = state.coops * 5;
             
-            // Lógica de Peso (kg vs g)
             let pct = (state.feedCurrent / state.feedMax) * 100;
             document.getElementById('feed-bar').style.width = pct + "%";
             document.getElementById('feed-pct').innerText = Math.ceil(pct) + "%";
-            
-            let weightText = state.feedCurrent >= 1000 
-                ? (state.feedCurrent / 1000).toFixed(3) + " kg" 
-                : Math.floor(state.feedCurrent) + " g";
-            document.getElementById('feed-weight').innerText = weightText;
-
-            // Taxa de consumo: 20g por galinha/seg
-            document.getElementById('consume-rate').innerText = (state.chickens * 20);
+            document.getElementById('feed-weight').innerText = (state.feedCurrent / 1000).toFixed(3) + " kg";
+            document.getElementById('consume-rate').innerText = (state.chickens * 20).toFixed(0);
 
             let vG = Math.floor(state.eggs) * state.rateV;
             let rG = Math.floor(state.eggs) * state.rateR;
             document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}€`;
             
-            document.getElementById('b-chk').disabled = (state.virtual < state.prices.chk || state.chickens >= state.coops * 5);
-            document.getElementById('b-coop').disabled = (state.virtual < state.prices.coop);
+            for (let id in state.upgrades) {
+                let btn = document.getElementById('b-' + id);
+                if(btn) {
+                    let canBuy = state.virtual >= state.upgrades[id].p;
+                    if(id === 'chk' && state.chickens >= state.coops * 5) canBuy = false;
+                    btn.disabled = !canBuy;
+                }
+            }
         }
 
         setInterval(() => {
             if(state.feedCurrent > 0) {
-                // Consome 20g por galinha por segundo
                 state.feedCurrent = Math.max(0, state.feedCurrent - (20 * state.chickens));
-                state.eggs += (state.chickens * 0.1);
+                state.eggs += (state.chickens * state.prodSpeed);
                 update();
             }
         }, 1000);
@@ -148,24 +151,30 @@
             }
         }
 
-        function buy(type) {
-            if(state.virtual >= state.prices[type]) {
-                state.virtual -= state.prices[type];
-                if(type === 'chk') state.chickens++;
-                if(type === 'coop') state.coops++;
-                state.prices[type] = Math.round(state.prices[type] * 1.5);
+        function buy(id) {
+            let up = state.upgrades[id];
+            if(state.virtual >= up.p) {
+                state.virtual -= up.p;
+                if(id === 'chk') state.chickens++;
+                if(id === 'coop') state.coops++;
+                if(id === 'silo') state.feedMax += 5000;
+                if(id === 'light') state.prodSpeed *= 1.2;
+                if(id === 'bio') state.rateR *= 1.15;
+                if(id === 'clean') state.feedCurrent = Math.min(state.feedMax, state.feedCurrent * 1.1); // Simulação de eficiência
+                
+                up.p = Math.round(up.p * 1.6);
+                renderShop();
                 update();
             }
         }
 
         function watchAd() {
-            tg.showConfirm("Assistir anúncio para repor 5kg de ração?", (ok) => {
-                if(ok) {
-                    state.feedCurrent = state.feedMax;
-                    update();
-                }
+            tg.showConfirm("Assistir anúncio para repor a ração?", (ok) => {
+                if(ok) { state.feedCurrent = state.feedMax; update(); }
             });
         }
+
+        renderShop();
         update();
     </script>
 </body>
