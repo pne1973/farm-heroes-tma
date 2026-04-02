@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.40 - Produção Completa</title>
+    <title>Apex Social v33.42 - Full Assets</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -16,7 +16,7 @@
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Barras e UI */
+        /* Progressões */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
@@ -25,18 +25,19 @@
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; }
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #ddd; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #ddd; min-width: 70px; }
 
-        /* Mercado (30 Expansões) */
-        .market-scroll { max-height: 300px; overflow-y: auto; padding-right: 5px; }
-        .market-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
-        
-        /* Admin Hub */
+        /* Mercado com Imagens */
+        .market-scroll { max-height: 380px; overflow-y: auto; padding-right: 5px; }
+        .market-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .market-icon { font-size: 1.5rem; margin-right: 12px; background: #f8f9fa; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+        .market-info { flex-grow: 1; }
+
+        /* Painel Admin v33.42 */
         #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .profit-pos { color: var(--google-green); font-weight: bold; }
-        .live-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 8px; border-radius: 8px; height: 100px; overflow-y: auto; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -44,7 +45,7 @@
     <div class="card">
         <div class="flex-between">
             <div>
-                <span class="label">Saldo Real <span id="adm-badge"></span></span>
+                <span class="label">Saldo Real <span id="adm-badge" style="display:none; background:var(--google-red); color:white; padding:1px 4px; border-radius:4px; font-size:0.6rem;">ADMIN</span></span>
                 <div style="font-size:1.5rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
                 <div style="font-size:0.8rem; color:#888;" id="brl-bal">R$ 0.00</div>
             </div>
@@ -64,7 +65,7 @@
         <div class="label" style="margin-top:10px;">Nível de Ração</div>
         <div class="track" style="height:25px; border-radius:12px;">
             <div id="feed-fill" class="fill-blue"></div>
-            <div style="position:absolute; width:100%; text-align:center; line-height:25px; font-weight:bold; color: white;" id="feed-pct">100%</div>
+            <div style="position:absolute; width:100%; text-align:center; line-height:25px; font-weight:bold; color: white; font-size: 0.8rem;" id="feed-pct">100%</div>
         </div>
         <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO</button>
         <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (30s)</button>
@@ -77,13 +78,12 @@
     </div>
 
     <div id="admin-hub" style="display:none;">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">GLOBAL CONSOLE v33.40</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">GLOBAL CONSOLE v33.42</div>
         <div class="admin-grid">
-            <div class="admin-box"><span class="label">Receita Ads</span><div id="adm-rev">0.0000€</div></div>
-            <div class="admin-box"><span class="label">Margem Lucro</span><div id="adm-profit" class="profit-pos">0.0000€</div></div>
+            <div class="admin-box"><span class="label">Receita Ads (Est.)</span><div id="adm-rev">0.0000€</div></div>
+            <div class="admin-box"><span class="label">Users Ativos</span><div id="adm-u">1,804</div></div>
         </div>
         <button class="btn" style="background:#333; color:white;" onclick="toggleSim()">🔥 STRESS TEST: 500 BOTS</button>
-        <div id="live-log" class="live-log">> Sistema operacional...</div>
     </div>
 
     <script>
@@ -91,27 +91,39 @@
         const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
         const EUR_BRL = 6.1245; //
         
-        let simActive = false;
-        let finance = { rev: 0, exp: 0 };
-        
+        let finance = { rev: 0 };
         let state = {
             eggs: 0, virt: 10.00, real: 0, chickens: 1, maxChickens: 5,
             feedMax: 5000, feedCur: 5000, eggTimer: 0, eggLimit: 100, 
             rateV: 0.50, rateR: 0.0001, adsVistas: 0
         };
 
-        // Gerador de Mercado (30 Itens)
+        // Gerador do Mercado com Imagens
         function loadMarket() {
             const list = document.getElementById('market-list');
             list.innerHTML = "";
+            
             for(let i=1; i<=30; i++) {
-                let cost = Math.floor(32 * Math.pow(1.2, i-1));
-                let type = i <= 15 ? 'Aves' : 'Silo';
-                let desc = i <= 15 ? `+1 Ave (Lvl ${i})` : `+500kg Ração (Lvl ${i-15})`;
-                
+                let cost = Math.floor(32 * Math.pow(1.25, i-1));
+                let icon = "";
+                let title = "";
+                let desc = "";
+
+                if(i <= 10) {
+                    icon = "🐔"; title = `Nova Galinha Lvl ${i}`; desc = "+1 ovo por ciclo";
+                } else if(i <= 20) {
+                    icon = "🏠"; title = `Galinheiro Lvl ${i-10}`; desc = "+5 espaço para aves";
+                } else {
+                    icon = "🏗️"; title = `Silo Industrial Lvl ${i-20}`; desc = "+1000kg de ração";
+                }
+
                 list.innerHTML += `
                     <div class="market-item">
-                        <div><b>${type} Nível ${i}</b><br><small>${desc}</small></div>
+                        <div class="market-icon">${icon}</div>
+                        <div class="market-info">
+                            <b>${title}</b><br>
+                            <small>${desc}</small>
+                        </div>
                         <button class="btn btn-buy" onclick="buy(${i}, ${cost})">${cost}🟡</button>
                     </div>`;
             }
@@ -120,14 +132,16 @@
         function buy(lvl, cost) {
             if(state.virt >= cost) {
                 state.virt -= cost;
-                if(lvl <= 15) { state.chickens++; state.maxChickens++; }
-                else { state.feedMax += 500; }
+                if(lvl <= 10) state.chickens++;
+                else if(lvl <= 20) state.maxChickens += 5;
+                else state.feedMax += 1000;
                 updateUI();
-                tg.showAlert("Expansão Nível " + lvl + " Adquirida!");
-            } else { tg.showAlert("Falta Capital Quinta!"); }
+                tg.showAlert("Expansão Ativada!");
+            } else {
+                tg.showAlert("Saldo de Capital Quinta insuficiente.");
+            }
         }
 
-        // Lógica Global
         function watchAd() {
             window.open("https://www.google.com", '_blank');
             setTimeout(() => {
@@ -135,7 +149,7 @@
                 state.adsVistas++;
                 finance.rev += 0.0065;
                 updateUI();
-                tg.showAlert("Ração Recarregada!");
+                tg.showAlert("Ração Reposta!");
             }, 30000);
         }
 
@@ -155,13 +169,12 @@
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens}`;
             document.getElementById('user-ads').innerText = state.adsVistas;
-            document.getElementById('feed-pct').innerText = Math.ceil((state.feedCur/state.feedMax)*100) + "%";
             document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax)*100 + "%";
+            document.getElementById('feed-pct').innerText = Math.ceil((state.feedCur/state.feedMax)*100) + "%";
             document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
             
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
                 document.getElementById('adm-rev').innerText = finance.rev.toFixed(4) + "€";
-                document.getElementById('adm-profit').innerText = (finance.rev - (finance.exp)).toFixed(4) + "€";
             }
         }
 
@@ -173,17 +186,6 @@
                 updateUI();
             }
         }, 100);
-
-        function toggleSim() {
-            simActive = !simActive;
-            if(simActive) {
-                setInterval(() => {
-                    if(!simActive) return;
-                    finance.rev += 0.0065 * 5;
-                    updateUI();
-                }, 3000);
-            }
-        }
 
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
