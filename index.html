@@ -3,231 +3,257 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Granja Pro - Telegram</title>
+    <title>Egg Tycoon Real - ID: 5401881400</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
-            --tg-theme-bg-color: #f4f7f6;
-            --tg-theme-button-color: #2481cc;
+            --tg-bg: #f4f7f6;
+            --tg-btn: #2481cc;
             --primary: #2ecc71;
             --secondary: #e67e22;
-            --danger: #e74c3c;
+            --wallet-grad: linear-gradient(135deg, #1e3a8a, #3b82f6);
         }
 
         body {
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--tg-theme-bg-color);
+            font-family: -apple-system, sans-serif;
+            background-color: var(--tg-bg);
             margin: 0; padding: 15px;
             color: #333;
             user-select: none;
         }
 
-        .header-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
+        /* Carteira de Saldo Real */
+        .wallet-bar {
+            background: var(--wallet-grad);
+            color: white;
+            padding: 15px;
+            border-radius: 16px;
             margin-bottom: 15px;
-        }
-
-        .card {
-            background: white;
-            padding: 12px;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            text-align: center;
-        }
-
-        .card span { font-size: 0.75rem; color: #888; text-transform: uppercase; display: block; }
-        .card b { font-size: 1.2rem; color: var(--tg-theme-button-color); }
-
-        .main-display {
-            background: white;
-            padding: 20px;
-            border-radius: 20px;
-            margin-bottom: 20px;
-            position: relative;
-        }
-
-        .resource-bar {
-            width: 100%;
-            height: 10px;
-            background: #eee;
-            border-radius: 5px;
-            margin: 10px 0;
-            overflow: hidden;
-        }
-
-        #feed-bar-inner {
-            height: 100%;
-            background: var(--secondary);
-            width: 100%;
-            transition: width 0.3s;
-        }
-
-        .btn {
-            border: none;
-            border-radius: 10px;
-            padding: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            margin-bottom: 10px;
-            transition: opacity 0.2s;
-        }
-
-        .btn-sell { background: var(--primary); color: white; }
-        .btn-feed { background: var(--secondary); color: white; }
-        .btn-upgrade { background: #eee; color: #333; display: flex; justify-content: space-between; align-items: center; }
-        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        .inventory-info {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wallet-info span { font-size: 0.75rem; opacity: 0.9; text-transform: uppercase; }
+        .wallet-info b { font-size: 1.3rem; display: block; }
+        .btn-withdraw-open { background: rgba(255,255,255,0.2); border: none; color: white; padding: 8px 12px; border-radius: 8px; font-weight: bold; font-size: 0.8rem; }
+
+        /* Stats do Jogo */
+        .header-stats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;
+        }
+        .card {
+            background: white; padding: 12px; border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05); text-align: center;
+        }
+        .card span { font-size: 0.7rem; color: #888; text-transform: uppercase; }
+        .card b { font-size: 1.1rem; color: var(--tg-btn); display: block; margin-top: 4px; }
+
+        /* Área Central */
+        .main-display {
+            background: white; padding: 20px; border-radius: 20px; margin-bottom: 20px;
+        }
+        .resource-bar { width: 100%; height: 10px; background: #eee; border-radius: 5px; margin: 10px 0; overflow: hidden; }
+        #feed-bar-inner { height: 100%; background: var(--secondary); width: 100%; transition: width 0.3s; }
+        
+        .boost-badge { 
+            background: #f1c40f; color: #000; font-size: 0.7rem; padding: 2px 8px; 
+            border-radius: 10px; font-weight: bold; display: none; margin-bottom: 10px;
         }
 
-        h3 { margin: 20px 0 10px; font-size: 1.1rem; }
+        /* Botões */
+        .btn {
+            border: none; border-radius: 12px; padding: 14px;
+            font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 10px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-ad { background: var(--secondary); color: white; }
+        .btn-shop { background: #fff; color: #333; border: 1px solid #ddd; display: flex; justify-content: space-between; }
+        .btn:disabled { opacity: 0.5; }
+
+        /* Modais */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center;
+        }
+        .modal-content { background: white; width: 85%; padding: 25px; border-radius: 24px; text-align: center; }
+        .prog-bg { background: #eee; height: 12px; border-radius: 6px; margin: 15px 0; overflow: hidden; }
+        #prog-fill { background: #2ecc71; height: 100%; width: 0%; transition: width 0.5s; }
     </style>
 </head>
 <body>
 
+    <div class="wallet-bar">
+        <div class="wallet-info">
+            <span>Saldo Acumulado (Real)</span>
+            <b id="real-balance">0.0000€</b>
+        </div>
+        <button class="btn-withdraw-open" onclick="openModal()">WALLET</button>
+    </div>
+
     <div class="header-stats">
         <div class="card">
-            <span>Ovos em Stock</span>
+            <span>Stock de Ovos</span>
             <b id="egg-count">0</b>
         </div>
         <div class="card">
-            <span>Saldo</span>
-            <b id="cash-count">0.00€</b>
+            <span>Capital da Quinta</span>
+            <b id="game-cash">5.00€</b>
         </div>
     </div>
 
     <div class="main-display">
-        <div class="inventory-info">
-            <span>🐔 Galinhas: <b id="chicken-count">1</b>/<span id="max-chickens">5</span></span>
-            <span>🏠 Galinheiros: <b id="coop-count">1</b></span>
+        <div id="boost-active" class="boost-badge">PRODUÇÃO 2X ATIVA!</div>
+        <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+            <span>🐔 <b id="chickens">1</b>/<span id="max-chickens">5</span></span>
+            <span>🏠 Galinheiros: <b id="coops">1</b></span>
         </div>
         
-        <span>Stock de Ração</span>
+        <div style="margin-top: 15px; font-size: 0.85rem; color: #666;">Stock de Ração</div>
         <div class="resource-bar">
             <div id="feed-bar-inner"></div>
         </div>
-        <button class="btn btn-feed" onclick="buyFeed()">Comprar Ração (5.00€)</button>
-        <button class="btn btn-sell" onclick="sellEggs()">Vender Ovos (0.15€/un)</button>
+
+        <button class="btn btn-ad" onclick="watchAd('feed')">📺 Ração Grátis + Saldo Real</button>
+        <button class="btn btn-primary" onclick="sellEggs()">Vender Produção (0.15€/un)</button>
     </div>
 
-    <h3>Gestão da Quinta</h3>
-    
-    <button class="btn btn-upgrade" id="buy-chicken-btn" onclick="buyChicken()">
-        <span>+1 Galinha</span>
-        <b id="cost-chicken">20.00€</b>
+    <h3>Mercado de Expansão</h3>
+    <button class="btn btn-shop" id="btn-buy-chicken" onclick="buyItem('chicken')">
+        <span>+1 Galinha</span> <b id="cost-chicken">20.00€</b>
     </button>
+    <button class="btn btn-shop" id="btn-buy-coop" onclick="buyItem('coop')">
+        <span>+1 Galinheiro (+5 vagas)</span> <b id="cost-coop">100.00€</b>
+    </button>
+    <button class="btn btn-ad" onclick="watchAd('boost')">📺 Ativar Turbo 2x (5 min) + Saldo Real</button>
 
-    <button class="btn btn-upgrade" id="buy-coop-btn" onclick="buyCoop()">
-        <span>+1 Galinheiro (+5 vagas)</span>
-        <b id="cost-coop">100.00€</b>
-    </button>
-
-    <button class="btn btn-upgrade" id="upgrade-feed-btn" onclick="upgradeFeed()">
-        <span>Melhorar Qualidade Ração</span>
-        <b id="cost-feed-level">50.00€</b>
-    </button>
+    <div id="modal-wallet" class="modal">
+        <div class="modal-content">
+            <h3>Tua Carteira</h3>
+            <p style="font-size: 0.9rem; color: #666;">Ganhas <b>0.0010€</b> por cada anúncio assistido para ajudar a tua quinta.</p>
+            <div class="prog-bg"><div id="prog-fill"></div></div>
+            <p id="prog-text" style="font-size: 0.75rem; margin-top: -10px;">0% para o levantamento</p>
+            
+            <h2 id="modal-real-val">0.0000€</h2>
+            <button class="btn btn-primary" id="btn-withdraw" disabled>Levantar para PayPal (Mín. 5€)</button>
+            <button class="btn" onclick="closeModal()" style="background:none; color:#888;">Voltar ao Jogo</button>
+        </div>
+    </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         tg.expand();
 
-        let farm = {
+        // Configuração Inicial
+        let data = {
+            gameCash: 5.0,
+            realBalance: 0.0,
             eggs: 0,
-            cash: 5.00, // Começa com algum dinheiro para ração inicial
             chickens: 1,
             coops: 1,
-            feed: 100, // Porcentagem
-            feedQuality: 1, // Multiplicador de produção
-            
-            prices: {
-                chicken: 20,
-                coop: 100,
-                feedLevel: 50,
-                eggValue: 0.15,
-                feedRefill: 5
-            }
+            feed: 100,
+            boostActive: false,
+            boostTime: 0,
+            prices: { chicken: 20, coop: 100, eggValue: 0.15 }
         };
 
-        function updateUI() {
-            document.getElementById('egg-count').innerText = Math.floor(farm.eggs);
-            document.getElementById('cash-count').innerText = farm.cash.toFixed(2) + "€";
-            document.getElementById('chicken-count').innerText = farm.chickens;
-            document.getElementById('coop-count').innerText = farm.coops;
-            document.getElementById('max-chickens').innerText = farm.coops * 5;
-            document.getElementById('feed-bar-inner').style.width = farm.feed + "%";
+        const MIN_WITHDRAW = 5.00;
+        const AD_REWARD = 0.001; // Baseado no teu CPM de 1€
 
-            // Atualizar Botões
-            document.getElementById('buy-chicken-btn').disabled = (farm.cash < farm.prices.chicken || farm.chickens >= farm.coops * 5);
-            document.getElementById('buy-coop-btn').disabled = (farm.cash < farm.prices.coop);
-            document.getElementById('upgrade-feed-btn').disabled = (farm.cash < farm.prices.feedLevel);
+        function updateUI() {
+            // Stats Jogo
+            document.getElementById('egg-count').innerText = Math.floor(data.eggs);
+            document.getElementById('game-cash').innerText = data.gameCash.toFixed(2) + "€";
+            document.getElementById('chickens').innerText = data.chickens;
+            document.getElementById('coops').innerText = data.coops;
+            document.getElementById('max-chickens').innerText = data.coops * 5;
+            document.getElementById('feed-bar-inner').style.width = data.feed + "%";
+            
+            // Saldo Real
+            document.getElementById('real-balance').innerText = data.realBalance.toFixed(4) + "€";
+            document.getElementById('modal-real-val').innerText = data.realBalance.toFixed(4) + "€";
+
+            // Botões de Compra
+            document.getElementById('btn-buy-chicken').disabled = (data.gameCash < data.prices.chicken || data.chickens >= data.coops * 5);
+            document.getElementById('btn-buy-coop').disabled = (data.gameCash < data.prices.coop);
+            
+            // Boost UI
+            document.getElementById('boost-active').style.display = data.boostActive ? 'block' : 'none';
+
+            // Progresso Levantamento
+            let perc = (data.realBalance / MIN_WITHDRAW) * 100;
+            document.getElementById('prog-fill').style.width = Math.min(perc, 100) + "%";
+            document.getElementById('prog-text').innerText = Math.min(perc, 100).toFixed(1) + "% para o levantamento";
+            document.getElementById('btn-withdraw').disabled = (data.realBalance < MIN_WITHDRAW);
         }
 
-        // Loop de Produção
+        // Loop de Produção (1 segundo)
         setInterval(() => {
-            if (farm.feed > 0 && farm.chickens > 0) {
-                // Cada galinha consome ração e produz ovos
-                let consumption = 0.5 * farm.chickens;
-                farm.feed = Math.max(0, farm.feed - consumption);
+            if (data.feed > 0 && data.chickens > 0) {
+                let consumption = 0.4 * data.chickens;
+                data.feed = Math.max(0, data.feed - consumption);
                 
-                // Produção baseada na qualidade da ração
-                farm.eggs += (farm.chickens * 0.1 * farm.feedQuality);
-                updateUI();
+                let multiplier = data.boostActive ? 2 : 1;
+                data.eggs += (data.chickens * 0.1 * multiplier);
             }
+            
+            if (data.boostTime > 0) {
+                data.boostTime--;
+            } else {
+                data.boostActive = false;
+            }
+            updateUI();
         }, 1000);
 
+        // Função de Venda
         function sellEggs() {
-            if (farm.eggs >= 1) {
-                farm.cash += Math.floor(farm.eggs) * farm.prices.eggValue;
-                farm.eggs = 0;
+            if (data.eggs >= 1) {
+                data.gameCash += Math.floor(data.eggs) * data.prices.eggValue;
+                data.eggs = 0;
                 updateUI();
             }
         }
 
-        function buyFeed() {
-            if (farm.cash >= farm.prices.feedRefill) {
-                farm.cash -= farm.prices.feedRefill;
-                farm.feed = 100;
+        // Simulação de Anúncio (Aqui integras a tua rede de Ads futuramente)
+        function watchAd(type) {
+            tg.HapticFeedback.notificationOccurred('success');
+            
+            // Simula delay do anúncio
+            alert("A carregar anúncio premiado...");
+            
+            setTimeout(() => {
+                data.realBalance += AD_REWARD; // Ganho real para o utilizador
+                
+                if (type === 'feed') data.feed = 100;
+                if (type === 'boost') {
+                    data.boostActive = true;
+                    data.boostTime = 300; // 5 minutos
+                }
+                
                 updateUI();
-            }
+                alert("Sucesso! Recebeste o benefício e +0.0010€ no saldo real.");
+            }, 1000);
         }
 
-        function buyChicken() {
-            if (farm.cash >= farm.prices.chicken && farm.chickens < farm.coops * 5) {
-                farm.cash -= farm.prices.chicken;
-                farm.chickens++;
-                farm.prices.chicken = Math.round(farm.prices.chicken * 1.2);
-                document.getElementById('cost-chicken').innerText = farm.prices.chicken.toFixed(2) + "€";
-                updateUI();
+        // Compras da Loja
+        function buyItem(item) {
+            if (item === 'chicken' && data.gameCash >= data.prices.chicken) {
+                data.gameCash -= data.prices.chicken;
+                data.chickens++;
+                data.prices.chicken = Math.round(data.prices.chicken * 1.3);
+                document.getElementById('cost-chicken').innerText = data.prices.chicken.toFixed(2) + "€";
+            } else if (item === 'coop' && data.gameCash >= data.prices.coop) {
+                data.gameCash -= data.prices.coop;
+                data.coops++;
+                data.prices.coop = Math.round(data.prices.coop * 1.6);
+                document.getElementById('cost-coop').innerText = data.prices.coop.toFixed(2) + "€";
             }
+            updateUI();
         }
 
-        function buyCoop() {
-            if (farm.cash >= farm.prices.coop) {
-                farm.cash -= farm.prices.coop;
-                farm.coops++;
-                farm.prices.coop = Math.round(farm.prices.coop * 1.5);
-                document.getElementById('cost-coop').innerText = farm.prices.coop.toFixed(2) + "€";
-                updateUI();
-            }
-        }
-
-        function upgradeFeed() {
-            if (farm.cash >= farm.prices.feedLevel) {
-                farm.cash -= farm.prices.feedLevel;
-                farm.feedQuality += 0.5;
-                farm.prices.feedLevel = Math.round(farm.prices.feedLevel * 2);
-                document.getElementById('cost-feed-level').innerText = farm.prices.feedLevel.toFixed(2) + "€";
-                updateUI();
-            }
-        }
+        // Funções do Modal
+        function openModal() { document.getElementById('modal-wallet').style.display = 'flex'; }
+        function closeModal() { document.getElementById('modal-wallet').style.display = 'none'; }
 
         updateUI();
     </script>
