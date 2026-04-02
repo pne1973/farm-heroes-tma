@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.32 - Ad Analytics & Stress Test</title>
+    <title>Apex Social v33.33 - Global Economy Monitor</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -12,18 +12,16 @@
             --bg: #f8f9fa; --text: #3c4043; 
         }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
-        
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Monitor Admin v33.32 */
+        /* Monitor Admin v33.33 */
         #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .live-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 10px; border-radius: 8px; height: 100px; overflow-y: auto; border: 1px solid #333; margin-top: 10px; }
         
-        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
@@ -37,7 +35,6 @@
             <div>
                 <span class="label">Saldo Real <span id="adm-badge"></span></span>
                 <div style="font-size:1.4rem; color:var(--google-blue);" id="real-bal">0.0000€</div>
-                <button id="withdraw-btn" class="btn-withdraw" onclick="requestWithdraw()">LEVANTAR VIA PAYPAL</button>
             </div>
             <div style="text-align: right;">
                 <span class="label">Ads Vistas</span>
@@ -55,37 +52,36 @@
     </div>
 
     <div id="admin-hub" style="display:none;">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">AD ANALYTICS v33.32</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">ECONOMY LIVE MONITOR v33.33</div>
         
         <div class="admin-grid">
-            <div class="admin-box"><span class="label">Total Ads (Global)</span><div id="adm-total-ads">0</div></div>
-            <div class="admin-box"><span class="label">Receita Est. (€)</span><div id="adm-revenue">0.00€</div></div>
+            <div class="admin-box"><span class="label">Ovos Produzidos (Global)</span><div id="adm-total-eggs">0</div></div>
+            <div class="admin-box"><span class="label">Ração Consumida (Global)</span><div id="adm-total-feed">0.00 kg</div></div>
         </div>
 
         <div class="admin-grid">
-            <div class="admin-box"><span class="label">Ovos/Min</span><div id="adm-eggs">0</div></div>
-            <div class="admin-box"><span class="label">Utilizadores</span><div id="adm-u">1,771</div></div>
+            <div class="admin-box"><span class="label">Ads Vistas (Global)</span><div id="adm-total-ads">0</div></div>
+            <div class="admin-box"><span class="label">Utilizadores Ativos</span><div id="adm-u">1,771</div></div>
         </div>
 
-        <button class="btn" style="background:#333; color:white; font-size:0.8rem;" onclick="toggleSim()">🔥 INICIAR STRESS TEST (500 BOTS)</button>
-        <div id="live-log" class="live-log">> Monitor de tráfego pronto...</div>
+        <button class="btn" style="background:#333; color:white; font-size:0.8rem;" onclick="toggleSim()">🔥 STRESS TEST: SIMULAR 500 BOTS</button>
+        <div id="live-log" class="live-log">> Sistema de monitorização ativo...</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400; // ID Admin Autorizado [cite: 2026-03-26]
+        const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
         let simActive = false;
-        let globalStats = { totalAds: 0, revenue: 0, totalEggs: 0 };
+        let globalStats = { totalAds: 0, totalEggs: 0, totalFeed: 0 };
         
         let state = {
             eggs: 0, virt: 10, real: 0, chickens: 1, feedMax: 5000, feedCur: 5000, 
-            eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001,
-            adsVistas: 0 // Nova métrica por utilizador [cite: 2026-03-22]
+            eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001, adsVistas: 0
         };
 
         function toggleSim() {
             simActive = !simActive;
-            logToConsole(simActive ? "SIMULAÇÃO: Bots começaram a ver anúncios..." : "SIMULAÇÃO: Encerrada.");
+            logToConsole(simActive ? "TESTE: 500 bots iniciaram produção e consumo..." : "TESTE: Simulação parada.");
             if(simActive) runSimulation();
         }
 
@@ -98,18 +94,24 @@
         function runSimulation() {
             if(!simActive) return;
             
-            // Simula bots a verem anúncios aleatoriamente [cite: 2026-03-22]
-            let botsWatching = Math.floor(Math.random() * 5);
-            if(botsWatching > 0) {
-                globalStats.totalAds += botsWatching;
-                globalStats.revenue += (botsWatching * 0.005); // eCPM estimado
-                document.getElementById('adm-total-ads').innerText = globalStats.totalAds;
-                document.getElementById('adm-revenue').innerText = globalStats.revenue.toFixed(2) + "€";
-                logToConsole(`AD_WATCH: ${botsWatching} bots completaram 30s de anúncio.`);
-            }
+            // Simulação de 500 bots em atividade global [cite: 2026-03-22]
+            let botEggs = Math.floor(Math.random() * 25) + 10;
+            let botFeed = (Math.random() * 5).toFixed(2);
+            let botAds = Math.floor(Math.random() * 3);
 
+            globalStats.totalEggs += botEggs;
+            globalStats.totalFeed += parseFloat(botFeed);
+            globalStats.totalAds += botAds;
+
+            // Atualiza Interface Admin
+            document.getElementById('adm-total-eggs').innerText = globalStats.totalEggs.toLocaleString();
+            document.getElementById('adm-total-feed').innerText = (globalStats.totalFeed).toFixed(2) + " kg";
+            document.getElementById('adm-total-ads').innerText = globalStats.totalAds.toLocaleString();
             document.getElementById('adm-u').innerText = (1771 + Math.floor(Math.random()*50)).toLocaleString();
-            setTimeout(runSimulation, 4000);
+
+            logToConsole(`GLOBAL: +${botEggs} ovos | -${botFeed}kg ração | ${botAds} ads completas`);
+            
+            setTimeout(runSimulation, 3000);
         }
 
         function watchAd() {
@@ -119,12 +121,12 @@
                 if (document.visibilityState === 'visible') {
                     if (Date.now() - start >= 30000) {
                         state.feedCur = state.feedMax;
-                        state.adsVistas++; // Incrementa ads vistas pelo utilizador [cite: 2026-03-22]
-                        globalStats.totalAds++; // Incrementa global
+                        state.adsVistas++;
+                        globalStats.totalAds++;
                         updateUI();
                         clearInterval(interval);
-                        tg.showAlert("Recompensa entregue! Ads Vistas: " + state.adsVistas);
-                    } else { tg.showAlert("Visualização incompleta."); }
+                        tg.showAlert("Ração Reposta!");
+                    } else { tg.showAlert("Faltam segundos!"); }
                 }
             }, 2000);
         }
@@ -137,19 +139,17 @@
             let p = (state.feedCur / state.feedMax) * 100;
             document.getElementById('feed-fill').style.width = p + "%";
             document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
-            document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
-            
-            // Atualiza métricas globais no Admin
-            if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
-                document.getElementById('adm-total-ads').innerText = globalStats.totalAds;
-            }
         }
 
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur -= (2 * state.chickens);
                 state.eggTimer += (state.chickens * 0.5);
-                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
+                if(state.eggTimer >= state.eggLimit) { 
+                    state.eggs++; 
+                    globalStats.totalEggs++; // Incrementa global na produção real
+                    state.eggTimer = 0; 
+                }
                 updateUI();
             }
         }, 100);
@@ -163,16 +163,9 @@
             }
         }
 
-        function requestWithdraw() {
-            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
-                if(ok) { state.real = 0; updateUI(); tg.showAlert("Pedido enviado!"); }
-            });
-        }
-
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
                 document.getElementById('admin-hub').style.display = 'block';
-                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; margin-left:5px;">ADMIN</span>';
             }
             updateUI();
             tg.expand();
