@@ -3,49 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.13 - Magnata dos Ovos</title>
+    <title>Apex Social v33.12 - Enterprise Edition</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --google-blue: #1a73e8; --google-green: #34a853; --google-yellow: #fbbc05; --google-red: #ea4335; --bg: #f8f9fa; }
-        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: #3c4043; }
+        :root { 
+            --google-blue: #1a73e8; --google-green: #34a853; 
+            --google-yellow: #fbbc05; --google-red: #ea4335; 
+            --bg: #f8f9fa; --text: #3c4043; 
+        }
+        body { font-family: 'Roboto', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
+        
+        /* Cards & Layout */
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         
-        /* Sistema de Ranking */
-        .ranking-box { background: #fff; border-radius: 12px; padding: 10px; margin-bottom: 15px; border: 1px solid #e8eaed; }
-        .ranking-item { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #f1f3f4; }
+        /* Economia */
+        .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
+        .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
+
+        /* Retenção: Cofre & Mercado */
+        .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
         
-        /* Barra de Ração Dinâmica */
-        .feed-container { margin: 15px 0; }
-        .feed-track { background: #e8eaed; height: 32px; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid #dadce0; }
+        /* Barra de Ração */
+        .feed-track { background: #e8eaed; height: 32px; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid #dadce0; margin: 8px 0; }
         #feed-fill { height: 100%; background: var(--google-yellow); width: 100%; transition: width 0.3s linear; }
         .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; }
 
-        /* Botões Estilo Google */
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        /* Botões */
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; font-size: 1rem; width: 100%; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
         .btn-sell { background: var(--google-green); color: white; box-shadow: 0 2px 4px rgba(52,168,83,0.3); }
-        .btn-buy { background: var(--google-blue); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; }
+        .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
+        .btn-buy { background: var(--google-blue); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; border: none; cursor: pointer; }
+
+        /* Upgrades & Ranking */
+        .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
+        .row-info { flex: 1; margin-left: 10px; }
+        .row-info b { display: block; font-size: 0.9rem; }
+        .row-info span { font-size: 0.75rem; color: #70757a; }
         
-        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
-        .upgrade-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
-        .upgrade-info { flex: 1; margin-left: 10px; }
-        .upgrade-info b { display: block; font-size: 0.9rem; }
-        .upgrade-info span { font-size: 0.75rem; color: #70757a; }
+        /* Painel Admin Especial */
+        #admin-hub { background: #202124; color: #e8eaed; padding: 20px; border-top: 5px solid var(--google-red); margin-top: 40px; display: none; border-radius: 16px 16px 0 0; }
+        .admin-section { background: #2d2e31; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #3c4043; }
+        .pay-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #3c4043; font-size: 0.85rem; }
+        
+        #golden-egg { position: fixed; font-size: 3rem; cursor: pointer; display: none; z-index: 1000; filter: drop-shadow(0 0 10px gold); }
     </style>
 </head>
 <body>
 
+    <div id="golden-egg" onclick="catchGolden()">🥚✨</div>
+
     <div class="card">
         <div class="flex-between">
             <div>
-                <span style="font-size:0.7rem; font-weight:700; color:#70757a;">SALDO LEVANTÁVEL</span>
-                <div style="font-size:1.4rem; color:var(--google-blue); font-weight:500;" id="real-bal">0.0000 --</div>
+                <span class="label">Saldo Levantável <span id="adm-tag"></span></span>
+                <div class="val-real" id="real-bal">0.0000 --</div>
             </div>
             <div style="text-align: right;">
-                <span style="font-size:0.7rem; font-weight:700; color:#70757a;">CAPITAL QUINTA</span>
-                <div style="font-size:1.2rem; color:var(--google-yellow); font-weight:500;" id="virt-bal">10.00🟡</div>
+                <span class="label">Capital Quinta</span>
+                <div class="val-virt" id="virt-bal">10.00🟡</div>
             </div>
         </div>
+    </div>
+
+    <div class="piggy-bank" onclick="claimPiggy()">
+        <div>🐷 <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
+        <b id="piggy-val">0.0000 --</b>
     </div>
 
     <div class="market-banner">
@@ -54,97 +79,129 @@
             <button class="btn-buy" onclick="buyFeed()">COMPRAR 1KG</button>
         </div>
         <div style="margin-top:5px; font-size:0.85rem;">
-            1kg = <span id="corn-price">10.00</span>🟡 <span id="trend">▲</span>
+            1kg = <span id="corn-price">10.00</span>🟡 <span id="market-trend">▲</span>
         </div>
     </div>
 
     <div class="card">
-        <div class="flex-between">
+        <div class="flex-between" style="margin-bottom: 10px;">
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
-        <div class="feed-container">
-            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
-                <b id="feed-kg">5.000 kg</b>
-                <span id="consume-rate">Gasto: 20g/s</span>
-            </div>
-            <div class="feed-track">
-                <div id="feed-fill"></div>
-                <div class="feed-overlay" id="feed-pct">100%</div>
-            </div>
+        
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+            <b id="feed-kg">5.000 kg</b>
+            <span id="consume-rate">Gasto: 20g/s</span>
         </div>
+        <div class="feed-track">
+            <div id="feed-fill"></div>
+            <div class="feed-overlay" id="feed-pct">100%</div>
+        </div>
+
         <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
-        <button class="btn" style="background:white; border:1px solid #dadce0; color:var(--google-blue);" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
+        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
     </div>
 
-    <div class="ranking-box">
-        <b style="font-size:0.85rem; color:var(--google-blue);">🏆 TOP 10 MAGNATAS</b>
-        <div id="ranking-list" style="margin-top:8px;">
-            <div class="ranking-item"><span>1. Tu (Admin)</span><b>0.0000 --</b></div>
+    <div class="card">
+        <b class="label" style="color:var(--google-blue);">🏆 Top 10 Magnatas</b>
+        <div id="ranking-list" style="margin-top:10px;">
+            <div class="row-item"><span>1. Tu (Jogador)</span><b style="margin-left:auto;">0.0000 --</b></div>
         </div>
     </div>
 
     <div class="card">
-        <h3 style="margin:0 0 10px 0; font-size:1rem;">Melhorias da Quinta</h3>
+        <h3 style="margin-top:0; font-size:1rem;">Mercado de Expansão</h3>
         <div id="upgrades-list"></div>
+        <button class="btn" style="background:#f1f3f4; font-size:0.8rem; margin-top:10px;" onclick="copyInvite()">🔗 CONVIDAR AMIGOS (AFILIADOS)</button>
+    </div>
+
+    <div id="admin-hub">
+        <h2 style="margin-top:0; color:var(--google-red);">🛠️ ADMIN COMMAND CENTER</h2>
+        
+        <div class="admin-section">
+            <h3>📊 Métricas de Rede</h3>
+            <p>Utilizadores: <b id="adm-users">1</b> | Posts: <b id="adm-posts">0</b></p>
+            <p>Espaço: <b id="adm-storage">0.15</b> / 50 MB</p>
+        </div>
+
+        <div class="admin-section">
+            <h3 style="color:var(--google-green);">💰 Pagamentos PayPal Pendentes</h3>
+            <div id="adm-pay-list">
+                <div class="pay-row"><span>User 98721 (R$ 25.00)</span><button onclick="alert('Pago!')" style="background:var(--google-green); color:white; border:none; padding:2px 8px; border-radius:4px;">PAY</button></div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h3>🚫 Moderação por ID</h3>
+            <input type="text" id="del-id" placeholder="ID do Post ou User" style="width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:10px;">
+            <button class="btn" style="background:var(--google-red); color:white;" onclick="confirmDelete()">ELIMINAR DEFINITIVAMENTE</button>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const currency = tg.initDataUnsafe?.user?.language_code === 'pt-BR' ? { s: 'R$', r: 1 } : { s: '€', r: 1 };
+        const ADMIN_ID = 5401881400;
+        const locale = tg.initDataUnsafe?.user?.language_code === 'pt-BR' ? { s: 'R$', r: 1 } : { s: '€', r: 1 };
 
         let state = {
-            eggs: 0, virt: 10, real: 0, 
+            eggs: 0, virt: 10, real: 0, piggy: 0,
             chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000,
             cornPrice: 10.00, rateV: 0.50, rateR: 0.0001, prodSpeed: 0.1,
             upgrades: {
-                chk: { n: "Nova Galinha", d: "+Produção", p: 20, i: "🐔" },
-                cp: { n: "Galinheiro", d: "+5 Vagas", p: 100, i: "🏠" },
-                sl: { n: "Silo Industrial", d: "+5kg Cap.", p: 150, i: "🏗️" },
-                trk: { n: "Carrinha Entregas", d: "+15% Valor Venda", p: 300, i: "🚚" },
+                chk: { n: "Nova Galinha", d: "+Produção ovos", p: 20, i: "🐔" },
+                cp: { n: "Galinheiro", d: "+5 Vagas aves", p: 100, i: "🏠" },
+                sl: { n: "Silo Industrial", d: "+5kg capacidade", p: 150, i: "🏗️" },
+                trk: { n: "Logística", d: "+15% Valor Venda", p: 300, i: "🚚" },
                 bio: { n: "Selo BIO", d: "x2 Valor Real", p: 1000, i: "🌿" }
             }
         };
 
-        function save() { localStorage.setItem('apex_v33_13', JSON.stringify(state)); }
+        function save() { localStorage.setItem('apex_final_v33_12', JSON.stringify(state)); }
         function load() {
-            const s = localStorage.getItem('apex_v33_13');
+            const s = localStorage.getItem('apex_final_v33_12');
             if(s) state = JSON.parse(s);
+            if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
+                document.getElementById('admin-hub').style.display = 'block';
+                document.getElementById('adm-tag').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:5px;">ADMIN</span>';
+            }
         }
 
         function updateUI() {
-            document.getElementById('real-bal').innerText = state.real.toFixed(4) + currency.s;
+            document.getElementById('real-bal').innerText = state.real.toFixed(4) + locale.s;
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + locale.s;
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('corn-price').innerText = state.cornPrice.toFixed(2);
             
-            let pct = (state.feedCur / state.feedMax) * 100;
-            document.getElementById('feed-fill').style.width = pct + "%";
-            document.getElementById('feed-pct').innerText = Math.ceil(pct) + "%";
+            let p = (state.feedCur / state.feedMax) * 100;
+            document.getElementById('feed-fill').style.width = p + "%";
+            document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
-            
+            document.getElementById('consume-rate').innerText = "Gasto: " + (state.chickens * 20) + "g/s";
+
             let vG = Math.floor(state.eggs) * state.rateV;
             let rG = Math.floor(state.eggs) * state.rateR;
-            document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}${currency.s}`;
+            document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}${locale.s}`;
             renderShop();
         }
 
         function renderShop() {
-            const list = document.getElementById('upgrades-list');
-            list.innerHTML = '';
+            const container = document.getElementById('upgrades-list');
+            container.innerHTML = '';
             for(let id in state.upgrades) {
                 let u = state.upgrades[id];
-                let disabled = state.virt < u.p || (id === 'chk' && state.chickens >= state.coops*5);
-                list.innerHTML += `
-                    <div class="upgrade-row">
+                let canBuy = state.virt >= u.p && !(id === 'chk' && state.chickens >= state.coops*5);
+                container.innerHTML += `
+                    <div class="row-item">
                         <div style="font-size:1.5rem;">${u.i}</div>
-                        <div class="upgrade-info"><b>${u.n}</b><span>${u.d}</span></div>
-                        <button class="btn-buy" onclick="buy('${id}')" ${disabled?'disabled':''}>${u.p}🟡</button>
+                        <div class="row-info"><b>${u.n}</b><span>${u.d}</span></div>
+                        <button class="btn-buy" onclick="buy('${id}')" ${!canBuy?'disabled':''}>${u.p}🟡</button>
                     </div>`;
             }
         }
 
+        // CICLO DE JOGO
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens));
@@ -156,31 +213,30 @@
         setInterval(() => {
             let diff = (Math.random() * 4) - 2;
             state.cornPrice = Math.max(5, state.cornPrice + diff);
-            document.getElementById('trend').innerText = diff > 0 ? "▲" : "▼";
-            document.getElementById('trend').style.color = diff > 0 ? "var(--google-green)" : "var(--google-red)";
+            document.getElementById('market-trend').innerText = diff > 0 ? "▲" : "▼";
+            document.getElementById('market-trend').style.color = diff > 0 ? "var(--google-green)" : "var(--google-red)";
         }, 30000);
-
-        function buyFeed() {
-            if(state.virt >= state.cornPrice && state.feedCur + 1000 <= state.feedMax) {
-                state.virt -= state.cornPrice;
-                state.feedCur += 1000;
-                updateUI();
-                save();
-            } else {
-                tg.showAlert("Saldo insuficiente ou silo cheio!");
-            }
-        }
 
         function sell() {
             let q = Math.floor(state.eggs);
             if(q >= 1) {
                 state.virt += (q * state.rateV);
-                state.real += (q * state.rateR);
+                let gainR = (q * state.rateR);
+                state.real += (gainR * 0.8);
+                state.piggy += (gainR * 0.2);
                 state.eggs = 0;
                 tg.HapticFeedback.impactOccurred('medium');
                 save();
-                updateUI();
             }
+        }
+
+        function buyFeed() {
+            if(state.virt >= state.cornPrice && state.feedCur + 1000 <= state.feedMax) {
+                state.virt -= state.cornPrice;
+                state.feedCur += 1000;
+                save();
+                updateUI();
+            } else { tg.showAlert("Saldo insuficiente ou silo cheio!"); }
         }
 
         function buy(id) {
@@ -198,9 +254,46 @@
             }
         }
 
+        function claimPiggy() {
+            if(state.piggy <= 0) return;
+            tg.showConfirm(`Resgatar ${state.piggy.toFixed(4)}${locale.s} do cofre? (Requer AD)`, (ok) => {
+                if(ok) { state.real += state.piggy; state.piggy = 0; updateUI(); save(); }
+            });
+        }
+
         function watchAd() {
-            tg.showConfirm("Repor ração grátis (AD)?", (ok) => {
+            tg.showConfirm("Ver anúncio para repor ração?", (ok) => {
                 if(ok) { state.feedCur = state.feedMax; updateUI(); }
+            });
+        }
+
+        function catchGolden() {
+            document.getElementById('golden-egg').style.display = 'none';
+            state.virt += 50;
+            tg.showAlert("Ovo de Ouro! +50🟡");
+            updateUI();
+        }
+
+        setInterval(() => {
+            if(Math.random() < 0.1) {
+                let el = document.getElementById('golden-egg');
+                el.style.left = Math.random()*80 + "%"; el.style.top = Math.random()*80 + "%";
+                el.style.display = 'block';
+                setTimeout(() => el.style.display='none', 7000);
+            }
+        }, 45000);
+
+        function copyInvite() {
+            const link = `https://t.me/ApexSocialBot?start=${tg.initDataUnsafe?.user?.id || 'u'}`;
+            navigator.clipboard.writeText(link);
+            tg.showAlert("Link de convite copiado!");
+        }
+
+        function confirmDelete() {
+            let id = document.getElementById('del-id').value;
+            if(!id) return;
+            tg.showConfirm(`ELIMINAR DEFINITIVAMENTE o ID ${id}?`, (ok) => {
+                if(ok) { tg.showAlert(`ID ${id} removido.`); document.getElementById('del-id').value = ''; }
             });
         }
 
