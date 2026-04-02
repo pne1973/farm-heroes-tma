@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.27 - Production Master</title>
+    <title>Apex Social v33.28 - Production Master</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -11,7 +11,7 @@
             --google-yellow: #fbbc05; --google-red: #ea4335; 
             --bg: #f8f9fa; --text: #3c4043; 
         }
-        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; overflow-x: hidden; }
         
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
@@ -19,19 +19,22 @@
         .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
         .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
-        .btn-withdraw { margin-top: 8px; background: var(--google-blue); color: white; border: none; padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
+        /* Botão de Levantamento do Utilizador */
+        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 8px 14px; border-radius: 12px; font-size: 0.8rem; cursor: pointer; font-weight: bold; width: 100%; display: none; transition: opacity 0.2s; }
+        .btn-withdraw:active { opacity: 0.7; }
 
         .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         
+        /* Barras de Progresso */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #dadce0; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
         
         .feed-track { height: 32px; border-radius: 16px; }
-        .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; }
+        .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; color: #3c4043; }
 
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; }
-        .btn-sell { background: var(--google-green); color: white; }
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-family: inherit; }
+        .btn-sell { background: var(--google-green); color: white; box-shadow: 0 2px 4px rgba(52,168,83,0.3); }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
         .btn-buy { background: #dadce0; color: #3c4043; padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: none; cursor: pointer; min-width: 85px; font-weight: bold; }
         .can-afford { background: var(--google-yellow) !important; color: white !important; }
@@ -39,7 +42,9 @@
         .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
         .row-info { flex: 1; margin-left: 12px; }
         .row-info b { display: block; font-size: 0.9rem; color: #202124; }
+        .row-info span { font-size: 0.7rem; color: #70757a; }
 
+        /* Estilo do Painel Admin */
         #admin-hub { background: #121212; color: #fff; padding: 25px; border-top: 6px solid var(--google-red); margin-top: 40px; border-radius: 24px 24px 0 0; display: none; font-family: monospace; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .admin-box { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
@@ -62,7 +67,7 @@
     </div>
 
     <div class="piggy-bank" onclick="claimPiggy()">
-        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b><br><small>20% de bónus automático</small></div>
+        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
         <b id="piggy-val">0.0000€</b>
     </div>
 
@@ -71,16 +76,20 @@
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
-        <div class="track" style="height: 8px;"><div id="egg-progress" class="fill-yellow"></div></div>
+        
+        <div style="margin-top: 10px;"><b class="label">Próximo Ovo</b></div>
+        <div class="track" style="height: 8px;">
+            <div id="egg-progress" class="fill-yellow"></div>
+        </div>
 
         <div style="margin-top: 15px;"><b class="label">Ração</b></div>
-        <div class="flex-between" style="font-size:0.75rem; color: #70757a;"><b id="feed-kg">5.000 kg</b><span>Gasto: Dinâmico</span></div>
+        <div class="flex-between" style="font-size:0.75rem; color: #70757a;"><b id="feed-kg">5.000 kg</b><span id="consume-rate">Gasto: Dinâmico</span></div>
         <div class="track feed-track">
             <div id="feed-fill" class="fill-blue"></div>
             <div class="feed-overlay" id="feed-pct">100%</div>
         </div>
         <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000€</small></button>
-        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (SMART LINK)</button>
+        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (VER 30s)</button>
     </div>
 
     <div class="card">
@@ -89,21 +98,22 @@
     </div>
 
     <div id="admin-hub">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.27</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.28</div>
         <div class="admin-grid">
             <div class="admin-box"><span class="label">Users</span><b id="adm-u">1</b></div>
             <div class="admin-box"><span class="label">EUR/BRL</span><b>6.1245</b></div>
         </div>
-        <button class="btn" style="background:#333; color:white; padding:10px; font-size:0.8rem;" onclick="simulateNewUser()">Simular Novo Utilizador</button>
-        <div class="label" style="color:var(--google-green); margin-top:20px;">PayPal Pendentes</div>
+        <button class="btn" style="background:#333; color:white; padding:10px; font-size:0.8rem;" onclick="simulateNewUser()">Simular Pedido de Utilizador</button>
+        
+        <div class="label" style="color:var(--google-green); margin-top:20px;">PayPal Pendentes (Admin Only)</div>
         <div id="adm-pays" style="background:#1e1e1e; padding:10px; border-radius:8px; margin-top:10px;">
-            <div id="no-payments" style="font-size:0.7rem; color:#777;">Sem pedidos.</div>
+            <div id="no-payments" style="font-size:0.7rem; color:#777;">Sem pedidos pendentes.</div>
         </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400;
+        const ADMIN_ID = 5401881400; // ID do Administrador
         let users = []; 
         
         let state = {
@@ -124,31 +134,36 @@
             { id: 'genetic', n: "Genética XL", d: "+50% Saldo Virtual", i: "🧬", p: 2500 }
         ];
 
-        // LÓGICA DE ANÚNCIO INFALÍVEL (v33.27)
+        // LÓGICA DE ANÚNCIO COM RETENÇÃO DE 30s (v33.28)
         function watchAd() {
             const adUrl = "https://www.google.com"; // Substituir pelo seu Direct Link
+            const TEMPO_MINIMO = 30000; // 30 segundos obrigatórios
             
-            tg.showConfirm("Ver anúncio para repor 100% da ração?", (ok) => {
+            tg.showConfirm("Vê o anúncio completo (30s) para repor a ração. Continuar?", (ok) => {
                 if(ok) {
-                    sessionStorage.setItem('ad_watching', 'true');
+                    const startTime = Date.now();
+                    sessionStorage.setItem('ad_start_time', startTime);
                     window.open(adUrl, '_blank');
                     
-                    // Intervalo de verificação ativa
                     const checkReturn = setInterval(() => {
-                        if (sessionStorage.getItem('ad_watching') === 'true') {
-                            // Se o utilizador voltou e a app está visível
-                            if (document.visibilityState === 'visible') {
+                        if (document.visibilityState === 'visible') {
+                            const now = Date.now();
+                            const decorrido = now - startTime;
+
+                            if (decorrido >= TEMPO_MINIMO) {
                                 state.feedCur = state.feedMax;
                                 updateUI();
-                                sessionStorage.removeItem('ad_watching');
+                                sessionStorage.removeItem('ad_start_time');
                                 clearInterval(checkReturn);
-                                tg.showAlert("✅ Recompensa entregue! Stock reabastecido.");
+                                tg.showAlert("✅ Perfeito! Stock reabastecido com bónus de visualização.");
+                            } else {
+                                const faltam = Math.ceil((TEMPO_MINIMO - decorrido) / 1000);
+                                tg.showAlert(`⚠️ Ainda faltam ${faltam} segundos. Por favor, vê o anúncio até ao fim para ganhar a ração.`);
                             }
                         }
-                    }, 1000);
+                    }, 2000);
 
-                    // Timeout de segurança (2 minutos)
-                    setTimeout(() => clearInterval(checkReturn), 120000);
+                    setTimeout(() => clearInterval(checkReturn), 180000);
                 }
             });
         }
@@ -158,6 +173,7 @@
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
             document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
+            document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('egg-progress').style.width = (state.eggTimer / state.eggLimit * 100) + "%";
             
             let p = (state.feedCur / state.feedMax) * 100;
@@ -165,6 +181,7 @@
             document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
             
+            // MOSTRAR BOTÃO DE LEVANTAMENTO SE SALDO REAL > 0
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
             
             let vG = Math.floor(state.eggs) * state.rateV;
@@ -201,26 +218,26 @@
         }
 
         function requestWithdraw() {
-            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
+            tg.showConfirm(`Confirmar levantamento de ${state.real.toFixed(4)}€ para o seu PayPal?`, (ok) => {
                 if(ok) {
                     users.push({ id: state.id, valor: state.real });
                     state.real = 0;
                     updateUI();
                     refreshAdminList();
-                    tg.showAlert("Pedido enviado!");
+                    tg.showAlert("Pedido enviado! O Admin processará o pagamento via PayPal brevemente.");
                 }
             });
         }
 
         function simulateNewUser() {
-            users.push({ id: Math.floor(Math.random()*9e8), valor: (Math.random()*5).toFixed(4) });
+            users.push({ id: Math.floor(Math.random()*9e8), valor: (Math.random()*10).toFixed(4) });
             refreshAdminList();
         }
 
         function refreshAdminList() {
             const container = document.getElementById('adm-pays');
             document.getElementById('adm-u').innerText = users.length + 1;
-            if(users.length === 0) { container.innerHTML = 'Sem pedidos.'; return; }
+            if(users.length === 0) { container.innerHTML = 'Sem pedidos pendentes.'; return; }
             container.innerHTML = users.map((u, i) => `
                 <div class="flex-between" style="border-bottom:1px solid #333; padding:8px 0; font-size:0.75rem;">
                     <span>ID: ${u.id} (${(u.valor * 6.1245).toFixed(2)} BRL)</span>
@@ -248,6 +265,15 @@
                 state.piggy += (q * state.rateR * 0.2);
                 state.eggs = 0;
                 updateUI();
+            }
+        }
+
+        function claimPiggy() {
+            if(state.piggy > 0) {
+                state.real += state.piggy;
+                state.piggy = 0;
+                updateUI();
+                tg.showAlert("Cofre recolhido!");
             }
         }
 
