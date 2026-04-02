@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.50 - Full Production System</title>
+    <title>Apex Social v33.60 - Versão Final</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -28,14 +28,15 @@
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; }
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #ddd; }
-        .btn-pay { background: var(--google-green); color: white; border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; border: none; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #ddd; min-width: 75px; }
 
-        /* Mercado e Admin */
-        .market-scroll { max-height: 250px; overflow-y: auto; padding-right: 5px; }
-        .market-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
+        /* Mercado e Ícones */
+        .market-scroll { max-height: 350px; overflow-y: auto; padding-right: 5px; }
+        .market-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
+        .market-icon { font-size: 1.4rem; margin-right: 12px; }
+
+        /* Admin Hub */
         #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
-        .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -56,7 +57,7 @@
     <div class="card vault-card">
         <div class="flex-between">
             <span>🐷 <b>Cofre de Retenção</b></span>
-            <b id="vault-bal" style="font-size: 1.1rem;">0.0000€</b>
+            <b id="vault-bal">0.0000€</b>
         </div>
         <div class="label" style="color: #ad1457; margin-top: 4px;">20% de bónus acumulado</div>
     </div>
@@ -68,19 +69,9 @@
         </div>
         <div class="label" style="margin-top:10px;">Próximo Ovo</div>
         <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
-        
-        <div class="flex-between" style="margin-top:10px;">
-            <div class="label">Ração: <span id="feed-kg">5.000 kg</span></div>
-            <div class="label">Gasto: Dinâmico</div>
-        </div>
-        <div class="track" style="height:25px; border-radius:12px;">
-            <div id="feed-fill" class="fill-blue"></div>
-        </div>
-        
-        <button class="btn btn-sell" onclick="sell()">
-            VENDER PRODUÇÃO<br>
-            <small style="font-weight: normal; opacity: 0.9;" id="sell-preview">Previsto: 0.50🟡 | 0.0001€</small>
-        </button>
+        <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 kg</span> | Gasto: Dinâmico</div>
+        <div class="track" style="height:25px; border-radius:12px;"><div id="feed-fill" class="fill-blue"></div></div>
+        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="sell-preview">Previsto: 0.50🟡 | 0.0001€</small></button>
         <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (VER 30s)</button>
     </div>
 
@@ -90,19 +81,14 @@
     </div>
 
     <div id="admin-hub" style="display:none;">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">SYSTEM ADMIN v33.50</div>
-        
-        <div class="admin-box">
-            <span class="label">Pedidos de Levantamento PayPal</span>
-            <div id="payout-list" style="font-size: 0.75rem; margin-top:10px;">
-                <div class="flex-between" style="border-top: 1px solid #333; padding: 8px 0;">
-                    <span>User: 550132720 | 0.2003€</span>
-                    <button class="btn-pay" onclick="tg.showAlert('Pagamento Processado!')">PAY</button>
-                </div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">GLOBAL CONSOLE v33.60</div>
+        <div id="payout-list" style="font-size: 0.75rem; background:#1e1e1e; padding:10px; border-radius:10px;">
+            <span class="label">Pedidos PayPal</span>
+            <div class="flex-between" style="padding-top:8px;">
+                <span>User: 5401881400 | 0.00€</span>
+                <button style="background:var(--google-green); color:white; border:none; padding:2px 8px; border-radius:4px;">PAY</button>
             </div>
         </div>
-
-        <button class="btn" style="background:#333; color:white;" onclick="toggleSim()">🔥 STRESS TEST: SIMULAR 500 BOTS</button>
     </div>
 
     <script>
@@ -112,42 +98,62 @@
         let state = {
             eggs: 0, virt: 10.00, real: 0, vault: 0, 
             chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 5000, 
-            eggTimer: 0, eggLimit: 100, rateV: 0.50, rateR: 0.0001
+            eggTimer: 0, eggLimit: 100, prodSpeed: 1.5,
+            rateV: 0.50, rateR: 0.0001
         };
 
         function loadMarket() {
             const list = document.getElementById('market-list');
             for(let i=1; i<=30; i++) {
-                let cost = Math.floor(32 * Math.pow(1.2, i-1));
-                let title = i <= 15 ? `Nova Galinha Lvl ${i}` : `Silo Industrial Lvl ${i-15}`;
-                let icon = i <= 15 ? "🐔" : "🏗️";
+                let cost = Math.floor(32 * Math.pow(1.22, i-1));
+                let icon, title, desc, action;
+
+                if(i <= 8) { 
+                    icon = "🐔"; title = `Nova Galinha Lvl ${i}`; desc = "+1 produção"; 
+                    action = () => { state.chickens++; };
+                } else if(i <= 16) { 
+                    icon = "🏠"; title = `Galinheiro Lvl ${i-8}`; desc = "+5 espaço aves"; 
+                    action = () => { state.maxChickens += 5; };
+                } else if(i <= 24) { 
+                    icon = "💡"; title = `Iluminação LED Lvl ${i-16}`; desc = "+10% velocidade"; 
+                    action = () => { state.prodSpeed += 0.2; };
+                } else { 
+                    icon = "🏗️"; title = `Silo Nível ${i-24}`; desc = "+1000kg ração"; 
+                    action = () => { state.feedMax += 1000; };
+                }
+
                 list.innerHTML += `
                     <div class="market-item">
-                        <div><b>${icon} ${title}</b><br><small>+Expansão Produção</small></div>
-                        <button class="btn btn-buy" onclick="buy(${cost}, ${i <= 15})">${cost}🟡</button>
+                        <div class="market-icon">${icon}</div>
+                        <div style="flex-grow:1;"><b>${title}</b><br><small>${desc}</small></div>
+                        <button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button>
                     </div>`;
             }
         }
 
-        function buy(cost, isChick) {
+        function buy(cost, id) {
             if(state.virt >= cost) {
                 state.virt -= cost;
-                if(isChick) { state.chickens++; state.maxChickens++; }
-                else { state.feedMax += 1000; }
+                // Re-executa a lógica da melhoria baseada no ID
+                if(id <= 8) state.chickens++;
+                else if(id <= 16) state.maxChickens += 5;
+                else if(id <= 24) state.prodSpeed += 0.2;
+                else state.feedMax += 1000;
                 updateUI();
-            } else { tg.showAlert("🟡 Saldo insuficiente!"); }
+                tg.showAlert("Expansão Nível " + id + " Adquirida!");
+            } else { tg.showAlert("🟡 Capital Quinta insuficiente!"); }
         }
 
         function sell() {
             let q = Math.floor(state.eggs);
             if(q >= 1) {
-                let gainReal = q * state.rateR;
-                state.real += gainReal * 0.8; // 80% Saldo Disponível
-                state.vault += gainReal * 0.2; // 20% Cofre
+                let gain = q * state.rateR;
+                state.real += gain * 0.8;
+                state.vault += gain * 0.2; //
                 state.virt += q * state.rateV;
                 state.eggs = 0;
                 updateUI();
-                tg.showAlert("Venda realizada com sucesso!");
+                tg.showAlert("Produção vendida!");
             }
         }
 
@@ -174,8 +180,8 @@
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                state.feedCur -= (state.chickens * 1.2); // Gasto Dinâmico
-                state.eggTimer += (state.chickens * 1.5);
+                state.feedCur -= (state.chickens * 1.1);
+                state.eggTimer += (state.chickens * state.prodSpeed);
                 if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
                 updateUI();
             }
