@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.42 - Full Assets</title>
+    <title>Apex Social v33.50 - Full Production System</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
             --google-blue: #1a73e8; --google-green: #34a853; 
             --google-yellow: #fbbc05; --google-red: #ea4335; 
-            --bg: #f8f9fa; --text: #3c4043; 
+            --bg: #f8f9fa; --text: #3c4043; --pink-bg: #fce4ec;
         }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Progressões */
+        /* Cofre de Retenção */
+        .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
+        
+        /* Barras de Progresso */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
@@ -25,19 +28,14 @@
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; }
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.8rem; border: 1px solid #ddd; min-width: 70px; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 8px 14px; border-radius: 12px; font-size: 0.75rem; border: 1px solid #ddd; }
+        .btn-pay { background: var(--google-green); color: white; border-radius: 4px; padding: 4px 8px; font-size: 0.7rem; border: none; }
 
-        /* Mercado com Imagens */
-        .market-scroll { max-height: 380px; overflow-y: auto; padding-right: 5px; }
-        .market-item { border-bottom: 1px solid #eee; padding: 12px 0; display: flex; justify-content: space-between; align-items: center; }
-        .market-icon { font-size: 1.5rem; margin-right: 12px; background: #f8f9fa; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-        .market-info { flex-grow: 1; }
-
-        /* Painel Admin v33.42 */
+        /* Mercado e Admin */
+        .market-scroll { max-height: 250px; overflow-y: auto; padding-right: 5px; }
+        .market-item { border-bottom: 1px solid #eee; padding: 10px 0; display: flex; justify-content: space-between; align-items: center; }
         #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
-        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; }
-        .profit-pos { color: var(--google-green); font-weight: bold; }
+        .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; margin-bottom: 10px; }
     </style>
 </head>
 <body>
@@ -45,15 +43,22 @@
     <div class="card">
         <div class="flex-between">
             <div>
-                <span class="label">Saldo Real <span id="adm-badge" style="display:none; background:var(--google-red); color:white; padding:1px 4px; border-radius:4px; font-size:0.6rem;">ADMIN</span></span>
+                <span class="label">Saldo Real <span id="adm-badge" style="display:none; background:var(--google-red); color:white; padding:1px 4px; border-radius:4px;">ADMIN</span></span>
                 <div style="font-size:1.5rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
-                <div style="font-size:0.8rem; color:#888;" id="brl-bal">R$ 0.00</div>
             </div>
             <div style="text-align: right;">
-                <span class="label">Ads Vistas</span>
-                <div id="user-ads" style="font-size:1.2rem; color:var(--google-green);">0</div>
+                <span class="label">Capital Quinta</span>
+                <div id="virt-bal" style="font-size:1.2rem; color:var(--google-yellow); font-weight: 500;">10.00🟡</div>
             </div>
         </div>
+    </div>
+
+    <div class="card vault-card">
+        <div class="flex-between">
+            <span>🐷 <b>Cofre de Retenção</b></span>
+            <b id="vault-bal" style="font-size: 1.1rem;">0.0000€</b>
+        </div>
+        <div class="label" style="color: #ad1457; margin-top: 4px;">20% de bónus acumulado</div>
     </div>
 
     <div class="card">
@@ -61,84 +66,88 @@
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
+        <div class="label" style="margin-top:10px;">Próximo Ovo</div>
         <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
-        <div class="label" style="margin-top:10px;">Nível de Ração</div>
+        
+        <div class="flex-between" style="margin-top:10px;">
+            <div class="label">Ração: <span id="feed-kg">5.000 kg</span></div>
+            <div class="label">Gasto: Dinâmico</div>
+        </div>
         <div class="track" style="height:25px; border-radius:12px;">
             <div id="feed-fill" class="fill-blue"></div>
-            <div style="position:absolute; width:100%; text-align:center; line-height:25px; font-weight:bold; color: white; font-size: 0.8rem;" id="feed-pct">100%</div>
         </div>
-        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO</button>
-        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (30s)</button>
+        
+        <button class="btn btn-sell" onclick="sell()">
+            VENDER PRODUÇÃO<br>
+            <small style="font-weight: normal; opacity: 0.9;" id="sell-preview">Previsto: 0.50🟡 | 0.0001€</small>
+        </button>
+        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (VER 30s)</button>
     </div>
 
     <div class="card">
         <div class="label" style="margin-bottom:10px;">🚀 Mercado de Expansão (30 Níveis)</div>
-        <div class="market-scroll" id="market-list">
-            </div>
+        <div class="market-scroll" id="market-list"></div>
     </div>
 
     <div id="admin-hub" style="display:none;">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">GLOBAL CONSOLE v33.42</div>
-        <div class="admin-grid">
-            <div class="admin-box"><span class="label">Receita Ads (Est.)</span><div id="adm-rev">0.0000€</div></div>
-            <div class="admin-box"><span class="label">Users Ativos</span><div id="adm-u">1,804</div></div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">SYSTEM ADMIN v33.50</div>
+        
+        <div class="admin-box">
+            <span class="label">Pedidos de Levantamento PayPal</span>
+            <div id="payout-list" style="font-size: 0.75rem; margin-top:10px;">
+                <div class="flex-between" style="border-top: 1px solid #333; padding: 8px 0;">
+                    <span>User: 550132720 | 0.2003€</span>
+                    <button class="btn-pay" onclick="tg.showAlert('Pagamento Processado!')">PAY</button>
+                </div>
+            </div>
         </div>
-        <button class="btn" style="background:#333; color:white;" onclick="toggleSim()">🔥 STRESS TEST: 500 BOTS</button>
+
+        <button class="btn" style="background:#333; color:white;" onclick="toggleSim()">🔥 STRESS TEST: SIMULAR 500 BOTS</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
         const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
-        const EUR_BRL = 6.1245; //
         
-        let finance = { rev: 0 };
         let state = {
-            eggs: 0, virt: 10.00, real: 0, chickens: 1, maxChickens: 5,
-            feedMax: 5000, feedCur: 5000, eggTimer: 0, eggLimit: 100, 
-            rateV: 0.50, rateR: 0.0001, adsVistas: 0
+            eggs: 0, virt: 10.00, real: 0, vault: 0, 
+            chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 5000, 
+            eggTimer: 0, eggLimit: 100, rateV: 0.50, rateR: 0.0001
         };
 
-        // Gerador do Mercado com Imagens
         function loadMarket() {
             const list = document.getElementById('market-list');
-            list.innerHTML = "";
-            
             for(let i=1; i<=30; i++) {
-                let cost = Math.floor(32 * Math.pow(1.25, i-1));
-                let icon = "";
-                let title = "";
-                let desc = "";
-
-                if(i <= 10) {
-                    icon = "🐔"; title = `Nova Galinha Lvl ${i}`; desc = "+1 ovo por ciclo";
-                } else if(i <= 20) {
-                    icon = "🏠"; title = `Galinheiro Lvl ${i-10}`; desc = "+5 espaço para aves";
-                } else {
-                    icon = "🏗️"; title = `Silo Industrial Lvl ${i-20}`; desc = "+1000kg de ração";
-                }
-
+                let cost = Math.floor(32 * Math.pow(1.2, i-1));
+                let title = i <= 15 ? `Nova Galinha Lvl ${i}` : `Silo Industrial Lvl ${i-15}`;
+                let icon = i <= 15 ? "🐔" : "🏗️";
                 list.innerHTML += `
                     <div class="market-item">
-                        <div class="market-icon">${icon}</div>
-                        <div class="market-info">
-                            <b>${title}</b><br>
-                            <small>${desc}</small>
-                        </div>
-                        <button class="btn btn-buy" onclick="buy(${i}, ${cost})">${cost}🟡</button>
+                        <div><b>${icon} ${title}</b><br><small>+Expansão Produção</small></div>
+                        <button class="btn btn-buy" onclick="buy(${cost}, ${i <= 15})">${cost}🟡</button>
                     </div>`;
             }
         }
 
-        function buy(lvl, cost) {
+        function buy(cost, isChick) {
             if(state.virt >= cost) {
                 state.virt -= cost;
-                if(lvl <= 10) state.chickens++;
-                else if(lvl <= 20) state.maxChickens += 5;
-                else state.feedMax += 1000;
+                if(isChick) { state.chickens++; state.maxChickens++; }
+                else { state.feedMax += 1000; }
                 updateUI();
-                tg.showAlert("Expansão Ativada!");
-            } else {
-                tg.showAlert("Saldo de Capital Quinta insuficiente.");
+            } else { tg.showAlert("🟡 Saldo insuficiente!"); }
+        }
+
+        function sell() {
+            let q = Math.floor(state.eggs);
+            if(q >= 1) {
+                let gainReal = q * state.rateR;
+                state.real += gainReal * 0.8; // 80% Saldo Disponível
+                state.vault += gainReal * 0.2; // 20% Cofre
+                state.virt += q * state.rateV;
+                state.eggs = 0;
+                updateUI();
+                tg.showAlert("Venda realizada com sucesso!");
             }
         }
 
@@ -146,41 +155,26 @@
             window.open("https://www.google.com", '_blank');
             setTimeout(() => {
                 state.feedCur = state.feedMax;
-                state.adsVistas++;
-                finance.rev += 0.0065;
                 updateUI();
                 tg.showAlert("Ração Reposta!");
             }, 30000);
         }
 
-        function sell() {
-            let q = Math.floor(state.eggs);
-            if(q >= 1) {
-                state.real += (q * state.rateR);
-                state.virt += (q * state.rateV);
-                state.eggs = 0;
-                updateUI();
-            }
-        }
-
         function updateUI() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
-            document.getElementById('brl-bal').innerText = "R$ " + (state.real * EUR_BRL).toFixed(2);
+            document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('vault-bal').innerText = state.vault.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens}`;
-            document.getElementById('user-ads').innerText = state.adsVistas;
+            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
             document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax)*100 + "%";
-            document.getElementById('feed-pct').innerText = Math.ceil((state.feedCur/state.feedMax)*100) + "%";
             document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
-            
-            if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
-                document.getElementById('adm-rev').innerText = finance.rev.toFixed(4) + "€";
-            }
+            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(2)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
         }
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                state.feedCur -= (state.chickens * 2);
+                state.feedCur -= (state.chickens * 1.2); // Gasto Dinâmico
                 state.eggTimer += (state.chickens * 1.5);
                 if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
                 updateUI();
