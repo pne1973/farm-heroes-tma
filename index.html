@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.34 - Official Production</title>
+    <title>Apex Social v33.34 - Production Build</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -17,7 +17,6 @@
             -webkit-tap-highlight-color: transparent;
         }
         
-        /* Utility Cards */
         .card { 
             background: white; border-radius: 16px; padding: 16px; 
             box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; 
@@ -26,25 +25,24 @@
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* Progress Bars */
+        /* Barras de Progressão */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
 
-        /* Buttons */
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; transition: opacity 0.2s; }
-        .btn:active { opacity: 0.8; }
+        /* Botões */
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.9rem; }
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-withdraw { background: var(--google-blue); color: white; padding: 8px; border-radius: 8px; font-size: 0.75rem; margin-top: 8px; display: none; }
+        .btn-withdraw { background: var(--google-blue); color: white; padding: 8px; border-radius: 8px; font-size: 0.75rem; margin-top: 8px; display: none; width: 100%; }
 
-        /* Admin Hub Style */
+        /* Painel Admin */
         #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
         .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; }
         .profit-pos { color: var(--google-green); font-weight: bold; }
         .profit-neg { color: var(--google-red); font-weight: bold; }
-        .live-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 10px; border-radius: 8px; height: 120px; overflow-y: auto; border: 1px solid #333; margin-top: 10px; }
+        .live-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 10px; border-radius: 8px; height: 110px; overflow-y: auto; border: 1px solid #333; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -81,17 +79,14 @@
     </div>
 
     <div id="admin-hub" style="display:none;">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px; display:flex; justify-content:space-between;">
-            <span>ECONOMY MONITOR v33.34</span>
-            <span id="cpu-load" style="font-size:0.7rem; color:#666;">CPU: 2%</span>
-        </div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">FINANCIAL LIVE MONITOR v33.34</div>
         
         <div class="admin-grid">
-            <div class="admin-box"><span class="label">Receita Ads</span><div id="adm-rev">0.0000€</div></div>
-            <div class="admin-box"><span class="label">Pagamentos</span><div id="adm-exp">0.0000€</div></div>
+            <div class="admin-box"><span class="label">Receita Ads (Est.)</span><div id="adm-rev">0.0000€</div></div>
+            <div class="admin-box"><span class="label">Gastos Users</span><div id="adm-exp">0.0000€</div></div>
         </div>
 
-        <div class="admin-box" style="margin-bottom: 10px; text-align: center; border: 1px solid #444;">
+        <div class="admin-box" style="margin-bottom: 10px; text-align: center;">
             <span class="label">Lucro Líquido Estimado</span>
             <div id="adm-profit" style="font-size: 1.6rem;">0.0000€</div>
         </div>
@@ -107,34 +102,25 @@
         </div>
 
         <button class="btn" style="background:#222; color:white; border: 1px solid #444;" onclick="toggleSim()">🔥 STRESS TEST: SIMULAR 500 BOTS</button>
-        
-        <div class="label" style="color:var(--google-green); margin-top:10px;">Atividade Económica Live</div>
-        <div id="live-log" class="live-log">> Aguardando início do teste...</div>
+        <div id="live-log" class="live-log">> Pronto para monitorização...</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400; // ID Mestre [cite: 2026-03-26]
+        const ADMIN_ID = 5401881400; // ID Admin Autorizado [cite: 2026-03-26]
         
         let simActive = false;
         let finance = { rev: 0, exp: 0, feed: 0, ads: 0, eggs: 0 };
         
         let state = {
-            eggs: 0, 
-            real: 0, 
-            chickens: 1, 
-            feedMax: 5000, 
-            feedCur: 5000, 
-            eggTimer: 0, 
-            eggLimit: 100, 
-            rateR: 0.0001, // 0.0001€ por ovo [cite: 2026-03-22]
-            adsVistas: 0
+            eggs: 0, real: 0, chickens: 1, feedMax: 5000, feedCur: 5000, 
+            eggTimer: 0, eggLimit: 100, rateR: 0.0001, adsVistas: 0
         };
 
-        // MOTOR DE SIMULAÇÃO
+        // MOTOR DE SIMULAÇÃO DE CARGA [cite: 2026-03-22, 2026-03-26]
         function toggleSim() {
             simActive = !simActive;
-            logToConsole(simActive ? "STRESS TEST: Iniciado com 500 bots." : "STRESS TEST: Encerrado.");
+            logToConsole(simActive ? "TESTE: Bots ativos no ecossistema." : "TESTE: Parado.");
             if(simActive) runSimulation();
         }
 
@@ -147,11 +133,12 @@
         function runSimulation() {
             if(!simActive) return;
             
+            // Simulação de atividade global
             let botAds = Math.floor(Math.random() * 4);
             let botEggsSold = Math.floor(Math.random() * 40) + 10;
             let botFeed = parseFloat((Math.random() * 3).toFixed(2));
 
-            let gain = botAds * 0.0065; // eCPM simulado
+            let gain = botAds * 0.0065; // eCPM simulado por ad vista
             let loss = botEggsSold * state.rateR;
 
             finance.rev += gain;
@@ -161,7 +148,7 @@
             finance.ads += botAds;
 
             updateAdminUI();
-            logToConsole(`BOT: +${botEggsSold} ovos vendidos | Rec: +${gain.toFixed(4)}€`);
+            logToConsole(`ECON: +${botEggsSold} ovos | Ganhos Ad: +${gain.toFixed(4)}€`);
             
             setTimeout(runSimulation, 3000);
         }
@@ -172,7 +159,6 @@
             document.getElementById('adm-total-eggs').innerText = finance.eggs.toLocaleString();
             document.getElementById('adm-total-feed').innerText = finance.feed.toFixed(2) + " kg";
             document.getElementById('adm-u').innerText = (1804 + Math.floor(Math.random()*60)).toLocaleString();
-            document.getElementById('cpu-load').innerText = `CPU: ${Math.floor(Math.random()*15 + 2)}%`;
             
             let profit = finance.rev - finance.exp;
             const pDiv = document.getElementById('adm-profit');
@@ -180,7 +166,7 @@
             pDiv.className = profit >= 0 ? "profit-pos" : "profit-neg";
         }
 
-        // LÓGICA DE ANÚNCIOS (MONETIZAÇÃO) [cite: 2026-03-24]
+        // SISTEMA DE MONETIZAÇÃO (ADS) [cite: 2026-03-24]
         function watchAd() {
             const start = Date.now();
             window.open("https://www.google.com", '_blank');
@@ -193,7 +179,7 @@
                         updateUI();
                         if(tg.initDataUnsafe?.user?.id == ADMIN_ID) updateAdminUI();
                         clearInterval(interval);
-                        tg.showAlert("Ração Reposta! Ads totais: " + state.adsVistas);
+                        tg.showAlert("Ração Reposta!");
                     }
                 }
             }, 2000);
@@ -210,7 +196,7 @@
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
         }
 
-        // CICLO DE PRODUÇÃO [cite: 2026-03-22]
+        // LÓGICA DE JOGO [cite: 2026-03-22]
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur -= (2 * state.chickens);
@@ -233,14 +219,14 @@
                 state.eggs = 0; 
                 updateUI();
                 if(tg.initDataUnsafe?.user?.id == ADMIN_ID) updateAdminUI();
-                tg.showAlert(`Venda concluída: +${payout.toFixed(4)}€`);
+                tg.showAlert(`Produção vendida: +${payout.toFixed(4)}€`);
             }
         }
 
         function requestWithdraw() {
-            tg.showConfirm(`Confirmar levantamento de ${state.real.toFixed(4)}€ para o seu PayPal?`, (ok) => {
+            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€ via PayPal?`, (ok) => {
                 if(ok) {
-                    tg.showAlert("Pedido enviado para processamento manual.");
+                    tg.showAlert("Pedido de levantamento registado.");
                     state.real = 0;
                     updateUI();
                 }
