@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.25 - Ad & Multi-User Test</title>
+    <title>Apex Social v33.26 - Production Master</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -19,11 +19,13 @@
         .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
         .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
+        /* Botão de Levantamento do Utilizador */
         .btn-withdraw { margin-top: 8px; background: var(--google-blue); color: white; border: none; padding: 6px 14px; border-radius: 12px; font-size: 0.75rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
 
         .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
         
+        /* Barras de Progresso */
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; border: 1px solid #dadce0; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
@@ -40,7 +42,9 @@
         .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
         .row-info { flex: 1; margin-left: 12px; }
         .row-info b { display: block; font-size: 0.9rem; color: #202124; }
-        
+        .row-info span { font-size: 0.7rem; color: #70757a; }
+
+        /* Estilo do Painel Admin */
         #admin-hub { background: #121212; color: #fff; padding: 25px; border-top: 6px solid var(--google-red); margin-top: 40px; border-radius: 24px 24px 0 0; display: none; font-family: monospace; }
         .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
         .admin-box { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; }
@@ -63,8 +67,13 @@
     </div>
 
     <div class="piggy-bank" onclick="claimPiggy()">
-        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b></div>
+        <div><span style="font-size:1.2rem;">🐷</span> <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
         <b id="piggy-val">0.0000€</b>
+    </div>
+
+    <div class="market-banner">
+        <div class="flex-between"><span>🌾 <b>Mercado de Milho</b></span><button class="btn-buy can-afford" onclick="buyFeed()">COMPRAR 1KG</button></div>
+        <div style="margin-top:5px; font-size:0.85rem;">1kg = <span id="corn-price">10.00</span>🟡 <span id="trend">▲</span></div>
     </div>
 
     <div class="card">
@@ -72,7 +81,11 @@
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
-        <div class="track" style="height: 8px;"><div id="egg-progress" class="fill-yellow"></div></div>
+        
+        <div style="margin-top: 10px;"><b class="label">Próximo Ovo</b></div>
+        <div class="track" style="height: 8px;">
+            <div id="egg-progress" class="fill-yellow"></div>
+        </div>
 
         <div style="margin-top: 15px;"><b class="label">Ração</b></div>
         <div class="flex-between" style="font-size:0.75rem; color: #70757a;"><b id="feed-kg">5.000 kg</b><span id="consume-rate">Gasto: 20g/s</span></div>
@@ -80,7 +93,7 @@
             <div id="feed-fill" class="fill-blue"></div>
             <div class="feed-overlay" id="feed-pct">100%</div>
         </div>
-        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO</button>
+        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000€</small></button>
         <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (SMART LINK)</button>
     </div>
 
@@ -90,12 +103,11 @@
     </div>
 
     <div id="admin-hub">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.25</div>
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:20px;">SYSTEM ADMIN v33.26</div>
         <div class="admin-grid">
             <div class="admin-box"><span class="label">Users</span><b id="adm-u">1</b></div>
             <div class="admin-box"><span class="label">EUR/BRL</span><b>6.1245</b></div>
         </div>
-        
         <div class="label" style="color:var(--google-yellow); margin-bottom:10px;">Simulador de Teste</div>
         <button class="btn" style="background:#333; color:white; padding:10px; font-size:0.8rem;" onclick="simulateNewUser()">Simular Novo Utilizador</button>
         
@@ -108,32 +120,51 @@
     <script>
         const tg = window.Telegram.WebApp;
         const ADMIN_ID = 5401881400;
-        let users = []; // Simulação de base de dados para teste
+        let users = []; 
         
         let state = {
             id: 5401881400, eggs: 0, virt: 10, real: 0, piggy: 0,
             chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000, 
             eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001,
-            levels: { chk: 1, cp: 1, silo: 1 }
+            levels: { chk: 1, cp: 1, silo: 1, logistics: 0, auto: 0, bio: 0, incub: 0, genetic: 0, solar: 0, export: 0, drone: 0, staff: 0, lab: 0, storage: 0, brand: 0 }
         };
 
-        // FUNÇÃO DE ANÚNCIO COM DETEÇÃO DE FOCO
+        const catalog = [
+            { id: 'chk', n: "Nova Galinha", d: "+Produção base", i: "🐔", p: 20 },
+            { id: 'cp', n: "Galinheiro", d: "+5 Vagas aves", i: "🏠", p: 100 },
+            { id: 'silo', n: "Silo Industrial", d: "+5kg ração", i: "🏗️", p: 240 },
+            { id: 'logistics', n: "Logística 🚚", d: "+15% Venda global", i: "📦", p: 300 },
+            { id: 'auto', n: "Alimentador Auto", d: "-10% gasto ração", i: "🤖", p: 500 },
+            { id: 'bio', n: "Selo BIO 🌿", d: "Dobro de Saldo Real", i: "⭐", p: 1000 },
+            { id: 'incub', n: "Incubadora", d: "+20% Velocidade", i: "🥚", p: 1500 },
+            { id: 'genetic', n: "Genética XL", d: "+50% Saldo Virtual", i: "🧬", p: 2500 },
+            { id: 'solar', n: "Painéis Solares", d: "Custos reduzidos", i: "☀️", p: 4000 },
+            { id: 'export', n: "Licença Export", d: "+25% Saldo Real", i: "🌍", p: 7500 },
+            { id: 'drone', n: "Drones Entrega", d: "+5% Bónus venda", i: "🛸", p: 12000 },
+            { id: 'staff', n: "Equipa Técnica", d: "Produção 24/7", i: "👥", p: 20000 },
+            { id: 'lab', n: "Laboratório", d: "Ovos de Ouro", i: "🧪", p: 35000 },
+            { id: 'storage', n: "Câmara Fria", d: "Stock ilimitado", i: "❄️", p: 60000 },
+            { id: 'brand', n: "Franchise Global", d: "Multiplicador x2", i: "🏢", p: 100000 }
+        ];
+
+        // SISTEMA DE ANÚNCIO ADSTERRA COM DUPLA DETEÇÃO [cite: 2026-03-22]
         function watchAd() {
-            // Exemplo de Smart Direct Link do Adsterra
             const adUrl = "https://www.google.com"; 
-            
-            tg.showConfirm("Ver anúncio para repor stock?", (ok) => {
+            tg.showConfirm("Ver anúncio para repor 100% da ração?", (ok) => {
                 if(ok) {
                     window.open(adUrl, '_blank');
-                    
-                    // Detetor de retorno para entregar benefício
-                    const onReturn = () => {
-                        state.feedCur = state.feedMax;
-                        updateUI();
-                        tg.showAlert("✅ Stock Reposto! Bom trabalho na quinta.");
-                        window.removeEventListener('focus', onReturn);
+                    const deliverReward = () => {
+                        if (state.feedCur < state.feedMax) {
+                            state.feedCur = state.feedMax;
+                            updateUI();
+                            tg.showAlert("✅ Stock Reposto! O seu esforço valeu a pena.");
+                        }
+                        window.removeEventListener('focus', deliverReward);
+                        document.removeEventListener('visibilitychange', handleVisibility);
                     };
-                    window.addEventListener('focus', onReturn, { once: true });
+                    const handleVisibility = () => { if (document.visibilityState === 'visible') deliverReward(); };
+                    window.addEventListener('focus', deliverReward, { once: true });
+                    document.addEventListener('visibilitychange', handleVisibility, { once: true });
                 }
             });
         }
@@ -141,44 +172,75 @@
         function updateUI() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + "€";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
+            document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('egg-progress').style.width = (state.eggTimer / state.eggLimit * 100) + "%";
             
             let p = (state.feedCur / state.feedMax) * 100;
             document.getElementById('feed-fill').style.width = p + "%";
             document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
+            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
             
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
             renderUpgrades();
         }
 
+        function renderUpgrades() {
+            const container = document.getElementById('upgrades-list');
+            container.innerHTML = '';
+            catalog.forEach(u => {
+                let lvl = state.levels[u.id] || 0;
+                let cost = Math.round(u.p * Math.pow(1.6, lvl));
+                let canBuy = state.virt >= cost;
+                container.innerHTML += `
+                    <div class="row-item">
+                        <div style="font-size:1.6rem;">${u.i}</div>
+                        <div class="row-info"><b>${u.n} (Lvl ${lvl})</b><span>${u.d}</span></div>
+                        <button class="btn-buy ${canBuy?'can-afford':''}" onclick="buy('${u.id}', ${cost})" ${!canBuy?'disabled':''}>${cost}🟡</button>
+                    </div>`;
+            });
+        }
+
+        function buy(id, cost) {
+            if(state.virt >= cost) {
+                state.virt -= cost;
+                state.levels[id]++;
+                if(id==='chk') state.chickens++;
+                if(id==='cp') state.coops++;
+                if(id==='silo') state.feedMax += 5000;
+                if(id==='incub') state.eggLimit = Math.max(10, state.eggLimit * 0.8);
+                updateUI();
+            }
+        }
+
         function requestWithdraw() {
-            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
+            tg.showConfirm(`Solicitar levantamento de ${state.real.toFixed(4)}€ via PayPal?`, (ok) => {
                 if(ok) {
-                    const pedido = { id: state.id, valor: state.real };
-                    users.push(pedido);
+                    users.push({ id: state.id, valor: state.real });
                     state.real = 0;
                     updateUI();
                     refreshAdminList();
-                    tg.showAlert("Pedido enviado ao Painel Admin!");
+                    tg.showAlert("Pedido enviado com sucesso!");
                 }
             });
         }
 
-        // FUNÇÕES DE TESTE MULTI-UTILIZADOR
+        // LÓGICA DE SIMULAÇÃO ADMIN [cite: 2026-03-22, 2026-03-26]
         function simulateNewUser() {
             const mockId = Math.floor(Math.random() * 900000000);
-            const mockValor = (Math.random() * 5).toFixed(4);
+            const mockValor = (Math.random() * 10).toFixed(4);
             users.push({ id: mockId, valor: parseFloat(mockValor) });
             refreshAdminList();
-            tg.showAlert(`Utilizador ${mockId} simulou um pedido de ${mockValor}€`);
         }
 
         function refreshAdminList() {
             const container = document.getElementById('adm-pays');
             document.getElementById('adm-u').innerText = users.length + 1;
-            if(users.length === 0) return;
-            
+            if(users.length === 0) {
+                container.innerHTML = '<div id="no-payments" style="font-size:0.7rem; color:#777;">Nenhum pedido pendente.</div>';
+                return;
+            }
             container.innerHTML = users.map((u, i) => `
                 <div class="flex-between" style="border-bottom:1px solid #333; padding:8px 0; font-size:0.75rem;">
                     <span>ID: ${u.id} (R$ ${(u.valor * 6.1245).toFixed(2)})</span>
@@ -190,28 +252,16 @@
         function processPay(index) {
             users.splice(index, 1);
             refreshAdminList();
-            if(users.length === 0) document.getElementById('adm-pays').innerHTML = '<div id="no-payments" style="font-size:0.7rem; color:#777;">Nenhum pedido pendente.</div>';
-        }
-
-        function renderUpgrades() {
-            const container = document.getElementById('upgrades-list');
-            container.innerHTML = `
-                <div class="row-item">
-                    <div style="font-size:1.6rem;">🐔</div>
-                    <div class="row-info"><b>Nova Galinha (Lvl ${state.levels.chk})</b></div>
-                    <button class="btn-buy ${state.virt>=20?'can-afford':''}" onclick="buy('chk', 20)">20🟡</button>
-                </div>`;
-        }
-
-        function buy(id, cost) {
-            if(state.virt >= cost) { state.virt -= cost; state.levels[id]++; if(id==='chk') state.chickens++; updateUI(); }
         }
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                state.feedCur = Math.max(0, state.feedCur - (2 * state.chickens));
+                state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens / 10));
                 state.eggTimer += (state.chickens * 0.5);
-                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; }
+                if(state.eggTimer >= state.eggLimit) {
+                    state.eggs++;
+                    state.eggTimer = 0;
+                }
                 updateUI();
             }
         }, 100);
@@ -220,7 +270,8 @@
             let q = Math.floor(state.eggs);
             if(q >= 1) {
                 state.virt += (q * state.rateV);
-                state.real += (q * state.rateR);
+                state.real += (q * state.rateR * 0.8);
+                state.piggy += (q * state.rateR * 0.2);
                 state.eggs = 0;
                 updateUI();
             }
