@@ -3,203 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social - v33.12</title>
+    <title>Apex Social v33.13 - Magnata dos Ovos</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        :root { --tg-bg: #f8f9fa; --google-blue: #1a73e8; --google-green: #34a853; --google-yellow: #fbbc05; --google-red: #ea4335; }
-        body { font-family: 'Segoe UI', Roboto, sans-serif; background: var(--tg-bg); margin: 0; padding: 12px; color: #3c4043; }
-        
-        /* Layout Cards */
+        :root { --google-blue: #1a73e8; --google-green: #34a853; --google-yellow: #fbbc05; --google-red: #ea4335; --bg: #f8f9fa; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: #3c4043; }
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         
-        /* Dinheiro e Moeda */
-        .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; }
-        .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
-        .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
-
-        /* Cofre (Piggy Bank) */
-        .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        /* Sistema de Ranking */
+        .ranking-box { background: #fff; border-radius: 12px; padding: 10px; margin-bottom: 15px; border: 1px solid #e8eaed; }
+        .ranking-item { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid #f1f3f4; }
         
-        /* Mercado de Milho */
-        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 10px; border-radius: 10px; font-size: 0.85rem; margin-bottom: 12px; }
-        .trend-up { color: var(--google-green); }
-        .trend-down { color: var(--google-red); }
+        /* Barra de Ração Dinâmica */
+        .feed-container { margin: 15px 0; }
+        .feed-track { background: #e8eaed; height: 32px; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid #dadce0; }
+        #feed-fill { height: 100%; background: var(--google-yellow); width: 100%; transition: width 0.3s linear; }
+        .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; }
 
-        /* Barra de Ração */
-        .feed-header { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 5px; font-weight: bold; }
-        .feed-track { background: #e8eaed; height: 30px; border-radius: 15px; overflow: hidden; position: relative; border: 1px solid #dadce0; }
-        #feed-fill { height: 100%; background: var(--google-yellow); width: 100%; transition: width 0.4s linear; }
-        .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 30px; font-weight: bold; font-size: 0.8rem; }
-
-        /* Botões */
-        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; font-size: 1rem; width: 100%; cursor: pointer; margin-bottom: 8px; transition: 0.2s; }
-        .btn-sell { background: var(--google-green); color: white; }
-        .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
+        /* Botões Estilo Google */
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; }
+        .btn-sell { background: var(--google-green); color: white; box-shadow: 0 2px 4px rgba(52,168,83,0.3); }
+        .btn-buy { background: var(--google-blue); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; }
         
-        /* Shop */
-        .shop-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
-        .shop-info { flex: 1; margin-left: 10px; }
-        .shop-info b { display: block; font-size: 0.9rem; }
-        .shop-info span { font-size: 0.75rem; color: #70757a; }
-        .buy-btn { background: #f8f9fa; border: 1px solid #dadce0; border-radius: 18px; padding: 6px 14px; font-weight: bold; }
-
-        /* Admin & Affiliates */
-        .admin-tag { background: var(--google-red); color: white; font-size: 0.6rem; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
-        #golden-egg { position: fixed; font-size: 3rem; cursor: pointer; display: none; z-index: 9999; filter: drop-shadow(0 0 10px gold); }
+        .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
+        .upgrade-row { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
+        .upgrade-info { flex: 1; margin-left: 10px; }
+        .upgrade-info b { display: block; font-size: 0.9rem; }
+        .upgrade-info span { font-size: 0.75rem; color: #70757a; }
     </style>
 </head>
 <body>
 
-    <div id="golden-egg" onclick="catchGolden()">🥚✨</div>
-
     <div class="card">
         <div class="flex-between">
             <div>
-                <span class="label">Saldo Real <span id="admin-indicator"></span></span>
-                <div class="val-real" id="real-bal">0.0000 --</div>
+                <span style="font-size:0.7rem; font-weight:700; color:#70757a;">SALDO LEVANTÁVEL</span>
+                <div style="font-size:1.4rem; color:var(--google-blue); font-weight:500;" id="real-bal">0.0000 --</div>
             </div>
             <div style="text-align: right;">
-                <span class="label">Capital Quinta</span>
-                <div class="val-virt" id="virt-bal">10.00🟡</div>
+                <span style="font-size:0.7rem; font-weight:700; color:#70757a;">CAPITAL QUINTA</span>
+                <div style="font-size:1.2rem; color:var(--google-yellow); font-weight:500;" id="virt-bal">10.00🟡</div>
             </div>
         </div>
-    </div>
-
-    <div class="piggy-bank" onclick="claimPiggy()">
-        <div>🐷 <b>Cofre de Retenção</b><br><small>20% de bónus acumulado</small></div>
-        <b id="piggy-val">0.0000 --</b>
     </div>
 
     <div class="market-banner">
-        🌾 <b>Mercado de Milho:</b> 1kg = <span id="corn-price">10.00</span>🟡 
-        <span id="market-trend" class="trend-up">▲</span>
-        <br><small>Preço flutua a cada 30s. Compra no momento certo!</small>
+        <div class="flex-between">
+            <span>🌾 <b>Mercado de Milho</b></span>
+            <button class="btn-buy" onclick="buyFeed()">COMPRAR 1KG</button>
+        </div>
+        <div style="margin-top:5px; font-size:0.85rem;">
+            1kg = <span id="corn-price">10.00</span>🟡 <span id="trend">▲</span>
+        </div>
     </div>
 
     <div class="card">
-        <div class="flex-between" style="margin-bottom: 10px;">
+        <div class="flex-between">
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
-        
-        <div class="feed-header">
-            <span id="feed-kg">5.000 kg</span>
-            <span id="consume-rate">Gasto: 20g/s</span>
+        <div class="feed-container">
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; margin-bottom:4px;">
+                <b id="feed-kg">5.000 kg</b>
+                <span id="consume-rate">Gasto: 20g/s</span>
+            </div>
+            <div class="feed-track">
+                <div id="feed-fill"></div>
+                <div class="feed-overlay" id="feed-pct">100%</div>
+            </div>
         </div>
-        <div class="feed-track">
-            <div id="feed-fill"></div>
-            <div class="feed-overlay" id="feed-pct">100%</div>
-        </div>
+        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
+        <button class="btn" style="background:white; border:1px solid #dadce0; color:var(--google-blue);" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
+    </div>
 
-        <div style="margin-top: 15px;">
-            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
-            <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
+    <div class="ranking-box">
+        <b style="font-size:0.85rem; color:var(--google-blue);">🏆 TOP 10 MAGNATAS</b>
+        <div id="ranking-list" style="margin-top:8px;">
+            <div class="ranking-item"><span>1. Tu (Admin)</span><b>0.0000 --</b></div>
         </div>
     </div>
 
     <div class="card">
-        <h3 style="margin-top: 0; font-size: 1rem;">Mercado de Expansão</h3>
-        <div id="shop-items"></div>
-        <button class="btn" style="background:#eee; font-size:0.8rem; margin-top:10px;" onclick="copyInvite()">🔗 COPIAR LINK DE CONVITE (AFILIADOS)</button>
-    </div>
-
-    <div id="admin-panel" class="card" style="display:none; border-color: var(--google-red);">
-        <h3 style="color:var(--google-red); margin-top:0;">Painel Administrativo</h3>
-        <p style="font-size:0.8rem;">ID: 5401881400 | Total Users: 1 | PayPal Pendentes: 0</p>
-        <button class="btn" style="background:var(--google-red); color:white;" onclick="alert('Lista de pagamentos limpa.')">LIMPAR LISTA PAYPAL</button>
+        <h3 style="margin:0 0 10px 0; font-size:1rem;">Melhorias da Quinta</h3>
+        <div id="upgrades-list"></div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const myID = 5401881400;
         const currency = tg.initDataUnsafe?.user?.language_code === 'pt-BR' ? { s: 'R$', r: 1 } : { s: '€', r: 1 };
 
         let state = {
-            eggs: 0, virt: 10, real: 0, piggy: 0,
-            chickens: 1, coops: 1,
-            feedMax: 5000, feedCur: 5000, cornPrice: 10.00,
-            rateV: 0.50, rateR: 0.0001,
+            eggs: 0, virt: 10, real: 0, 
+            chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000,
+            cornPrice: 10.00, rateV: 0.50, rateR: 0.0001, prodSpeed: 0.1,
             upgrades: {
-                chk: { n: "Nova Galinha", d: "+Produção ovos", p: 20, i: "🐔" },
-                cp: { n: "Galinheiro", d: "+5 vagas aves", p: 100, i: "🏠" },
-                sl: { n: "Silo Industrial", d: "+5kg capacidade", p: 150, i: "🏗️" },
-                lt: { n: "Iluminação LED", d: "+10% Valor Real", p: 250, i: "💡" }
+                chk: { n: "Nova Galinha", d: "+Produção", p: 20, i: "🐔" },
+                cp: { n: "Galinheiro", d: "+5 Vagas", p: 100, i: "🏠" },
+                sl: { n: "Silo Industrial", d: "+5kg Cap.", p: 150, i: "🏗️" },
+                trk: { n: "Carrinha Entregas", d: "+15% Valor Venda", p: 300, i: "🚚" },
+                bio: { n: "Selo BIO", d: "x2 Valor Real", p: 1000, i: "🌿" }
             }
         };
 
-        function save() { localStorage.setItem('apex_v33_final', JSON.stringify(state)); }
+        function save() { localStorage.setItem('apex_v33_13', JSON.stringify(state)); }
         function load() {
-            const s = localStorage.getItem('apex_v33_final');
+            const s = localStorage.getItem('apex_v33_13');
             if(s) state = JSON.parse(s);
-            if(tg.initDataUnsafe?.user?.id == myID) {
-                document.getElementById('admin-panel').style.display = 'block';
-                document.getElementById('admin-indicator').innerHTML = '<span class="admin-tag">ADMIN</span>';
-            }
         }
 
-        function update() {
+        function updateUI() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + currency.s;
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
-            document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + currency.s;
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('chk-count').innerText = state.chickens + "/" + (state.coops * 5);
             document.getElementById('corn-price').innerText = state.cornPrice.toFixed(2);
-
-            let p = (state.feedCur / state.feedMax) * 100;
-            document.getElementById('feed-fill').style.width = p + "%";
-            document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
+            
+            let pct = (state.feedCur / state.feedMax) * 100;
+            document.getElementById('feed-fill').style.width = pct + "%";
+            document.getElementById('feed-pct').innerText = Math.ceil(pct) + "%";
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " kg";
-            document.getElementById('consume-rate').innerText = "Gasto: " + (state.chickens * 20) + "g/s";
-
+            
             let vG = Math.floor(state.eggs) * state.rateV;
             let rG = Math.floor(state.eggs) * state.rateR;
             document.getElementById('preview').innerText = `Previsto: ${vG.toFixed(2)}🟡 | ${rG.toFixed(4)}${currency.s}`;
-            
             renderShop();
         }
 
         function renderShop() {
-            const container = document.getElementById('shop-items');
-            container.innerHTML = '';
+            const list = document.getElementById('upgrades-list');
+            list.innerHTML = '';
             for(let id in state.upgrades) {
                 let u = state.upgrades[id];
-                let canBuy = state.virt >= u.p && !(id === 'chk' && state.chickens >= state.coops*5);
-                container.innerHTML += `
-                    <div class="shop-row">
+                let disabled = state.virt < u.p || (id === 'chk' && state.chickens >= state.coops*5);
+                list.innerHTML += `
+                    <div class="upgrade-row">
                         <div style="font-size:1.5rem;">${u.i}</div>
-                        <div class="shop-info"><b>${u.n}</b><span>${u.d}</span></div>
-                        <button class="buy-btn" onclick="buy('${id}')" ${!canBuy?'disabled':''}>${u.p}🟡</button>
+                        <div class="upgrade-info"><b>${u.n}</b><span>${u.d}</span></div>
+                        <button class="btn-buy" onclick="buy('${id}')" ${disabled?'disabled':''}>${u.p}🟡</button>
                     </div>`;
             }
         }
 
-        // ECONOMIA
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens));
-                state.eggs += (state.chickens * 0.1);
-                update();
+                state.eggs += (state.chickens * state.prodSpeed);
+                updateUI();
             }
         }, 1000);
 
         setInterval(() => {
             let diff = (Math.random() * 4) - 2;
             state.cornPrice = Math.max(5, state.cornPrice + diff);
-            document.getElementById('market-trend').innerText = diff > 0 ? "▲" : "▼";
-            document.getElementById('market-trend').className = diff > 0 ? "trend-up" : "trend-down";
+            document.getElementById('trend').innerText = diff > 0 ? "▲" : "▼";
+            document.getElementById('trend').style.color = diff > 0 ? "var(--google-green)" : "var(--google-red)";
         }, 30000);
+
+        function buyFeed() {
+            if(state.virt >= state.cornPrice && state.feedCur + 1000 <= state.feedMax) {
+                state.virt -= state.cornPrice;
+                state.feedCur += 1000;
+                updateUI();
+                save();
+            } else {
+                tg.showAlert("Saldo insuficiente ou silo cheio!");
+            }
+        }
 
         function sell() {
             let q = Math.floor(state.eggs);
             if(q >= 1) {
                 state.virt += (q * state.rateV);
-                let gainR = (q * state.rateR);
-                state.real += (gainR * 0.8);
-                state.piggy += (gainR * 0.2); // 20% retenção cofre
+                state.real += (q * state.rateR);
                 state.eggs = 0;
                 tg.HapticFeedback.impactOccurred('medium');
                 save();
+                updateUI();
             }
         }
 
@@ -210,49 +190,21 @@
                 if(id==='chk') state.chickens++;
                 if(id==='cp') state.coops++;
                 if(id==='sl') state.feedMax += 5000;
-                if(id==='lt') state.rateR *= 1.1;
+                if(id==='trk') { state.rateV *= 1.15; state.rateR *= 1.15; }
+                if(id==='bio') state.rateR *= 2;
                 u.p = Math.round(u.p * 1.6);
                 save();
-                update();
+                updateUI();
             }
-        }
-
-        function claimPiggy() {
-            if(state.piggy <= 0) return;
-            tg.showConfirm(`Desejas resgatar ${state.piggy.toFixed(4)}${currency.s} do cofre? (Requer ver AD)`, (ok) => {
-                if(ok) { state.real += state.piggy; state.piggy = 0; update(); save(); }
-            });
         }
 
         function watchAd() {
-            tg.showConfirm("Assistir anúncio para repor ração?", (ok) => {
-                if(ok) { state.feedCur = state.feedMax; update(); }
+            tg.showConfirm("Repor ração grátis (AD)?", (ok) => {
+                if(ok) { state.feedCur = state.feedMax; updateUI(); }
             });
         }
 
-        function catchGolden() {
-            document.getElementById('golden-egg').style.display = 'none';
-            state.virt += 50;
-            tg.showAlert("Ovo de Ouro capturado! +50🟡");
-            update();
-        }
-
-        setInterval(() => {
-            if(Math.random() < 0.1) {
-                let el = document.getElementById('golden-egg');
-                el.style.left = Math.random()*80 + "%"; el.style.top = Math.random()*80 + "%";
-                el.style.display = 'block';
-                setTimeout(() => el.style.display='none', 6000);
-            }
-        }, 40000);
-
-        function copyInvite() {
-            const link = `https://t.me/SuaBotApp?start=${tg.initDataUnsafe?.user?.id || 'user'}`;
-            navigator.clipboard.writeText(link);
-            tg.showAlert("Link de convite copiado!");
-        }
-
-        window.onload = () => { load(); update(); tg.expand(); };
+        window.onload = () => { load(); updateUI(); tg.expand(); };
     </script>
 </body>
 </html>
