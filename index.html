@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.30 - Multi-User Simulation</title>
+    <title>Apex Social v33.32 - Ad Analytics & Stress Test</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -16,24 +16,18 @@
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
-        .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
-        
-        /* Botão PayPal Utilizador - Sempre presente se houver saldo */
-        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
 
+        /* Monitor Admin v33.32 */
+        #admin-hub { background: #121212; color: #fff; padding: 20px; border-top: 6px solid var(--google-red); margin-top: 30px; border-radius: 24px 24px 0 0; }
+        .admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .admin-box { background: #1e1e1e; padding: 10px; border-radius: 10px; border: 1px solid #333; }
+        .live-log { background: #000; color: #0f0; font-family: monospace; font-size: 0.65rem; padding: 10px; border-radius: 8px; height: 100px; overflow-y: auto; border: 1px solid #333; margin-top: 10px; }
+        
+        .btn-withdraw { margin-top: 10px; background: var(--google-blue); color: white; border: none; padding: 10px; border-radius: 12px; font-size: 0.85rem; cursor: pointer; font-weight: bold; width: 100%; display: none; }
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; position: relative; margin: 8px 0; }
         .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; transition: width 0.3s linear; }
-
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; }
-        .btn-sell { background: var(--google-green); color: white; }
-        .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-
-        /* Painel Admin v33.30 */
-        #admin-hub { background: #121212; color: #fff; padding: 25px; border-top: 6px solid var(--google-red); margin-top: 40px; border-radius: 24px 24px 0 0; display: none; }
-        .admin-box { background: #1e1e1e; padding: 12px; border-radius: 10px; border: 1px solid #333; margin-bottom: 10px; }
-        .sim-active { color: var(--google-green); font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
@@ -42,124 +36,113 @@
         <div class="flex-between">
             <div>
                 <span class="label">Saldo Real <span id="adm-badge"></span></span>
-                <div class="val-real" id="real-bal">0.0000€</div>
+                <div style="font-size:1.4rem; color:var(--google-blue);" id="real-bal">0.0000€</div>
                 <button id="withdraw-btn" class="btn-withdraw" onclick="requestWithdraw()">LEVANTAR VIA PAYPAL</button>
             </div>
             <div style="text-align: right;">
-                <span class="label">Capital Quinta</span>
-                <div id="virt-bal" style="font-size:1.2rem; color:var(--google-yellow);">10.00🟡</div>
+                <span class="label">Ads Vistas</span>
+                <div id="user-ads" style="font-size:1.2rem; color:var(--google-green);">0</div>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <div class="flex-between">
-            <span>🥚 Stock: <b id="egg-count">0</b></span>
-            <span>🐔 Aves: <b id="chk-count">1/5</b></span>
-        </div>
+        <div class="flex-between"><span>🥚 Stock: <b id="egg-count">0</b></span><span>🐔 Aves: <b id="chk-count">1/5</b></span></div>
         <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
-        <div class="track" style="height:30px; border-radius:15px;">
-            <div id="feed-fill" class="fill-blue"></div>
-            <div style="position:absolute; width:100%; text-align:center; line-height:30px; font-weight:bold;" id="feed-pct">100%</div>
-        </div>
-        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO</button>
-        <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (30s)</button>
+        <div class="track" style="height:30px; border-radius:15px;"><div id="feed-fill" class="fill-blue"></div><div style="position:absolute; width:100%; text-align:center; line-height:30px; font-weight:bold;" id="feed-pct">100%</div></div>
+        <button class="btn" style="background:var(--google-green); color:white;" onclick="sell()">VENDER PRODUÇÃO</button>
+        <button class="btn" style="background:white; color:var(--google-blue); border:1px solid #dadce0;" onclick="watchAd()">📺 REPOR RAÇÃO (30s)</button>
     </div>
 
-    <div id="admin-hub">
-        <div style="color:var(--google-red); font-weight:900; margin-bottom:15px;">ADMIN ENGINE v33.30</div>
+    <div id="admin-hub" style="display:none;">
+        <div style="color:var(--google-red); font-weight:900; margin-bottom:10px;">AD ANALYTICS v33.32</div>
         
-        <div class="admin-box">
-            <span class="label">Utilizadores Ativos</span>
-            <div style="font-size:1.5rem;"><b id="adm-u">1,248</b> <span id="sim-label" class="sim-active" style="display:none;">(SIMULANDO)</span></div>
+        <div class="admin-grid">
+            <div class="admin-box"><span class="label">Total Ads (Global)</span><div id="adm-total-ads">0</div></div>
+            <div class="admin-box"><span class="label">Receita Est. (€)</span><div id="adm-revenue">0.00€</div></div>
         </div>
 
-        <div class="label" style="color:var(--google-yellow); margin-bottom:10px;">Controlo de Stress Test</div>
-        <button class="btn" style="background:#333; color:white;" onclick="startSimulation()">🔥 Simular 500 Utilizadores em Jogo</button>
-        <button class="btn" style="background:#444; color:white;" onclick="requestWithdrawSim()">Gerar Pedido PayPal Aleatório</button>
-        
-        <div id="adm-pays" style="margin-top:15px; font-size:0.8rem;"></div>
+        <div class="admin-grid">
+            <div class="admin-box"><span class="label">Ovos/Min</span><div id="adm-eggs">0</div></div>
+            <div class="admin-box"><span class="label">Utilizadores</span><div id="adm-u">1,771</div></div>
+        </div>
+
+        <button class="btn" style="background:#333; color:white; font-size:0.8rem;" onclick="toggleSim()">🔥 INICIAR STRESS TEST (500 BOTS)</button>
+        <div id="live-log" class="live-log">> Monitor de tráfego pronto...</div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400;
-        let users = [];
+        const ADMIN_ID = 5401881400; // ID Admin Autorizado [cite: 2026-03-26]
         let simActive = false;
-        let baseUsers = 1248;
-
+        let globalStats = { totalAds: 0, revenue: 0, totalEggs: 0 };
+        
         let state = {
-            id: 5401881400, eggs: 0, virt: 10, real: 0,
-            chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000, 
-            eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001
+            eggs: 0, virt: 10, real: 0, chickens: 1, feedMax: 5000, feedCur: 5000, 
+            eggTimer: 0, eggLimit: 100, rateV: 0.5, rateR: 0.0001,
+            adsVistas: 0 // Nova métrica por utilizador [cite: 2026-03-22]
         };
 
-        // MOTOR DE SIMULAÇÃO DE JOGO [cite: 2026-03-22]
-        function startSimulation() {
+        function toggleSim() {
             simActive = !simActive;
-            document.getElementById('sim-label').style.display = simActive ? 'inline' : 'none';
-            if(simActive) {
-                tg.showAlert("Simulação Iniciada: 500 bots começaram a consumir ração e produzir ovos no servidor virtual.");
-                runSimLoop();
-            }
+            logToConsole(simActive ? "SIMULAÇÃO: Bots começaram a ver anúncios..." : "SIMULAÇÃO: Encerrada.");
+            if(simActive) runSimulation();
         }
 
-        function runSimLoop() {
+        function logToConsole(msg) {
+            const log = document.getElementById('live-log');
+            log.innerHTML += `<br>> [${new Date().toLocaleTimeString()}] ${msg}`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function runSimulation() {
             if(!simActive) return;
-            // Simula oscilação de utilizadores e carga
-            let fluctuation = Math.floor(Math.random() * 50);
-            document.getElementById('adm-u').innerText = (baseUsers + 500 + fluctuation).toLocaleString();
-            setTimeout(runSimLoop, 2000);
+            
+            // Simula bots a verem anúncios aleatoriamente [cite: 2026-03-22]
+            let botsWatching = Math.floor(Math.random() * 5);
+            if(botsWatching > 0) {
+                globalStats.totalAds += botsWatching;
+                globalStats.revenue += (botsWatching * 0.005); // eCPM estimado
+                document.getElementById('adm-total-ads').innerText = globalStats.totalAds;
+                document.getElementById('adm-revenue').innerText = globalStats.revenue.toFixed(2) + "€";
+                logToConsole(`AD_WATCH: ${botsWatching} bots completaram 30s de anúncio.`);
+            }
+
+            document.getElementById('adm-u').innerText = (1771 + Math.floor(Math.random()*50)).toLocaleString();
+            setTimeout(runSimulation, 4000);
         }
 
         function watchAd() {
-            const startTime = Date.now();
+            const start = Date.now();
             window.open("https://www.google.com", '_blank');
-            const check = setInterval(() => {
+            const interval = setInterval(() => {
                 if (document.visibilityState === 'visible') {
-                    if (Date.now() - startTime >= 30000) {
-                        state.feedCur = state.feedMax; updateUI();
-                        clearInterval(check); tg.showAlert("Ração Reposta!");
-                    } else {
-                        tg.showAlert("Ainda não passaram 30 segundos.");
-                    }
+                    if (Date.now() - start >= 30000) {
+                        state.feedCur = state.feedMax;
+                        state.adsVistas++; // Incrementa ads vistas pelo utilizador [cite: 2026-03-22]
+                        globalStats.totalAds++; // Incrementa global
+                        updateUI();
+                        clearInterval(interval);
+                        tg.showAlert("Recompensa entregue! Ads Vistas: " + state.adsVistas);
+                    } else { tg.showAlert("Visualização incompleta."); }
                 }
             }, 2000);
         }
 
         function updateUI() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
-            document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('user-ads').innerText = state.adsVistas;
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
             document.getElementById('egg-progress').style.width = (state.eggTimer / state.eggLimit * 100) + "%";
             let p = (state.feedCur / state.feedMax) * 100;
             document.getElementById('feed-fill').style.width = p + "%";
             document.getElementById('feed-pct').innerText = Math.ceil(p) + "%";
             document.getElementById('withdraw-btn').style.display = state.real > 0 ? 'block' : 'none';
-        }
-
-        function requestWithdraw() {
-            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
-                if(ok) {
-                    users.push({ id: state.id, valor: state.real });
-                    state.real = 0; updateUI(); refreshAdminList();
-                }
-            });
-        }
-
-        function requestWithdrawSim() {
-            users.push({ id: Math.floor(Math.random()*9e8), valor: Math.random()*5 });
-            refreshAdminList();
-        }
-
-        function refreshAdminList() {
-            const container = document.getElementById('adm-pays');
-            container.innerHTML = users.map((u, i) => `
-                <div style="display:flex; justify-content:space-between; padding:5px; border-bottom:1px solid #333;">
-                    <span>User ${u.id}: ${u.valor.toFixed(4)}€</span>
-                    <button onclick="users.splice(${i},1);refreshAdminList();" style="background:var(--google-green); color:white; border:none; border-radius:4px;">PAY</button>
-                </div>
-            `).join('');
+            
+            // Atualiza métricas globais no Admin
+            if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
+                document.getElementById('adm-total-ads').innerText = globalStats.totalAds;
+            }
         }
 
         setInterval(() => {
@@ -180,10 +163,16 @@
             }
         }
 
+        function requestWithdraw() {
+            tg.showConfirm(`Levantar ${state.real.toFixed(4)}€?`, (ok) => {
+                if(ok) { state.real = 0; updateUI(); tg.showAlert("Pedido enviado!"); }
+            });
+        }
+
         window.onload = () => {
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
                 document.getElementById('admin-hub').style.display = 'block';
-                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 4px; border-radius:4px; margin-left:5px;">ADMIN</span>';
+                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; margin-left:5px;">ADMIN</span>';
             }
             updateUI();
             tg.expand();
