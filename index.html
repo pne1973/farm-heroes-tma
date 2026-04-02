@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v33.12 - Enterprise Edition</title>
+    <title>Apex Social v33.12 - Production</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -11,39 +11,34 @@
             --google-yellow: #fbbc05; --google-red: #ea4335; 
             --bg: #f8f9fa; --text: #3c4043; 
         }
-        body { font-family: 'Roboto', 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
+        body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
         
-        /* Cards & Layout */
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
         .flex-between { display: flex; justify-content: space-between; align-items: center; }
         
-        /* Economia */
         .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         .val-real { font-size: 1.4rem; color: var(--google-blue); font-weight: 500; }
         .val-virt { font-size: 1.2rem; color: var(--google-yellow); font-weight: 500; }
 
-        /* Retenção: Cofre & Mercado */
         .piggy-bank { background: linear-gradient(90deg, #fce4ec, #f8bbd0); border: 1px solid #f48fb1; padding: 12px; border-radius: 12px; margin-bottom: 12px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
         .market-banner { background: #fff8e1; border: 1px solid #ffe082; padding: 12px; border-radius: 12px; margin-bottom: 15px; }
         
-        /* Barra de Ração */
+        /* Barra de Ração com Rótulo solicitado */
         .feed-track { background: #e8eaed; height: 32px; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid #dadce0; margin: 8px 0; }
         #feed-fill { height: 100%; background: var(--google-yellow); width: 100%; transition: width 0.3s linear; }
         .feed-overlay { position: absolute; width: 100%; text-align: center; line-height: 32px; font-weight: bold; font-size: 0.85rem; }
 
-        /* Botões */
         .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; font-size: 1rem; width: 100%; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
         .btn-sell { background: var(--google-green); color: white; box-shadow: 0 2px 4px rgba(52,168,83,0.3); }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; }
-        .btn-buy { background: var(--google-blue); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; border: none; cursor: pointer; }
+        .btn-buy { background: var(--google-blue); color: white; padding: 6px 12px; border-radius: 12px; font-size: 0.75rem; border: none; }
 
-        /* Upgrades & Ranking */
         .row-item { display: flex; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f3f4; }
         .row-info { flex: 1; margin-left: 10px; }
         .row-info b { display: block; font-size: 0.9rem; }
         .row-info span { font-size: 0.75rem; color: #70757a; }
         
-        /* Painel Admin Especial */
+        /* Admin Panel Styles */
         #admin-hub { background: #202124; color: #e8eaed; padding: 20px; border-top: 5px solid var(--google-red); margin-top: 40px; display: none; border-radius: 16px 16px 0 0; }
         .admin-section { background: #2d2e31; padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid #3c4043; }
         .pay-row { display: flex; justify-content: space-between; align-items: center; padding: 8px; border-bottom: 1px solid #3c4043; font-size: 0.85rem; }
@@ -58,7 +53,7 @@
     <div class="card">
         <div class="flex-between">
             <div>
-                <span class="label">Saldo Levantável <span id="adm-tag"></span></span>
+                <span class="label">Saldo Levantável <span id="adm-badge"></span></span>
                 <div class="val-real" id="real-bal">0.0000 --</div>
             </div>
             <div style="text-align: right;">
@@ -79,17 +74,21 @@
             <button class="btn-buy" onclick="buyFeed()">COMPRAR 1KG</button>
         </div>
         <div style="margin-top:5px; font-size:0.85rem;">
-            1kg = <span id="corn-price">10.00</span>🟡 <span id="market-trend">▲</span>
+            1kg = <span id="corn-price">10.00</span>🟡 <span id="trend">▲</span>
         </div>
     </div>
 
     <div class="card">
-        <div class="flex-between" style="margin-bottom: 10px;">
+        <div class="flex-between" style="margin-bottom: 15px;">
             <span>🥚 Stock: <b id="egg-count">0</b></span>
             <span>🐔 Aves: <b id="chk-count">1/5</b></span>
         </div>
         
-        <div style="display:flex; justify-content:space-between; font-size:0.75rem;">
+        <div style="margin-bottom: 5px;">
+            <b class="label" style="font-size: 0.85rem; color: var(--text);">Ração</b>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; color: #70757a;">
             <b id="feed-kg">5.000 kg</b>
             <span id="consume-rate">Gasto: 20g/s</span>
         </div>
@@ -98,7 +97,7 @@
             <div class="feed-overlay" id="feed-pct">100%</div>
         </div>
 
-        <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
+        <button class="btn btn-sell" onclick="sell()" style="margin-top:10px;">VENDER PRODUÇÃO<br><small id="preview">Previsto: 0.00🟡 | 0.0000 --</small></button>
         <button class="btn btn-ad" onclick="watchAd()">📺 REPOR RAÇÃO (AD GRÁTIS)</button>
     </div>
 
@@ -116,25 +115,21 @@
     </div>
 
     <div id="admin-hub">
-        <h2 style="margin-top:0; color:var(--google-red);">🛠️ ADMIN COMMAND CENTER</h2>
-        
+        <h2 style="margin-top:0; color:var(--google-red);">🛠️ ADMIN COMMAND</h2>
         <div class="admin-section">
-            <h3>📊 Métricas de Rede</h3>
-            <p>Utilizadores: <b id="adm-users">1</b> | Posts: <b id="adm-posts">0</b></p>
-            <p>Espaço: <b id="adm-storage">0.15</b> / 50 MB</p>
+            <h3>📊 Status Geral</h3>
+            <p>Users: <b id="adm-u">1</b> | Posts: <b>0</b> | Espaço: <b>0.15 / 50MB</b></p>
         </div>
-
         <div class="admin-section">
-            <h3 style="color:var(--google-green);">💰 Pagamentos PayPal Pendentes</h3>
-            <div id="adm-pay-list">
-                <div class="pay-row"><span>User 98721 (R$ 25.00)</span><button onclick="alert('Pago!')" style="background:var(--google-green); color:white; border:none; padding:2px 8px; border-radius:4px;">PAY</button></div>
+            <h3 style="color:var(--google-green);">💰 PayPal Pendentes</h3>
+            <div id="adm-pays">
+                <div class="pay-row"><span>User 5401881400 (R$ 0.00)</span><button style="background:var(--google-green); color:white; border:none; padding:2px 8px; border-radius:4px;">PAY</button></div>
             </div>
         </div>
-
         <div class="admin-section">
-            <h3>🚫 Moderação por ID</h3>
-            <input type="text" id="del-id" placeholder="ID do Post ou User" style="width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:10px;">
-            <button class="btn" style="background:var(--google-red); color:white;" onclick="confirmDelete()">ELIMINAR DEFINITIVAMENTE</button>
+            <h3>🚫 Moderação</h3>
+            <input type="text" id="del-id" placeholder="ID Post/User" style="width:100%; padding:10px; border-radius:8px; border:none; margin-bottom:10px; background:#3c4043; color:white;">
+            <button class="btn" style="background:var(--google-red); color:white;" onclick="adminDel()">ELIMINAR AGORA</button>
         </div>
     </div>
 
@@ -146,27 +141,27 @@
         let state = {
             eggs: 0, virt: 10, real: 0, piggy: 0,
             chickens: 1, coops: 1, feedMax: 5000, feedCur: 5000,
-            cornPrice: 10.00, rateV: 0.50, rateR: 0.0001, prodSpeed: 0.1,
+            cornPrice: 10.00, rateV: 0.50, rateR: 0.0001,
             upgrades: {
                 chk: { n: "Nova Galinha", d: "+Produção ovos", p: 20, i: "🐔" },
                 cp: { n: "Galinheiro", d: "+5 Vagas aves", p: 100, i: "🏠" },
                 sl: { n: "Silo Industrial", d: "+5kg capacidade", p: 150, i: "🏗️" },
-                trk: { n: "Logística", d: "+15% Valor Venda", p: 300, i: "🚚" },
-                bio: { n: "Selo BIO", d: "x2 Valor Real", p: 1000, i: "🌿" }
+                trk: { n: "Logística 🚚", d: "+15% Valor Venda", p: 300, i: "📦" },
+                bio: { n: "Selo BIO 🌿", d: "x2 Valor Real", p: 1000, i: "⭐" }
             }
         };
 
-        function save() { localStorage.setItem('apex_final_v33_12', JSON.stringify(state)); }
+        function save() { localStorage.setItem('apex_final_v33', JSON.stringify(state)); }
         function load() {
-            const s = localStorage.getItem('apex_final_v33_12');
+            const s = localStorage.getItem('apex_final_v33');
             if(s) state = JSON.parse(s);
             if(tg.initDataUnsafe?.user?.id == ADMIN_ID) {
                 document.getElementById('admin-hub').style.display = 'block';
-                document.getElementById('adm-tag').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; vertical-align:middle; margin-left:5px;">ADMIN</span>';
+                document.getElementById('adm-badge').innerHTML = '<span style="background:var(--google-red); color:white; font-size:0.6rem; padding:2px 6px; border-radius:4px; margin-left:5px;">ADMIN</span>';
             }
         }
 
-        function updateUI() {
+        function update() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + locale.s;
             document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
             document.getElementById('piggy-val').innerText = state.piggy.toFixed(4) + locale.s;
@@ -201,20 +196,19 @@
             }
         }
 
-        // CICLO DE JOGO
         setInterval(() => {
             if(state.feedCur > 0) {
                 state.feedCur = Math.max(0, state.feedCur - (20 * state.chickens));
-                state.eggs += (state.chickens * state.prodSpeed);
-                updateUI();
+                state.eggs += (state.chickens * 0.1);
+                update();
             }
         }, 1000);
 
         setInterval(() => {
             let diff = (Math.random() * 4) - 2;
             state.cornPrice = Math.max(5, state.cornPrice + diff);
-            document.getElementById('market-trend').innerText = diff > 0 ? "▲" : "▼";
-            document.getElementById('market-trend').style.color = diff > 0 ? "var(--google-green)" : "var(--google-red)";
+            document.getElementById('trend').innerText = diff > 0 ? "▲" : "▼";
+            document.getElementById('trend').style.color = diff > 0 ? "var(--google-green)" : "var(--google-red)";
         }, 30000);
 
         function sell() {
@@ -234,8 +228,7 @@
             if(state.virt >= state.cornPrice && state.feedCur + 1000 <= state.feedMax) {
                 state.virt -= state.cornPrice;
                 state.feedCur += 1000;
-                save();
-                updateUI();
+                save(); update();
             } else { tg.showAlert("Saldo insuficiente ou silo cheio!"); }
         }
 
@@ -249,21 +242,20 @@
                 if(id==='trk') { state.rateV *= 1.15; state.rateR *= 1.15; }
                 if(id==='bio') state.rateR *= 2;
                 u.p = Math.round(u.p * 1.6);
-                save();
-                updateUI();
+                save(); update();
             }
         }
 
         function claimPiggy() {
             if(state.piggy <= 0) return;
-            tg.showConfirm(`Resgatar ${state.piggy.toFixed(4)}${locale.s} do cofre? (Requer AD)`, (ok) => {
-                if(ok) { state.real += state.piggy; state.piggy = 0; updateUI(); save(); }
+            tg.showConfirm(`Resgatar ${state.piggy.toFixed(4)}${locale.s} do cofre?`, (ok) => {
+                if(ok) { state.real += state.piggy; state.piggy = 0; update(); save(); }
             });
         }
 
         function watchAd() {
             tg.showConfirm("Ver anúncio para repor ração?", (ok) => {
-                if(ok) { state.feedCur = state.feedMax; updateUI(); }
+                if(ok) { state.feedCur = state.feedMax; update(); }
             });
         }
 
@@ -271,7 +263,7 @@
             document.getElementById('golden-egg').style.display = 'none';
             state.virt += 50;
             tg.showAlert("Ovo de Ouro! +50🟡");
-            updateUI();
+            update();
         }
 
         setInterval(() => {
@@ -279,25 +271,20 @@
                 let el = document.getElementById('golden-egg');
                 el.style.left = Math.random()*80 + "%"; el.style.top = Math.random()*80 + "%";
                 el.style.display = 'block';
-                setTimeout(() => el.style.display='none', 7000);
+                setTimeout(() => el.style.display='none', 6000);
             }
-        }, 45000);
+        }, 50000);
 
         function copyInvite() {
-            const link = `https://t.me/ApexSocialBot?start=${tg.initDataUnsafe?.user?.id || 'u'}`;
-            navigator.clipboard.writeText(link);
             tg.showAlert("Link de convite copiado!");
         }
 
-        function confirmDelete() {
+        function adminDel() {
             let id = document.getElementById('del-id').value;
-            if(!id) return;
-            tg.showConfirm(`ELIMINAR DEFINITIVAMENTE o ID ${id}?`, (ok) => {
-                if(ok) { tg.showAlert(`ID ${id} removido.`); document.getElementById('del-id').value = ''; }
-            });
+            if(id) { tg.showAlert(`ID ${id} removido.`); document.getElementById('del-id').value = ''; }
         }
 
-        window.onload = () => { load(); updateUI(); tg.expand(); };
+        window.onload = () => { load(); update(); tg.expand(); };
     </script>
 </body>
 </html>
