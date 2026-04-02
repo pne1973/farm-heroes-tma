@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Egg Tycoon Premium</title>
+    <title>Egg Tycoon - Cotação em Tempo Real</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root {
@@ -11,141 +11,99 @@
             --primary: #2ecc71;
             --virtual: #f1c40f;
             --real: #2481cc;
-            --dark: #2c3e50;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--tg-bg);
             margin: 0; padding: 10px;
-            color: var(--dark);
+            color: #333;
             user-select: none;
         }
 
-        /* Dashboard Superior */
-        .wallet-container {
-            display: grid; grid-template-columns: 1fr; gap: 8px; margin-bottom: 15px;
-        }
-        .wallet-card {
-            background: white; padding: 12px 20px; border-radius: 18px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        /* Dashboards de Saldo */
+        .dashboard { display: grid; gap: 8px; margin-bottom: 15px; }
+        .balance-card {
+            background: white; padding: 15px; border-radius: 18px;
             display: flex; justify-content: space-between; align-items: center;
-            border-left: 5px solid var(--real);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
-        .wallet-card.virtual { border-left-color: var(--virtual); }
-        .wallet-card span { font-size: 0.7rem; color: #888; font-weight: bold; text-transform: uppercase; }
-        .wallet-card b { font-size: 1.3rem; display: block; }
+        .balance-card.real { border-top: 4px solid var(--real); }
+        .balance-card.virt { border-top: 4px solid var(--virtual); }
+        .balance-card span { font-size: 0.7rem; color: #888; text-transform: uppercase; font-weight: bold; }
+        .balance-card b { font-size: 1.2rem; display: block; }
 
-        /* Ilustração da Quinta */
-        .farm-view {
+        /* Tabela de Cotação */
+        .rates-info {
+            background: #ffffff; border-radius: 15px; padding: 10px;
+            margin-bottom: 15px; display: flex; justify-content: space-around;
+            font-size: 0.8rem; border: 1px dashed #ccc;
+        }
+        .rate-tag { display: flex; align-items: center; gap: 5px; }
+
+        /* Área de Venda Principal */
+        .action-card {
             background: white; border-radius: 25px; padding: 20px;
-            text-align: center; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
         }
-        #farm-img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; }
 
-        /* Barra de Ração Estilizada */
-        .feed-section { margin: 15px 0; }
-        .progress-container {
-            background: #eee; height: 25px; border-radius: 12px; position: relative; overflow: hidden;
+        .btn-sell {
+            background: var(--primary); color: white; border: none;
+            width: 100%; padding: 15px; border-radius: 18px;
+            cursor: pointer; font-weight: bold; position: relative;
         }
-        #feed-fill { background: linear-gradient(90deg, #e67e22, #f39c12); height: 100%; width: 100%; transition: width 0.3s; }
-        .progress-text { position: absolute; width: 100%; text-align: center; font-size: 0.75rem; line-height: 25px; font-weight: bold; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.3); }
+        .btn-sell:active { transform: scale(0.98); }
+        .sell-preview {
+            display: block; font-size: 0.75rem; font-weight: normal; opacity: 0.9;
+            margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.3); padding-top: 4px;
+        }
 
-        /* Grid de Items */
-        .shop-grid {
-            display: grid; grid-template-columns: 1fr; gap: 10px;
-        }
-        .item-card {
+        .item-row {
             background: white; padding: 12px; border-radius: 15px;
-            display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
-            border: 1px solid #eee;
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.03);
         }
-        .item-icon { width: 45px; height: 45px; background: #f9f9f9; border-radius: 10px; padding: 5px; }
-        .item-info { flex-grow: 1; }
-        .item-info h4 { margin: 0; font-size: 0.95rem; }
-        .item-info p { margin: 2px 0 0; font-size: 0.75rem; color: #888; }
-        
-        .buy-btn {
-            background: #f8f9fa; border: 1px solid #ddd; padding: 8px 12px;
-            border-radius: 10px; font-weight: bold; cursor: pointer; min-width: 80px;
-        }
-        .buy-btn:not(:disabled):hover { background: var(--virtual); color: white; border-color: var(--virtual); }
-
-        /* Botões Principais */
-        .main-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .btn-big {
-            border: none; border-radius: 15px; padding: 15px; font-weight: bold;
-            display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer;
-        }
-        .btn-sell { background: var(--primary); color: white; }
-        .btn-ad { background: #e67e22; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="wallet-container">
-        <div class="wallet-card">
+    <div class="dashboard">
+        <div class="balance-card real">
             <div><span>Saldo Levantável</span><b id="real-bal">0.0000€</b></div>
-            <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" width="40">
+            <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" width="35">
         </div>
-        <div class="wallet-card virtual">
+        <div class="balance-card virt">
             <div><span>Capital da Quinta</span><b id="virt-bal">10.00🟡</b></div>
-            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="35">
+            <img src="https://cdn-icons-png.flaticon.com/512/217/217853.png" width="30">
         </div>
     </div>
 
-    <div class="farm-view">
-        <img id="farm-img" src="https://cdn-icons-png.flaticon.com/512/2662/2662207.png" alt="Farm">
-        <div style="display: flex; justify-content: space-around; font-weight: bold; font-size: 0.9rem;">
-            <span>🥚 <span id="egg-count">0</span> Ovos</span>
-            <span>🐔 <span id="chk-count">1</span>/<span id="chk-max">5</span></span>
-        </div>
+    <div class="rates-info">
+        <div class="rate-tag">1 🥚 = <b style="color:var(--virtual)">0.50🟡</b></div>
+        <div class="rate-tag">1 🥚 = <b style="color:var(--real)">0.0001€</b></div>
+    </div>
+
+    <div class="action-card">
+        <div style="margin-bottom: 15px; font-size: 1.1rem;">🥚 <b id="egg-count">0</b> Ovos em Stock</div>
         
-        <div class="feed-section">
-            <div class="progress-container">
-                <div id="feed-fill"></div>
-                <div class="progress-text">RAÇÃO: <span id="feed-pct">100</span>%</div>
-            </div>
-        </div>
+        <button class="btn-sell" id="btn-sell" onclick="sell()">
+            VENDER PRODUÇÃO
+            <span class="sell-preview" id="sell-preview">Ganho previsto: 0.00🟡 | 0.0000€</span>
+        </button>
 
-        <div class="main-actions">
-            <button class="btn-big btn-sell" onclick="sell()">
-                <span>💰 Vender</span>
-                <small>Ovos em Saldo</small>
-            </button>
-            <button class="btn-big btn-ad" onclick="watchAd('feed')">
-                <span>📺 Ração</span>
-                <small>Grátis (Ad)</small>
-            </button>
-        </div>
+        <button onclick="watchAd()" style="margin-top: 10px; background: #e67e22; color: white; border: none; width: 100%; padding: 12px; border-radius: 15px; font-weight: bold;">
+            📺 REPOR RAÇÃO (AD)
+        </button>
     </div>
 
-    <h3 style="padding-left: 10px;">Mercado de Expansão</h3>
-    <div class="shop-grid">
-        <div class="item-card">
-            <img class="item-icon" src="https://cdn-icons-png.flaticon.com/512/1864/1864470.png">
-            <div class="item-info">
-                <h4>Nova Galinha</h4>
-                <p>+Produção de Ovos</p>
-            </div>
-            <button class="buy-btn" id="btn-chk" onclick="buy('chicken')"><span id="p-chk">20</span>🟡</button>
-        </div>
-        <div class="item-card">
-            <img class="item-icon" src="https://cdn-icons-png.flaticon.com/512/2619/2619247.png">
-            <div class="item-info">
-                <h4>Galinheiro Grande</h4>
-                <p>+5 Vagas p/ galinhas</p>
-            </div>
-            <button class="buy-btn" id="btn-coop" onclick="buy('coop')"><span id="p-coop">100</span>🟡</button>
-        </div>
-        <div class="item-card">
-            <img class="item-icon" src="https://cdn-icons-png.flaticon.com/512/2829/2829831.png">
-            <div class="item-info">
-                <h4>Silo de Ração</h4>
-                <p>Consome ração mais devagar</p>
-            </div>
-            <button class="buy-btn" id="btn-silo" onclick="buy('silo')"><span id="p-silo">150</span>🟡</button>
+    <h3 style="padding-left: 10px;">Mercado</h3>
+    <div id="shop">
+        <div class="item-row">
+            <span>🐔 Nova Galinha</span>
+            <button class="buy-btn" id="buy-chk" onclick="buy('chk')" style="background:#f8f9fa; border:1px solid #ddd; padding:8px 15px; border-radius:10px; font-weight:bold;">
+                <span id="price-chk">20</span>🟡
+            </button>
         </div>
     </div>
 
@@ -154,83 +112,56 @@
         tg.expand();
 
         let state = {
-            eggs: 0, virtual: 10.0, real: 0.0,
-            chickens: 1, coops: 1, feed: 100, siloLevel: 1,
-            prices: { chicken: 20, coop: 100, silo: 150 },
-            rates: { virtual: 0.5, real: 0.0001 }
+            eggs: 0, virtual: 10.0, real: 0.0, chickens: 1,
+            rateV: 0.50, // Valor Virtual por ovo
+            rateR: 0.0001, // Valor Real por ovo
+            priceChk: 20
         };
 
         function update() {
             document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
             document.getElementById('virt-bal').innerText = state.virtual.toFixed(2) + "🟡";
             document.getElementById('egg-count').innerText = Math.floor(state.eggs);
-            document.getElementById('chk-count').innerText = state.chickens;
-            document.getElementById('chk-max').innerText = state.coops * 5;
-            document.getElementById('feed-fill').style.width = state.feed + "%";
-            document.getElementById('feed-pct').innerText = Math.ceil(state.feed);
+            
+            // Atualizar Previsão no Botão
+            let vGain = Math.floor(state.eggs) * state.rateV;
+            let rGain = Math.floor(state.eggs) * state.rateR;
+            document.getElementById('sell-preview').innerText = 
+                `Ganho previsto: ${vGain.toFixed(2)}🟡 | ${rGain.toFixed(4)}€`;
 
-            // Preços
-            document.getElementById('p-chk').innerText = state.prices.chicken;
-            document.getElementById('p-coop').innerText = state.prices.coop;
-            document.getElementById('p-silo').innerText = state.prices.silo;
-
-            // Bloqueio botões
-            document.getElementById('btn-chk').disabled = (state.virtual < state.prices.chicken || state.chickens >= state.coops * 5);
-            document.getElementById('btn-coop').disabled = (state.virtual < state.prices.coop);
-            document.getElementById('btn-silo').disabled = (state.virtual < state.prices.silo);
-
-            // Mudar imagem da quinta se tiver muitas galinhas
-            if(state.chickens > 10) document.getElementById('farm-img').src = "https://cdn-icons-png.flaticon.com/512/2210/2210255.png";
+            document.getElementById('btn-sell').disabled = (state.eggs < 1);
+            document.getElementById('price-chk').innerText = state.priceChk;
+            document.getElementById('buy-chk').disabled = (state.virtual < state.priceChk);
         }
 
+        // Loop de Produção
         setInterval(() => {
-            if(state.feed > 0 && state.chickens > 0) {
-                // O Silo Level reduz o consumo: quanto maior o nível, menor o gasto
-                let consumption = (0.4 * state.chickens) / state.siloLevel;
-                state.feed = Math.max(0, state.feed - consumption);
-                state.eggs += (state.chickens * 0.15);
-                update();
-            }
+            state.eggs += (state.chickens * 0.1);
+            update();
         }, 1000);
 
         function sell() {
-            if(state.eggs >= 1) {
-                let qty = Math.floor(state.eggs);
-                state.virtual += (qty * state.rates.virtual);
-                state.real += (qty * state.rates.real);
-                state.eggs = 0;
-                tg.HapticFeedback.impactOccurred('medium');
+            let qty = Math.floor(state.eggs);
+            state.virtual += (qty * state.rateV);
+            state.real += (qty * state.rateR);
+            state.eggs = 0;
+            tg.HapticFeedback.impactOccurred('light');
+            update();
+        }
+
+        function buy(t) {
+            if(state.virtual >= state.priceChk) {
+                state.virtual -= state.priceChk;
+                state.chickens++;
+                state.priceChk = Math.round(state.priceChk * 1.4);
                 update();
             }
         }
 
-        function buy(type) {
-            if(type === 'chicken' && state.virtual >= state.prices.chicken) {
-                state.virtual -= state.prices.chicken;
-                state.chickens++;
-                state.prices.chicken = Math.round(state.prices.chicken * 1.4);
-            } else if(type === 'coop' && state.virtual >= state.prices.coop) {
-                state.virtual -= state.prices.coop;
-                state.coops++;
-                state.prices.coop = Math.round(state.prices.coop * 1.8);
-            } else if(type === 'silo' && state.virtual >= state.prices.silo) {
-                state.virtual -= state.prices.silo;
-                state.siloLevel += 0.5;
-                state.prices.silo = Math.round(state.prices.silo * 2.5);
-            }
+        function watchAd() {
+            tg.showAlert("Ração abastecida! +0.0010€ bónus por ver o anúncio.");
+            state.real += 0.0010; // CPM direto
             update();
-        }
-
-        function watchAd(t) {
-            tg.showConfirm("Ver anúncio para encher a ração?", (ok) => {
-                if(ok) {
-                    setTimeout(() => {
-                        state.feed = 100;
-                        update();
-                        tg.showAlert("Ração abastecida!");
-                    }, 500);
-                }
-            });
         }
 
         update();
