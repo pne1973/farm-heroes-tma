@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v35.30 - Inventory & Green Unlock</title>
+    <title>Apex Social v35.40 - Upgrade Benefits</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -26,13 +26,13 @@
         .btn-sell { background: var(--google-green); color: white; }
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 8px; }
         
-        /* Botão de Compra Dinâmico */
-        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 80px; transition: all 0.3s; }
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 90px; transition: all 0.3s; }
         .btn-buy.unlocked { background: var(--google-green) !important; color: white !important; border-color: var(--google-green) !important; font-weight: bold; }
 
-        .market-scroll { max-height: 250px; overflow-y: auto; }
+        .market-scroll { max-height: 280px; overflow-y: auto; }
         .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
-        .inv-count { font-size: 0.75rem; color: var(--google-blue); font-weight: bold; margin-left: 5px; }
+        .benefit-text { font-size: 0.65rem; color: #70757a; display: block; margin-top: 2px; }
+        .inv-count { font-size: 0.75rem; color: var(--google-blue); font-weight: bold; }
         
         #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; }
         #admin-hub { display: none; background: #000; color: #fff; position: fixed; inset: 0; z-index: 9999; padding: 20px; overflow-y: auto; }
@@ -91,7 +91,7 @@
     </div>
 
     <div id="admin-hub">
-        <div class="flex-between"><h3 style="color:var(--google-red);">APEX ADMIN v35.30</h3><button onclick="toggleAdmin()">FECHAR</button></div>
+        <div class="flex-between"><h3 style="color:var(--google-red);">APEX ADMIN v35.40</h3><button onclick="toggleAdmin()">FECHAR</button></div>
         <button class="btn" style="background:var(--google-red); color:white;" onclick="resetStorage()">⚠️ RESET TOTAL</button>
     </div>
 
@@ -138,22 +138,34 @@
         function resetStorage() { localStorage.clear(); location.reload(); }
         function toggleAdmin() { document.getElementById('admin-hub').style.display = (document.getElementById('admin-hub').style.display === 'block') ? 'none' : 'block'; }
 
-        // Mercado com indicadores de inventário e cores
+        // Mercado com descrição de benefícios
         function loadMarket() {
             const list = document.getElementById('market-list');
             list.innerHTML = ""; 
             for(let i=1; i<=30; i++) {
                 let cost = Math.floor(32 * Math.pow(1.15, i-1));
-                let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                let title = i <= 8 ? `Galinha Lvl ${i}` : i <= 16 ? `Galinheiro Lvl ${i-8}` : i <= 24 ? `Luz LED Lvl ${i-16}` : `Silo Nível ${i}`;
+                let icon, title, benefit;
+
+                if(i <= 8) {
+                    icon = "🐔"; title = `Galinha Lvl ${i}`; benefit = "+1 ovo por ciclo de produção";
+                } else if(i <= 16) {
+                    icon = "🏠"; title = `Galinheiro Lvl ${i-8}`; benefit = "+10 espaços para novas aves";
+                } else if(i <= 24) {
+                    icon = "💡"; title = `Luz LED Lvl ${i-16}`; benefit = "+20% velocidade de postura";
+                } else {
+                    icon = "🏗️"; title = `Silo Nível ${i}`; benefit = "+5.000kg capacidade de ração";
+                }
+
                 let count = state.inventory[i] || 0;
+                let isUnlocked = state.virt >= cost;
                 
                 list.innerHTML += `
                     <div class="market-item">
-                        <div>
-                            <b>${title}</b><span class="inv-count"> - ${count}</span>
+                        <div style="flex: 1;">
+                            <b>${title} <span class="inv-count">(${count})</span></b>
+                            <span class="benefit-text">${icon} ${benefit}</span>
                         </div>
-                        <button id="buy-btn-${i}" class="btn-buy ${state.virt >= cost ? 'unlocked' : ''}" 
+                        <button id="buy-btn-${i}" class="btn-buy ${isUnlocked ? 'unlocked' : ''}" 
                                 onclick="buy(${cost}, ${i})">${cost}🟡</button>
                     </div>`;
             }
@@ -172,7 +184,7 @@
                 save();
                 loadMarket();
                 updateUI();
-                tg.HapticFeedback.notificationOccurred('success');
+                tg.HapticFeedback.impactOccurred('medium');
             }
         }
 
@@ -191,6 +203,7 @@
             if(type === 'feed') state.feedCur = state.feedMax;
             else { state.boostActive = true; state.boostTime = 600; }
             updateUI(); save(); loadMarket();
+            tg.showAlert("Recompensa de teste ativada!");
         }
 
         function updateUI() {
