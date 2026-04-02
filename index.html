@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v35.00 - Persistent & Boosted</title>
+    <title>Apex Social v35.10 - Test Mode</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
@@ -18,7 +18,7 @@
 
         .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
         .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; position: relative; }
-        .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
+        .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.05s linear; }
         .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
         .fill-red { height: 100%; background: var(--google-red); width: 0%; transition: width 0.3s; }
 
@@ -27,12 +27,11 @@
         .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; }
 
-        .market-scroll { max-height: 300px; overflow-y: auto; }
+        .market-scroll { max-height: 250px; overflow-y: auto; }
         .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
         
         #admin-link { display: none; background: var(--google-red); color: white; border: none; padding: 3px 8px; border-radius: 6px; font-size: 0.65rem; cursor: pointer; }
         #admin-hub { display: none; background: #000; color: #fff; position: fixed; inset: 0; z-index: 9999; padding: 20px; overflow-y: auto; }
-        .boost-tag { position: absolute; right: 10px; top: -2px; font-size: 0.6rem; background: var(--google-red); color: white; padding: 2px 6px; border-radius: 4px; display: none; }
     </style>
 </head>
 <body>
@@ -66,21 +65,18 @@
 
             <div class="flex-between" style="margin-top: 15px;">
                 <span>🥚 Stock: <b id="egg-count">0</b></span>
-                <span id="boost-status" style="color: var(--google-red); font-size: 0.7rem; font-weight: bold; display: none;">🔥 TURBO ATIVO</span>
+                <span id="boost-status" style="color: var(--google-red); font-size: 0.7rem; font-weight: bold; display: none;">🔥 TURBO 5x ATIVO</span>
             </div>
-            <div class="track">
-                <div id="egg-progress" class="fill-yellow"></div>
-                <div id="boost-timer-ui" class="boost-tag">AD BOOST</div>
-            </div>
+            <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
             
             <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">5.000 KG</span></div>
             <div class="track" style="height:20px; border-radius:10px;"><div id="feed-fill" class="fill-blue"></div></div>
             
-            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="sell-preview">Previsto: 0.00🟡 | 0.0000€</small></button>
+            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO (TEST MODE)<br><small id="sell-preview">Previsto: 0.00🟡 | 0.0000€</small></button>
             
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                 <button class="btn btn-ad" onclick="watchAd('feed')">⛽ RAÇÃO</button>
-                <button class="btn btn-ad" onclick="watchAd('boost')">⚡ BOOST (2x)</button>
+                <button class="btn btn-ad" onclick="watchAd('boost')">⚡ BOOST (5x)</button>
             </div>
         </div>
 
@@ -91,32 +87,33 @@
     </div>
 
     <div id="admin-hub">
-        <div class="flex-between"><h3 style="color:var(--google-red);">ECONOMY MONITOR v35.00</h3><button onclick="toggleAdmin()">FECHAR</button></div>
+        <div class="flex-between"><h3 style="color:var(--google-red);">TEST MONITOR v35.10</h3><button onclick="toggleAdmin()">FECHAR</button></div>
         <button class="btn" style="background:var(--google-red); color:white;" onclick="resetStorage()">⚠️ RESET TOTAL (STORAGE)</button>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = 5401881400;
+        const ADMIN_ID = 5401881400; // [cite: 2026-03-26]
         
+        // Carregamento persistente [cite: 2026-03-22]
         let state = JSON.parse(localStorage.getItem('apex_state')) || {
-            eggs: 0, virt: 10.00, real: 0, vault: 0, 
-            chickens: 1, maxChickens: 5, feedMax: 5000, feedCur: 5000, 
-            eggTimer: 0, eggLimit: 100, prodSpeed: 1.5,
-            brlRate: 6.1245, boostActive: false, boostTime: 0
+            eggs: 0, virt: 100.00, real: 0, vault: 0, 
+            chickens: 1, maxChickens: 10, feedMax: 10000, feedCur: 10000, 
+            eggTimer: 0, eggLimit: 100, prodSpeed: 5.0, // Velocidade base aumentada para teste
+            brlRate: 6.1245, boostActive: false, boostTime: 0,
+            rateV: 1.50, rateR: 0.0050 // Ganhos aumentados para teste
         };
 
         function save() { localStorage.setItem('apex_state', JSON.stringify(state)); }
         function resetStorage() { localStorage.removeItem('apex_state'); location.reload(); }
-
         function toggleAdmin() { document.getElementById('admin-hub').style.display = (document.getElementById('admin-hub').style.display === 'block') ? 'none' : 'block'; }
 
         function loadMarket() {
             const list = document.getElementById('market-list');
             for(let i=1; i<=30; i++) {
-                let cost = Math.floor(32 * Math.pow(1.22, i-1));
+                let cost = Math.floor(32 * Math.pow(1.15, i-1));
                 let icon = i <= 8 ? "🐔" : i <= 16 ? "🏠" : i <= 24 ? "💡" : "🏗️";
-                list.innerHTML += `<div class="market-item"><div><b>Lvl ${i} ${icon}</b></div><button class="btn btn-buy" onclick="buy(${cost}, ${i})">${cost}🟡</button></div>`;
+                list.innerHTML += `<div class="market-item"><div><b>Lvl ${i} ${icon}</b></div><button class="btn btn-buy" onclick="buy(${cost}, i)">${cost}🟡</button></div>`;
             }
         }
 
@@ -124,33 +121,27 @@
             if(state.virt >= cost) {
                 state.virt -= cost;
                 if(id <= 8) state.chickens++;
-                else if(id <= 16) state.maxChickens += 5;
-                else if(id <= 24) state.prodSpeed *= 1.1;
-                else state.feedMax += 1000;
+                else if(id <= 16) state.maxChickens += 10;
+                else if(id <= 24) state.prodSpeed += 2.0;
+                else state.feedMax += 5000;
                 updateUI(); save();
             }
         }
 
         function watchAd(type) {
-            tg.showConfirm(`Ver anúncio de 30s para ${type === 'feed' ? 'Repor Ração' : 'Dobrar Produção'}?`, (ok) => {
-                if(ok) {
-                    setTimeout(() => {
-                        if(type === 'feed') state.feedCur = state.feedMax;
-                        else { state.boostActive = true; state.boostTime = 300; }
-                        updateUI(); save();
-                        tg.showAlert("Recompensa Atribuída!");
-                    }, 2000); // Simulação rápida para teste, em prod seria 30s
-                }
-            });
+            if(type === 'feed') state.feedCur = state.feedMax;
+            else { state.boostActive = true; state.boostTime = 600; } // Boost de 10 minutos
+            updateUI(); save();
+            tg.showAlert(`Teste: ${type} ativado instantaneamente!`);
         }
 
         function sell() {
             let q = Math.floor(state.eggs);
             if(q >= 1) {
-                let gain = q * 0.0001;
+                let gain = q * state.rateR;
                 state.real += gain * 0.8;
-                state.vault += gain * 0.2;
-                state.virt += q * 0.50;
+                state.vault += gain * 0.2; // Cofre de Retenção
+                state.virt += q * state.rateV;
                 state.eggs = 0;
                 updateUI(); save();
             }
@@ -167,17 +158,15 @@
             document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " KG";
             document.getElementById('feed-fill').style.width = (state.feedCur/state.feedMax)*100 + "%";
             document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
-            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * 0.5).toFixed(2)}🟡 | ${(state.eggs * 0.0001).toFixed(4)}€`;
-            
+            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(2)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
             document.getElementById('boost-status').style.display = state.boostActive ? 'inline' : 'none';
-            document.getElementById('boost-timer-ui').style.display = state.boostActive ? 'block' : 'none';
         }
 
         setInterval(() => {
             if(state.feedCur > 0) {
-                let speedMultiplier = state.boostActive ? 2 : 1;
-                state.feedCur -= (state.chickens * 0.5);
-                state.eggTimer += (state.chickens * state.prodSpeed * speedMultiplier * 0.1);
+                let multiplier = state.boostActive ? 5 : 1;
+                state.feedCur -= (state.chickens * 0.3);
+                state.eggTimer += (state.chickens * state.prodSpeed * multiplier * 0.2);
                 
                 if(state.boostActive) {
                     state.boostTime--;
