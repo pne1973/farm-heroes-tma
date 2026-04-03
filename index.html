@@ -3,183 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Apex Social v36.12 - Secure Checkout</title>
+    <title>Apex Social v35.90 - Progressive Mastery</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         :root { 
             --google-blue: #1a73e8; --google-green: #34a853; 
-            --google-red: #ea4335; --bg: #f8f9fa; --text: #3c4043;
+            --google-yellow: #fbbc05; --google-red: #ea4335; 
+            --bg: #f8f9fa; --text: #3c4043; --pink-bg: #fce4ec;
         }
         body { font-family: 'Roboto', sans-serif; background: var(--bg); margin: 0; padding: 12px; color: var(--text); user-select: none; }
-        
-        .ad-slot { background: #fff; border: 1px solid #ddd; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 0.65rem; color: #70757a; margin-bottom: 12px; border-radius: 12px; }
-
         .card { background: white; border-radius: 16px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 12px; border: 1px solid #e0e0e0; }
-        .balance-hero { text-align: center; padding: 10px 0; }
-        .balance-val { font-size: 2.2rem; color: var(--google-green); font-weight: 800; line-height: 1; }
-        
-        .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; }
-        .fill-egg { height: 100%; background: #fbbc05; width: 0%; transition: width 0.3s ease; }
-        .fill-feed { height: 100%; background: var(--google-blue); width: 100%; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .label { font-size: 0.7rem; color: #70757a; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .btn-main { border: none; border-radius: 24px; padding: 16px; font-weight: 700; width: 100%; cursor: pointer; font-size: 1rem; transition: 0.2s; margin-bottom: 10px; }
-        .btn-sell { background: var(--google-blue); color: white; }
-        
-        .market-item { border-bottom: 1px solid #eee; padding: 15px 0; display: flex; justify-content: space-between; align-items: center; }
-        .upgrade-info b { display: block; font-size: 0.95rem; }
-        .upgrade-info span { font-size: 0.7rem; color: #70757a; }
+        .vault-card { background: var(--pink-bg); border: 1px solid #f8bbd0; color: #880e4f; }
+        .track { background: #e8eaed; height: 12px; border-radius: 6px; overflow: hidden; margin: 8px 0; position: relative; }
+        .fill-yellow { height: 100%; background: var(--google-yellow); width: 0%; transition: width 0.1s linear; }
+        .fill-blue { height: 100%; background: var(--google-blue); width: 100%; }
+        .fill-red { height: 100%; background: var(--google-red); width: 0%; }
 
-        .btn-pay { 
-            border-radius: 12px; border: 1px solid #dadce0; padding: 8px 12px; min-width: 95px;
-            display: flex; flex-direction: column; align-items: center; cursor: pointer; font-family: inherit;
-        }
-        .btn-pay.wallet { background: #e8f0fe; color: var(--google-blue); border-color: var(--google-blue); }
-        .btn-pay.paypal { background: #0070ba; color: white; border: none; }
-        .btn-pay b { font-size: 0.85rem; }
-        .btn-pay small { font-size: 0.6rem; text-transform: uppercase; font-weight: 700; }
+        .btn { border: none; border-radius: 24px; padding: 15px; font-weight: 500; width: 100%; cursor: pointer; margin-bottom: 10px; font-size: 0.95rem; }
+        .btn-sell { background: var(--google-green); color: white; }
+        .btn-ad { background: white; color: var(--google-blue); border: 1px solid #dadce0; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        .btn-buy { background: #f1f3f4; color: var(--text); padding: 10px 18px; border-radius: 14px; font-size: 0.85rem; border: 1px solid #ddd; min-width: 90px; }
+        .btn-buy.unlocked { background: var(--google-green) !important; color: white !important; font-weight: bold; border-color: var(--google-green); }
+
+        .market-scroll { max-height: 400px; overflow-y: auto; }
+        .market-item { border-bottom: 1px solid #eee; padding: 14px 0; display: flex; justify-content: space-between; align-items: center; }
+        .benefit-text { font-size: 0.62rem; color: #70757a; display: block; margin-top: 2px; line-height: 1.3; }
+        .progression-tag { color: #d32f2f; font-weight: 800; font-size: 0.6rem; }
     </style>
 </head>
 <body>
 
-    <div class="ad-slot">ANÚNCIO: MONETIZAÇÃO ATIVA</div>
-
-    <div class="card balance-hero">
-        <span style="font-size: 0.75rem; font-weight: 700; color: #70757a;">CARTEIRA REAL</span>
-        <div class="balance-val" id="display-euro">0.0000€</div>
-        <div id="display-brl" style="color: #70757a; font-size: 0.9rem; margin-top: 4px;">R$ 0.00</div>
-    </div>
-
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 700;">
-            <span>ESTADO DA QUINTA</span>
-            <span id="ave-count">1/10 Aves</span>
-        </div>
-        <div class="track"><div id="egg-bar" class="fill-egg"></div></div>
-        
-        <div style="margin: 10px 0; font-size: 0.9rem;">
-            🥚 Ovos em Stock: <b id="egg-total">0</b>
-            <span id="turbo-label" style="display:none; color:var(--google-red); float:right; font-weight:800;">⚡ TURBO ATIVO</span>
+    <div id="ui-main">
+        <div class="card">
+            <div class="flex-between">
+                <div>
+                    <span class="label">Saldo Real</span>
+                    <div style="font-size:1.6rem; color:var(--google-blue); font-weight: 500;" id="real-bal">0.0000€</div>
+                    <div style="font-size:0.8rem; color:#70757a;" id="brl-bal">R$ 0.00</div>
+                </div>
+                <div style="text-align: right;">
+                    <span class="label">Capital Quinta</span>
+                    <div id="virt-bal" style="font-size:1.4rem; color:var(--google-yellow); font-weight: 500;">0.00🟡</div>
+                </div>
+            </div>
         </div>
 
-        <div style="font-size: 0.7rem; font-weight: 700; color: #70757a; margin-top: 10px;">RESERVATÓRIO DE RAÇÃO</div>
-        <div class="track" style="height: 16px;"><div id="feed-bar" class="fill-feed"></div></div>
-        
-        <button class="btn-main btn-sell" onclick="sellAll()">VENDER PRODUÇÃO<br><small id="preview-val">Valor Estimado: 0.0000€</small></button>
-    </div>
+        <div class="card vault-card">
+            <div class="flex-between"><span>🐷 <b>Cofre de Retenção (20%)</b></span><b id="vault-bal">0.0000€</b></div>
+        </div>
 
-    <div class="ad-slot" style="height:40px;">PUBLICIDADE PARCEIRA</div>
+        <div class="card">
+            <div class="flex-between">
+                <span class="label">Capacidade Quinta</span>
+                <span id="chk-count" style="font-weight: bold; font-size: 0.8rem;">1/10 Aves</span>
+            </div>
+            <div class="track" style="height: 8px;"><div id="chk-fill" class="fill-red"></div></div>
 
-    <div class="card">
-        <div style="font-size: 0.75rem; font-weight: 700; color: #70757a; margin-bottom: 12px;">LOJA DE EXPANSÕES (PAGAMENTO SEGURO)</div>
-        <div id="market-container"></div>
+            <div class="flex-between" style="margin-top: 15px;">
+                <span>🥚 Stock: <b id="egg-count">0</b></span>
+                <span id="boost-status" style="color: var(--google-red); font-size: 0.7rem; font-weight: bold; display: none;">⚡ TURBO 5x</span>
+            </div>
+            <div class="track"><div id="egg-progress" class="fill-yellow"></div></div>
+            
+            <div class="label" style="margin-top:10px;">Ração: <span id="feed-kg">10.000 KG</span></div>
+            <div class="track" style="height:15px; border-radius:10px;"><div id="feed-fill" class="fill-blue"></div></div>
+            
+            <button class="btn btn-sell" onclick="sell()">VENDER PRODUÇÃO<br><small id="sell-preview">Previsto: 0.0🟡 | 0.0000€</small></button>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="btn btn-ad" onclick="watchAd('feed')">⛽ +RAÇÃO</button>
+                <button class="btn btn-ad" onclick="watchAd('boost')">⚡ BOOST (5x)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="label" style="margin-bottom:10px;">🚀 Mercado (Expansões Progressivas)</div>
+            <div class="market-scroll" id="market-list"></div>
+        </div>
     </div>
 
     <script>
         const tg = window.Telegram.WebApp;
-        const ADMIN_ID = "5401881400"; // [cite: 2026-03-22]
 
-        let user = {
-            id: ADMIN_ID,
-            real: parseFloat(localStorage.getItem('apex_real')) || 0.0041, //
-            eggs: parseInt(localStorage.getItem('apex_eggs')) || 0,
-            chickens: parseInt(localStorage.getItem('apex_chicks')) || 1,
-            maxChicks: parseInt(localStorage.getItem('apex_max')) || 5,
-            feed: 4854, //
-            feedMax: 10000,
-            timer: 0,
-            speed: 2.5,
-            isTurbo: false
+        function getSafeValue(key, fallback) {
+            const val = localStorage.getItem(key);
+            return (val === null || val === "NaN" || isNaN(parseFloat(val))) ? fallback : parseFloat(val);
+        }
+
+        let state = {
+            eggs: getSafeValue('apex_eggs', 0),
+            virt: getSafeValue('apex_virt', 100.00),
+            real: getSafeValue('apex_real', 0),
+            vault: getSafeValue('apex_vault', 0),
+            chickens: getSafeValue('apex_chickens', 1),
+            maxChickens: getSafeValue('apex_maxChicks', 10),
+            feedMax: getSafeValue('apex_feedMax', 10000),
+            feedCur: getSafeValue('apex_feedCur', 10000),
+            eggTimer: 0, eggLimit: 100,
+            prodSpeed: 5.0, boostActive: false,
+            rateV: 1.50, rateR: 0.0050,
+            inventory: JSON.parse(localStorage.getItem('apex_inv')) || {}
         };
 
-        const upgrades = [
-            { id: 'f1', name: 'Ração Premium', desc: 'Enche o silo imediatamente.', cost: 0.50 },
-            { id: 'b1', name: 'Booster Turbo', desc: 'Produção 5x por 5 minutos.', cost: 1.20 },
-            { id: 'c1', name: 'Ave Nível Superior', desc: '+1.5 ovo/ciclo e +Velocidade.', cost: 2.50 },
-            { id: 'h1', name: 'Novo Pavilhão', desc: '+15 vagas no galinheiro.', cost: 8.00 }
-        ];
-
-        function renderMarket() {
-            const container = document.getElementById('market-container');
-            container.innerHTML = "";
-            upgrades.forEach(u => {
-                const hasBalance = user.real >= u.cost;
-                container.innerHTML += `
-                    <div class="market-item">
-                        <div class="upgrade-info">
-                            <b>${u.name}</b>
-                            <span>${u.desc}</span>
-                        </div>
-                        <div class="btn-pay ${hasBalance ? 'wallet' : 'paypal'}" onclick="checkout(${u.cost}, '${u.id}')">
-                            <b>${u.cost.toFixed(2)}€</b>
-                            <small>${hasBalance ? 'Usar Saldo' : 'PayPal'}</small>
-                        </div>
-                    </div>`;
-            });
-        }
-
-        function checkout(cost, type) {
-            if (user.real >= cost) {
-                user.real -= cost;
-                apply(type);
-                tg.HapticFeedback.notificationOccurred('success');
-                updateUI();
-            } else {
-                // Correção do redirecionamento PayPal
-                tg.showConfirm(`Saldo insuficiente (${user.real.toFixed(4)}€). Abrir checkout PayPal de ${cost.toFixed(2)}€?`, (confirm) => {
-                    if(confirm) {
-                        const paypalURL = `https://www.paypal.com/checkoutnow?amount=${cost}&currency=EUR&receiver=${ADMIN_ID}`;
-                        tg.openLink(paypalURL); 
-                    }
-                });
-            }
-        }
-
-        function apply(type) {
-            if(type === 'f1') user.feed = user.feedMax;
-            if(type === 'b1') { user.isTurbo = true; setTimeout(() => user.isTurbo = false, 300000); }
-            if(type === 'c1') { if(user.chickens < user.maxChicks) { user.chickens++; user.speed += 2; } else { tg.showAlert("Sem espaço!"); } }
-            if(type === 'h1') user.maxChicks += 15;
-            save(); renderMarket();
-        }
-
-        function sellAll() {
-            if(user.eggs > 0) {
-                user.real += (user.eggs * 0.0050);
-                user.eggs = 0;
-                tg.HapticFeedback.impactOccurred('medium');
-                updateUI(); save(); renderMarket();
-            }
-        }
-
         function save() {
-            localStorage.setItem('apex_real', user.real);
-            localStorage.setItem('apex_eggs', user.eggs);
-            localStorage.setItem('apex_chicks', user.chickens);
-            localStorage.setItem('apex_max', user.maxChicks);
+            localStorage.setItem('apex_eggs', state.eggs);
+            localStorage.setItem('apex_virt', state.virt);
+            localStorage.setItem('apex_real', state.real);
+            localStorage.setItem('apex_vault', state.vault);
+            localStorage.setItem('apex_chickens', state.chickens);
+            localStorage.setItem('apex_maxChicks', state.maxChickens);
+            localStorage.setItem('apex_feedMax', state.feedMax);
+            localStorage.setItem('apex_feedCur', state.feedCur);
+            localStorage.setItem('apex_inv', JSON.stringify(state.inventory));
+        }
+
+        function loadMarket() {
+            const list = document.getElementById('market-list');
+            list.innerHTML = ""; 
+            
+            for(let i=1; i<=30; i++) {
+                let cost = Math.floor(32 * Math.pow(1.20, i-1));
+                let icon, title, benefit;
+
+                if(i <= 8) {
+                    let speedMult = (1 + (i * 0.8)).toFixed(1);
+                    icon = "🐔"; title = `Ave Lvl ${i}`; 
+                    benefit = `Velocidade: <span style="color:#e65100;">${speedMult}x</span>. +1 ovo/ciclo.`;
+                } else if(i <= 16) {
+                    let lvl = i - 8;
+                    let capInc = 15 + (lvl * 5); // Incremento Progressivo
+                    icon = "🏠"; title = `Galinheiro Lvl ${lvl}`; 
+                    benefit = `<span class="progression-tag">+${capInc} VAGAS</span>. +10% Eficiência Global.`;
+                } else if(i <= 24) {
+                    let lvl = i - 16;
+                    let speedInc = 30 + (lvl * 10); // Incremento Progressivo
+                    icon = "💡"; title = `Luz LED Lvl ${lvl}`; 
+                    benefit = `<span class="progression-tag">+${speedInc}% VELOCIDADE</span>. -5% Consumo.`;
+                } else {
+                    let lvl = i - 24;
+                    let storageInc = 8000 + (lvl * 2000); // Incremento Progressivo
+                    icon = "🏗️"; title = `Silo Lvl ${lvl}`; 
+                    benefit = `<span class="progression-tag">+${(storageInc/1000)}k KG RAÇÃO</span>. +2% Valor Real.`;
+                }
+
+                let count = state.inventory[i] || 0;
+                let isUnlocked = state.virt >= cost;
+                
+                list.innerHTML += `
+                    <div class="market-item">
+                        <div style="flex: 1; padding-right: 5px;">
+                            <b>${title} <span style="color:var(--google-blue);">(${count})</span></b>
+                            <span class="benefit-text">${icon} ${benefit}</span>
+                        </div>
+                        <button class="btn-buy ${isUnlocked ? 'unlocked' : ''}" 
+                                onclick="buy(${cost}, ${i})">${cost}🟡</button>
+                    </div>`;
+            }
+        }
+
+        function buy(cost, id) {
+            if(state.virt >= cost) {
+                if(id <= 8 && state.chickens >= state.maxChickens) {
+                    tg.showAlert("Galinheiro lotado!"); return;
+                }
+                state.virt -= cost;
+                state.inventory[id] = (state.inventory[id] || 0) + 1;
+                
+                if(id <= 8) {
+                    state.chickens++;
+                    state.prodSpeed += (1 + (id * 0.9)); 
+                } else if(id <= 16) {
+                    let lvl = id - 8;
+                    state.maxChickens += (15 + (lvl * 5));
+                    state.prodSpeed *= 1.10;
+                } else if(id <= 24) {
+                    let lvl = id - 16;
+                    state.prodSpeed *= (1.30 + (lvl * 0.10));
+                } else {
+                    let lvl = id - 24;
+                    state.feedMax += (8000 + (lvl * 2000));
+                    state.rateR *= 1.02;
+                }
+                
+                save(); loadMarket(); updateUI();
+                tg.HapticFeedback.impactOccurred('medium');
+            }
+        }
+
+        function sell() {
+            let q = Math.floor(state.eggs);
+            if(q >= 1) {
+                state.real += (q * state.rateR) * 0.8;
+                state.vault += (q * state.rateR) * 0.2;
+                state.virt += q * state.rateV;
+                state.eggs = 0;
+                updateUI(); save(); loadMarket();
+            }
+        }
+
+        function watchAd(type) {
+            if(type === 'feed') state.feedCur = state.feedMax;
+            else { state.boostActive = true; setTimeout(() => state.boostActive = false, 600000); }
+            updateUI(); save();
         }
 
         function updateUI() {
-            document.getElementById('display-euro').innerText = user.real.toFixed(4) + "€";
-            document.getElementById('display-brl').innerText = "R$ " + (user.real * 6.1245).toFixed(2);
-            document.getElementById('egg-total').innerText = user.eggs;
-            document.getElementById('ave-count').innerText = `${user.chickens}/${user.maxChicks} Aves`;
-            document.getElementById('feed-bar').style.width = (user.feed / user.feedMax * 100) + "%";
-            document.getElementById('egg-bar').style.width = user.timer + "%";
-            document.getElementById('preview-val').innerText = `Valor Estimado: ${(user.eggs * 0.0050).toFixed(4)}€`;
-            document.getElementById('turbo-label').style.display = user.isTurbo ? 'block' : 'none';
+            document.getElementById('real-bal').innerText = state.real.toFixed(4) + "€";
+            document.getElementById('brl-bal').innerText = "R$ " + (state.real * 6.1245).toFixed(2);
+            document.getElementById('virt-bal').innerText = state.virt.toFixed(2) + "🟡";
+            document.getElementById('vault-bal').innerText = state.vault.toFixed(4) + "€";
+            document.getElementById('egg-count').innerText = Math.floor(state.eggs);
+            document.getElementById('chk-count').innerText = `${state.chickens}/${state.maxChickens} Aves`;
+            document.getElementById('chk-fill').style.width = Math.min((state.chickens / state.maxChickens) * 100, 100) + "%";
+            document.getElementById('feed-kg').innerText = (state.feedCur/1000).toFixed(3) + " KG";
+            document.getElementById('feed-fill').style.width = Math.min((state.feedCur/state.feedMax)*100, 100) + "%";
+            document.getElementById('egg-progress').style.width = (state.eggTimer/state.eggLimit)*100 + "%";
+            document.getElementById('sell-preview').innerText = `Previsto: ${(state.eggs * state.rateV).toFixed(1)}🟡 | ${(state.eggs * state.rateR).toFixed(4)}€`;
+            document.getElementById('boost-status').style.display = state.boostActive ? 'inline' : 'none';
         }
 
         setInterval(() => {
-            if(user.feed > 0) {
-                user.feed -= (user.chickens * 0.3);
-                let mult = user.isTurbo ? 5 : 1;
-                user.timer += (user.speed * 0.4 * mult);
-                if(user.timer >= 100) { user.eggs++; user.timer = 0; save(); }
+            if(state.feedCur > 0) {
+                let multiplier = state.boostActive ? 5 : 1;
+                state.feedCur -= (state.chickens * 0.4);
+                state.eggTimer += (state.prodSpeed * multiplier * 0.2);
+                if(state.eggTimer >= state.eggLimit) { state.eggs++; state.eggTimer = 0; save(); }
                 updateUI();
             }
         }, 100);
 
-        window.onload = () => { tg.expand(); renderMarket(); updateUI(); };
+        window.onload = () => { loadMarket(); updateUI(); tg.expand(); };
     </script>
 </body>
 </html>
